@@ -1,6 +1,6 @@
-# Milestone 0: Open Door
+# Milestone 1: Open Door
 
-Milestone 0 proves the smallest useful Twip loop.
+Milestone 1 proves the smallest useful Twip loop.
 
 ## Goal
 
