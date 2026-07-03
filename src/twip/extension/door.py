@@ -27,14 +27,27 @@ class Door(Component):
         return self.state == DoorState.CLOSED
 
     def handle(self, action: Action, entity: Entity, world: object) -> Result | None:
-        if action.verb != "open":
-            return None
-
         if action.target not in {self.key, entity.key, entity.name.lower()}:
             return None
 
+        if action.verb == "open":
+            return self.open(entity)
+
+        if action.verb == "close":
+            return self.close(entity)
+
+        return None
+
+    def open(self, entity: Entity) -> Result:
         if self.is_open:
             return Result.success(f"The {entity.name} is already open.")
 
         self.state = DoorState.OPEN
         return Result.success(f"You open the {entity.name}.")
+
+    def close(self, entity: Entity) -> Result:
+        if self.is_closed:
+            return Result.success(f"The {entity.name} is already closed.")
+
+        self.state = DoorState.CLOSED
+        return Result.success(f"You close the {entity.name}.")
