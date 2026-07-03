@@ -14,7 +14,19 @@ def test_door_wooden_locked_has_lockable():
     assert entity.component("lockable").state == LockState.LOCKED
 
 
-def test_door_wooden_locked_matches_door_alias():
+def test_door_wooden_locked_matches_door_name():
     entity = door_wooden_locked()
 
     assert entity.matches("door")
+
+
+def test_door_wooden_locked_matches_wooden_door():
+    entity = door_wooden_locked()
+
+    assert entity.matches("wooden door")
+
+
+def test_door_wooden_locked_does_not_match_wooden_without_name():
+    entity = door_wooden_locked()
+
+    assert not entity.matches("wooden")

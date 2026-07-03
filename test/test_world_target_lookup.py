@@ -6,9 +6,8 @@ from twip.world import World
 def test_unknown_target_fails_cleanly():
     world = World()
     entity = Entity(
-        key="entity_openable",
-        name="openable entity",
-        aliases={"thing"},
+        names=("thing", "entity"),
+        traits={"openable"},
     )
     entity.add_component(Openable())
     world.add(entity)

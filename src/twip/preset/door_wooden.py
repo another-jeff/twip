@@ -1,12 +1,17 @@
+from collections.abc import Iterable
+
 from twip.entity import Entity
 from twip.extension import Openable, OpenState
 
 
-def door_wooden(*, state: OpenState = OpenState.CLOSED) -> Entity:
+def door_wooden(
+    *,
+    state: OpenState = OpenState.CLOSED,
+    traits: Iterable[str] = (),
+) -> Entity:
     entity = Entity(
-        key="door_wooden",
-        name="wooden door",
-        aliases={"door"},
+        names=("door",),
+        traits={"wooden", *traits},
     )
 
     entity.add_component(Openable(state=state))
