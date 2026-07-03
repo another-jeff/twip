@@ -12,7 +12,7 @@ class World:
     entities: dict[str, Entity] = field(default_factory=dict)
     parser: Parser = field(default_factory=Parser)
 
-    def add_entity(self, entity: Entity) -> None:
+    def add(self, entity: Entity) -> None:
         self.entities[entity.key] = entity
 
     def entity(self, key: str) -> Entity:
@@ -27,7 +27,7 @@ class World:
         if not action.target:
             return Result.failure(f"{action.verb.capitalize()} what?")
 
-        entity = self.find_target(action.target)
+        entity = self.find(action.target)
 
         if entity is None:
             return Result.failure(f"You don't see {action.target} here.")
@@ -39,7 +39,7 @@ class World:
 
         return result
 
-    def find_target(self, target: str) -> Entity | None:
+    def find(self, target: str) -> Entity | None:
         matching_entities = [
             entity
             for entity in self.entities.values()
