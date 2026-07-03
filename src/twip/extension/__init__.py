@@ -1,3 +1,3 @@
-from twip.extension.door import Door, DoorState
+from twip.extension.openable import Openable, OpenState
 
-__all__ = ["Door", "DoorState"]
+__all__ = ["Openable", "OpenState"]

@@ -40,25 +40,13 @@ class World:
         return result
 
     def find_target(self, target: str) -> Entity | None:
-        if target in self.entities:
-            return self.entities[target]
-
-        matching_by_name = [
+        matching_entities = [
             entity
             for entity in self.entities.values()
-            if entity.name.lower() == target
+            if entity.matches(target)
         ]
 
-        if len(matching_by_name) == 1:
-            return matching_by_name[0]
-
-        matching_by_component = [
-            entity
-            for entity in self.entities.values()
-            if entity.has_component(target)
-        ]
-
-        if len(matching_by_component) == 1:
-            return matching_by_component[0]
+        if len(matching_entities) == 1:
+            return matching_entities[0]
 
         return None

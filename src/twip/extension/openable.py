@@ -7,29 +7,26 @@ from twip.entity import Entity
 from twip.result import Result
 
 
-class DoorState(StrEnum):
+class OpenState(StrEnum):
     CLOSED = "closed"
     OPEN = "open"
 
 
 @dataclass
-class Door(Component):
-    key = "door"
+class Openable(Component):
+    key = "openable"
 
-    state: DoorState = DoorState.CLOSED
+    state: OpenState = OpenState.CLOSED
 
     @property
     def is_open(self) -> bool:
-        return self.state == DoorState.OPEN
+        return self.state == OpenState.OPEN
 
     @property
     def is_closed(self) -> bool:
-        return self.state == DoorState.CLOSED
+        return self.state == OpenState.CLOSED
 
     def handle(self, action: Action, entity: Entity, world: object) -> Result | None:
-        if action.target not in {self.key, entity.key, entity.name.lower()}:
-            return None
-
         if action.verb == "open":
             return self.open(entity)
 
@@ -42,12 +39,12 @@ class Door(Component):
         if self.is_open:
             return Result.success(f"The {entity.name} is already open.")
 
-        self.state = DoorState.OPEN
+        self.state = OpenState.OPEN
         return Result.success(f"You open the {entity.name}.")
 
     def close(self, entity: Entity) -> Result:
         if self.is_closed:
             return Result.success(f"The {entity.name} is already closed.")
 
-        self.state = DoorState.CLOSED
+        self.state = OpenState.CLOSED
         return Result.success(f"You close the {entity.name}.")

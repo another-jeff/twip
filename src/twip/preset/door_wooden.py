@@ -1,13 +1,14 @@
 from twip.entity import Entity
-from twip.extension.door import Door, DoorState
+from twip.extension import Openable, OpenState
 
 
-def make_door_wooden(*, state: DoorState = DoorState.CLOSED) -> Entity:
+def make_door_wooden(*, state: OpenState = OpenState.CLOSED) -> Entity:
     entity = Entity(
         key="door_wooden",
         name="wooden door",
+        aliases={"door"},
     )
 
-    entity.add_component(Door(state=state))
+    entity.add_component(Openable(state=state))
 
     return entity

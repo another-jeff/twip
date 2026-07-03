@@ -1,19 +1,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TypeVar
 
 from twip.action import Action
 from twip.component import Component
 from twip.result import Result
-
-TComponent = TypeVar("TComponent", bound=Component)
 
 
 @dataclass
 class Entity:
     key: str
     name: str
+    aliases: set[str] = field(default_factory=set)
     components: dict[str, Component] = field(default_factory=dict)
 
     def add_component(self, component: Component) -> None:
@@ -24,6 +22,15 @@ class Entity:
 
     def has_component(self, key: str) -> bool:
         return key in self.components
+
+    def matches(self, target: str) -> bool:
+        normalized = target.lower()
+
+        return normalized in {
+            self.key.lower(),
+            self.name.lower(),
+            *self.aliases,
+        }
 
     def handle(self, action: Action, world: object) -> Result | None:
         for component in self.components.values():
