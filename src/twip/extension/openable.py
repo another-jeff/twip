@@ -4,6 +4,7 @@ from enum import StrEnum
 from twip.action import Action
 from twip.component import Component
 from twip.entity import Entity
+from twip.extension.lockable import LockState
 from twip.result import Result
 
 
@@ -38,6 +39,11 @@ class Openable(Component):
     def open(self, entity: Entity) -> Result:
         if self.is_open:
             return Result.success(f"The {entity.name} is already open.")
+
+        lockable = entity.components.get("lockable")
+
+        if lockable is not None and lockable.state == LockState.LOCKED:
+            return Result.failure(f"The {entity.name} is locked.")
 
         self.state = OpenState.OPEN
         return Result.success(f"You open the {entity.name}.")

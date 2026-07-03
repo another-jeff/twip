@@ -2,7 +2,6 @@ from twip import World
 from twip.extension import OpenState
 from twip.preset import door_wooden
 
-
 def make_world_with_wooden_door(
     *,
     state: OpenState = OpenState.CLOSED,
@@ -66,3 +65,4 @@ def test_open_unknown_target_fails_cleanly():
 
     assert not result.ok
     assert "window" in result.message
+    
