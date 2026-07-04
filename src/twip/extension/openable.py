@@ -15,7 +15,7 @@ class OpenState(StrEnum):
 
 @dataclass
 class Openable(Component):
-    key = "openable"
+    id = "openable"
 
     state: OpenState = OpenState.CLOSED
 

@@ -7,6 +7,7 @@ from twip.world import World
 __all__ = [
     "Action",
     "Component",
+    "Connector",
     "Entity",
     "Result",
     "World",

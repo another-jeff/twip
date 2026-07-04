@@ -134,3 +134,47 @@ assert door.is_open
 ```
 
 Avoid tests that only prove implementation details.
+
+# Add Methods Accept Multiple Values
+
+Any method whose purpose is to add a thing should accept one or more things.
+
+This avoids parallel method names such as:
+
+```python
+add_component(component)
+add_components(*components)
+```
+
+Prefer a single plural-capable method:
+
+```python
+def add_component(self, *components: Component) -> Self:
+    for component in components:
+        self.components[component.id] = component
+
+    return self
+```
+
+The singular method name is still acceptable because each argument is one component and the method may be called with one component:
+
+```python
+entity.add_component(Openable())
+```
+
+or several components:
+
+```python
+entity.add_component(
+    Openable(),
+    Connector.between(room_1, dir.N, room_2, dir.S),
+)
+```
+
+This convention keeps authoring terse without multiplying API surface.
+
+Rule:
+
+```text
+Any add method should accept a variadic collection unless there is a strong reason not to.
+```

@@ -12,7 +12,7 @@ From a room, the parser may resolve targets among:
 
 ```text
 entities contained by the current room
-portal entities touching the current room
+connector entities touching the current room
 ```
 
 Example:
@@ -37,7 +37,7 @@ north door
 
 The door does not need to be contained by the hall.
 
-It is visible because it touches the hall as a portal.
+It is visible because it touches the hall as a connector.
 
 ## Local language
 

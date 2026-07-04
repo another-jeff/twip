@@ -1,14 +1,14 @@
-# Portal Sidedness
+# Connector Sidedness
 
-A portal is a shared entity that connects rooms.
+A connector is a shared entity that relates rooms or spaces.
 
-Doors, gates, windows, archways, and passages may be portals.
+Doors, gates, windows, archways, roads, and passages may be connectors.
 
-A portal may have different parser-facing language and operation rules from each side.
+A connector may have different parser-facing language and operation rules from each side.
 
 ## Shared state
 
-Physical state belongs to the shared portal entity.
+Physical state belongs to the shared connector entity.
 
 Example:
 
@@ -28,7 +28,7 @@ This is true even when the door is visible from multiple rooms.
 
 ## Side-local language
 
-Each side of a portal may have local traits.
+Each side of a connector may have local traits.
 
 Example:
 
@@ -80,13 +80,13 @@ This avoids modeling one physical lock as two independent locks.
 door
   Openable
   Lockable
-  Portal
+  Connector
 
-portal side: hall
+connector side: hall
   traits={"north"}
   lock access=thumbturn
 
-portal side: porch
+connector side: porch
   traits={"south"}
   lock access=keyed
 ```
@@ -114,7 +114,7 @@ Key possession, inventory, permission checks, and actor equipment are later conc
 For now, Twip only needs the design seam:
 
 ```text
-portal side can carry local operation rules
+connector side can carry local operation rules
 ```
 
 Inventory is not magic.
@@ -125,10 +125,10 @@ Eventually:
 inventory = player.Container
 ```
 
-But portal sidedness should not require inventory to exist yet.
+But connector sidedness should not require inventory to exist yet.
 
 ## Rule
 
-A portal has shared physical state.
+A connector has shared physical state.
 
-A portal side has local language and local access rules.
+A connector side has local language and local access rules.

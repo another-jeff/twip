@@ -10,13 +10,13 @@ class LockState(Enum):
 
 
 class Lockable(Component):
-    key = "lockable"
+    id = "lockable"
 
     def __init__(self, *, state: LockState = LockState.UNLOCKED):
         self.state = state
 
 class Lockable(Component):
-    key = "lockable"
+    id = "lockable"
 
     def __init__(self, *, state: LockState = LockState.UNLOCKED):
         self.state = state

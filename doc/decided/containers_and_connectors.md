@@ -1,4 +1,4 @@
-# Containment vs Connection
+# Containment and Connection
 
 Twip distinguishes containment from connection.
 
@@ -56,7 +56,7 @@ A door is a shared boundary between rooms.
 Door
   Openable
   maybe Lockable
-  Portal
+  Connector
 ```
 
 A door should not be copied into each room.
