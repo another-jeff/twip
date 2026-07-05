@@ -72,29 +72,30 @@ class World:
     def handle(self, text: str) -> Result:
         action = self.parser.parse(text)
 
-        if not action.verb:
-            return Result.failure("Nothing happens.")
+        match action.verb:
+            case None | "":
+                return Result.failure("Nothing happens.")
 
-        if action.verb == "inventory":
-            return self._inventory()
+            case "inventory":
+                return self._inventory()
 
-        if action.verb == "look" and not action.target:
-            return self._look()
+            case "look" if not action.target:
+                return self._look()
 
-        if not action.target:
-            return Result.failure(f"{action.verb.capitalize()} what?")
+            case _ if not action.target:
+                return Result.failure(f"{action.verb.capitalize()} what?")
 
-        if action.verb == "look" and action.target:
-            return self._look_target(action)
+            case "look":
+                return self._look_target(action)
 
-        if action.verb == "take":
-            return self._take(action.target)
+            case "take":
+                return self._take(action.target)
 
-        if action.verb == "drop":
-            return self._drop(action.target)
+            case "drop":
+                return self._drop(action.target)
 
-        if action.verb in {"go", "move"}:
-            return self._move(action.target)
+            case "go" | "move":
+                return self._move(action.target)
 
         matching_entities = self.find_all(action.target)
 
@@ -112,6 +113,7 @@ class World:
             return Result.failure("You can't do that.")
 
         return result
+
 
     def _move(self, target: str) -> Result:
         if self.current is None:
