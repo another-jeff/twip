@@ -222,3 +222,32 @@ def test_look_includes_current_room_lookable_text():
     assert result.ok
     assert "rotunda" in result.message
     assert "A round stone chamber." in result.message
+
+
+def test_look_target_describes_visible_lookable_entity():
+    world = World()
+
+    room = world.add(
+        names=("room", "rotunda"),
+        traits={"room"},
+        components=(Container(),),
+    )
+
+    coin = world.add(
+        names=("coin",),
+        traits=set(),
+        components=(
+            Containable(),
+            Lookable("A dull copper coin."),
+        ),
+    )
+
+    room.components["container"].items.add(coin.id)
+    coin.components["containable"].parent = room.id
+
+    world.current = room.id
+
+    result = world.handle("look coin")
+
+    assert result.ok
+    assert result.message == "A dull copper coin."

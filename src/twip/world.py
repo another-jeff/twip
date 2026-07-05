@@ -77,7 +77,7 @@ class World:
         if action.verb == "inventory":
             return self._inventory()
 
-        if action.verb == "look":
+        if action.verb == "look" and not action.target:
             return self._look()
 
         if not action.target:
