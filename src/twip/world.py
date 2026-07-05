@@ -81,13 +81,13 @@ class World:
                 return inventory.handle(self)
 
             case "look" if not action.target:
-                 return look.room(self)
+                return look.room(self)
 
             case _ if not action.target:
                 return Result.failure(f"{action.verb.capitalize()} what?")
 
             case "look":
-                 return look.target(self, action)
+                return look.target(self, action)
 
             case "take":
                 return take.handle(self, action.target)
@@ -98,13 +98,23 @@ class World:
             case "go" | "move":
                 return move.handle(self, action.target)
 
-        matching_entities = self.find_all(action.target)
+            case _:
+                return self._handle_entity_action(action)
+            
+    
+    def _handle_entity_action(self, action: Action) -> Result:
+        target = action.target
+
+        if target is None:
+            return Result.failure(f"{action.verb.capitalize()} what?")
+
+        matching_entities = self.find_all(target)
 
         if not matching_entities:
-            return Result.failure(f"You don't see {action.target} here.")
+            return Result.failure(f"You don't see {target} here.")
 
         if len(matching_entities) > 1:
-            return Result.failure(f"Which {action.target} do you mean?")
+            return Result.failure(f"Which {target} do you mean?")
 
         entity = matching_entities[0]
 
