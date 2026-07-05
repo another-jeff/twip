@@ -5,6 +5,6 @@ from twip.component import Component
 
 @dataclass
 class Container(Component):
-    key = "container"
+    id = "container"
 
     items: set[str] = field(default_factory=set)

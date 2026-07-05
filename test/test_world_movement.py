@@ -1,0 +1,121 @@
+# test/test_world_movement.py
+
+from twip import dir
+from twip.extension import Container, Containable, Openable, OpenState
+from twip.world import World
+
+import tt
+
+
+def room(world: World, trait: str):
+    return world.add(
+        names=(tt.ROOM,),
+        traits={trait},
+        components=(Container(),),
+    )
+    
+def item(world: World, name: str):
+    return world.add(
+        names=(name,),
+        traits=set(),
+        components=(Containable(),),
+    )
+
+
+def test_go_direction_moves_to_connected_room():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+    room_2 = room(world, tt.ROOM_2)
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        connections=((room_1, dir.N), (room_2, dir.S)),
+    )
+
+    world.current = room_1.id
+
+    result = world.handle("go north")
+
+    assert result.ok
+    assert world.current == room_2.id
+
+
+def test_go_unknown_direction_fails_cleanly():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+
+    world.current = room_1.id
+
+    result = world.handle("go north")
+
+    assert not result.ok
+    assert world.current == room_1.id
+    
+def test_go_direction_through_closed_door_fails_cleanly():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+    room_2 = room(world, tt.ROOM_2)
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        connections=((room_1, dir.N), (room_2, dir.S)),
+        components=(Openable(state=OpenState.CLOSED),),
+    )
+
+    world.current = room_1.id
+
+    result = world.handle("go north")
+
+    assert not result.ok
+    assert world.current == room_1.id
+    
+def test_go_direction_through_open_door_moves_to_connected_room():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+    room_2 = room(world, tt.ROOM_2)
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        connections=((room_1, dir.N), (room_2, dir.S)),
+        components=(Openable(state=OpenState.OPEN),),
+    )
+
+    world.current = room_1.id
+
+    result = world.handle("go north")
+
+    assert result.ok
+    assert world.current == room_2.id
+    
+def test_movement_changes_visible_room_contents():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+    room_2 = room(world, tt.ROOM_2)
+
+    coin = item(world, tt.COIN)
+    gem = item(world, tt.GEM)
+
+    world.contain(room_1, coin)
+    world.contain(room_2, gem)
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        connections=((room_1, dir.N), (room_2, dir.S)),
+    )
+
+    world.current = room_1.id
+
+    assert world.find(tt.COIN) is coin
+    assert world.find(tt.GEM) is None
+
+    result = world.handle("go north")
+
+    assert result.ok
+    assert world.current == room_2.id
+    assert world.find(tt.COIN) is None
+    assert world.find(tt.GEM) is gem

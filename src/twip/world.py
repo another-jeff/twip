@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 from twip.component import Component
 from twip.entity import Entity
-from twip.extension.connector import Connector
+from twip.extension import Containable, Container, Connector, Openable, OpenState
 from twip.parser import Parser
 from twip.result import Result
 
@@ -66,7 +66,7 @@ class World:
 
     def entity(self, id: str) -> Entity:
         return self.entities[id]
-
+    
     def handle(self, text: str) -> Result:
         action = self.parser.parse(text)
 
@@ -75,6 +75,9 @@ class World:
 
         if not action.target:
             return Result.failure(f"{action.verb.capitalize()} what?")
+
+        if action.verb in {"go", "move"}:
+            return self._move(action.target)
 
         matching_entities = self.find_all(action.target)
 
@@ -93,6 +96,45 @@ class World:
 
         return result
 
+    def _move(self, direction: str) -> Result:
+        if self.current is None:
+            return Result.failure("You can't go that way.")
+
+        for entity in self.entities.values():
+            connector = entity.components.get(Connector.id)
+
+            if not isinstance(connector, Connector):
+                continue
+
+            here = connector.side_for(self.current)
+
+            if here is None:
+                continue
+
+            if direction not in here.traits:
+                continue
+
+            if self._connector_blocks_movement(entity):
+                return Result.failure("It's closed.")
+
+            there = self._other_side(connector, self.current)
+
+            if there is None:
+                return Result.failure("You can't go that way.")
+
+            self.current = there.room
+            return Result.success("You go that way.")
+
+        return Result.failure("You can't go that way.")
+
+
+    def _other_side(self, connector: Connector, room_id: str):
+        for side in connector.sides:
+            if side.room != room_id:
+                return side
+
+        return None
+
     def find(self, target: str) -> Entity | None:
         matching_entities = self.find_all(target)
 
@@ -105,10 +147,11 @@ class World:
         return [
             entity
             for entity in self.entities.values()
-            if self._visible_matches(entity, target)
+            if self._is_visible(entity)
+            if self._matches(entity, target)
         ]
 
-    def _visible_matches(self, entity: Entity, target: str) -> bool:
+    def _matches(self, entity: Entity, target: str) -> bool:
         if self.current is None:
             return entity.matches(target)
 
@@ -126,3 +169,42 @@ class World:
             return False
 
         return entity.matches(target, traits=side.traits)
+    
+    def _is_visible(self, entity: Entity) -> bool:
+        if self.current is None:
+            return True
+
+        if entity.id == self.current:
+            return True
+
+        if Connector.id in entity.components:
+            return self._connector_is_visible(entity)
+
+        containable = entity.components.get(Containable.id)
+
+        return (
+            containable is not None
+            and containable.parent == self.current
+        )
+
+
+    def _connector_is_visible(self, entity: Entity) -> bool:
+        connector = entity.component(Connector.id)
+
+        if not isinstance(connector, Connector):
+            return False
+
+        return connector.side_for(self.current) is not None
+
+
+    def contain(self, container: Entity, entity: Entity) -> None:
+        container.components[Container.id].items.add(entity.id)
+        entity.components[Containable.id].parent = container.id
+        
+    def _connector_blocks_movement(self, entity: Entity) -> bool:
+        openable = entity.components.get(Openable.id)
+
+        return (
+            isinstance(openable, Openable)
+            and openable.state == OpenState.CLOSED
+        )

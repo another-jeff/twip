@@ -1,0 +1,5 @@
+"commits: $(git rev-list --count HEAD)"
+"py files: $((Get-ChildItem -Recurse -Filter *.py | Where-Object FullName -notmatch '\\(\.venv|venv|__pycache__|\.git)\\').Count)"
+"tests: $((Select-String -Path (Get-ChildItem -Recurse -Filter 'test_*.py').FullName -Pattern '^\s*def\s+test_' | Measure-Object).Count)"
+"decided docs: $((Get-ChildItem -Recurse -File doc/decided -Filter *.md).Count)"
+"milestone docs: $((Get-ChildItem -Recurse -File doc/decided/milestone -Filter *.md).Count)"
