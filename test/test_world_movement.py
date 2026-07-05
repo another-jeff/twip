@@ -191,3 +191,31 @@ def test_go_direction_with_connector_traits_through_closed_door_fails():
 
     assert not result.ok
     assert world.current == room_1.id
+    
+def test_open_door_then_go_direction_moves_to_connected_room():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+    room_2 = room(world, tt.ROOM_2)
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        connections=((room_1, dir.N), (room_2, dir.S)),
+        components=(Openable(state=OpenState.CLOSED),),
+    )
+
+    world.current = room_1.id
+
+    go_closed = world.handle("go north")
+
+    assert not go_closed.ok
+    assert world.current == room_1.id
+
+    opened = world.handle("open north door")
+
+    assert opened.ok
+
+    go_open = world.handle("go north")
+
+    assert go_open.ok
+    assert world.current == room_2.id
