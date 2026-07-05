@@ -77,6 +77,9 @@ class World:
         if action.verb == "inventory":
             return self._inventory()
 
+        if action.verb == "look":
+            return self._look()
+
         if not action.target:
             return Result.failure(f"{action.verb.capitalize()} what?")
         
@@ -326,3 +329,10 @@ class World:
         )
 
         return Result.success("You are carrying: " + ", ".join(names))
+    
+    def _look(self) -> Result:
+        if not self.current:
+            return Result.failure("You are nowhere.")
+
+        room = self.entities[self.current]
+        return Result.success(f"You are in {room.names[-1]}.")
