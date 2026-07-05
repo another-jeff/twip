@@ -203,3 +203,27 @@ def test_drop_same_named_visible_room_item_does_not_create_ambiguity():
     assert room_coin.id in room_entity.component("container").items
     assert room_coin.id not in player_entity.component("container").items
     assert room_coin.component("containable").parent == room_entity.id
+
+
+def test_drop_after_room_change_puts_item_in_new_current_room():
+    world = World()
+
+    first_room = room(world, "first-room")
+    second_room = room(world, "second-room")
+    player_entity = player(world)
+    coin_entity = coin(world)
+
+    world.current = first_room.id
+    world.player_id = player_entity.id
+    world.contain(player_entity, coin_entity)
+
+    world.current = second_room.id
+
+    result = world.handle("drop coin")
+
+    assert result.ok
+
+    assert coin_entity.id not in player_entity.component("container").items
+    assert coin_entity.id not in first_room.component("container").items
+    assert coin_entity.id in second_room.component("container").items
+    assert coin_entity.component("containable").parent == second_room.id
