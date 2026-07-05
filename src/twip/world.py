@@ -7,6 +7,7 @@ from twip.entity import Entity
 from twip.extension import Containable, Container, Connector, Openable, OpenState, Lookable
 from twip.parser import Parser
 from twip.result import Result
+from twip.action import Action
 
 
 Connection = tuple[Entity | str, str | set[str]]
@@ -82,10 +83,13 @@ class World:
 
         if not action.target:
             return Result.failure(f"{action.verb.capitalize()} what?")
-        
+
+        if action.verb == "look" and action.target:
+            return self._look_target(action)
+
         if action.verb == "take":
             return self._take(action.target)
-        
+
         if action.verb == "drop":
             return self._drop(action.target)
 
@@ -352,5 +356,41 @@ class World:
             message += f" You see {', '.join(names)} here."
 
         return Result.success(message)
+
+
+    def _look_target(self, action: Action) -> Result:
+        matching_entities = self.find_all(action.target)
+
+        if self.player_id:
+            player = self.entities[self.player_id]
+            inventory = player.components.get("container")
+
+            if inventory:
+                inventory_matches = [
+                    self.entities[item_id]
+                    for item_id in inventory.items
+                    if self.entities[item_id].matches(action.target)
+                ]
+
+                matching_entities.extend(inventory_matches)
+
+        matching_entities = list({
+            entity.id: entity
+            for entity in matching_entities
+        }.values())
+
+        if not matching_entities:
+            return Result.failure(f"You don't see {action.target} here.")
+
+        if len(matching_entities) > 1:
+            return Result.failure(f"Which {action.target}?")
+
+        entity = matching_entities[0]
+        result = entity.handle(action, self)
+
+        if result:
+            return result
+
+        return Result.failure("You can't do that.")
     
     
