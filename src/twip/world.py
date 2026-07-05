@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 from twip.component import Component
 from twip.entity import Entity
-from twip.extension import Containable, Container, Connector, Openable, OpenState, Lookable
+from twip.extension import Containable, Container, Connector
 from twip.parser import Parser
 from twip.result import Result
 from twip.action import Action
@@ -126,44 +126,6 @@ class World:
         return result
 
 
-    def _matching_exits(self, target: str) -> list[tuple[Entity, Connector]]:
-        exits = []
-
-        for entity in self.entities.values():
-            connector = entity.components.get(Connector.id)
-
-            if not isinstance(connector, Connector):
-                continue
-
-            here = connector.side_for(self.current)
-
-            if here is None:
-                continue
-
-            if target in here.traits:
-                exits.append((entity, connector))
-                continue
-
-            if not self._target_mentions_side(target, here.traits):
-                continue
-
-            if entity.matches(target, traits=here.traits):
-                exits.append((entity, connector))
-
-        return exits
-
-    def _target_mentions_side(self, target: str, side_traits: set[str]) -> bool:
-        words = set(target.split())
-
-        return bool(words & side_traits)
-
-    def _other_side(self, connector: Connector, room_id: str):
-        for side in connector.sides:
-            if side.room != room_id:
-                return side
-
-        return None
-
     def find(self, target: str) -> Entity | None:
         matching_entities = self.find_all(target)
 
@@ -172,6 +134,7 @@ class World:
 
         return None
 
+
     def find_all(self, target: str) -> list[Entity]:
         return [
             entity
@@ -179,6 +142,7 @@ class World:
             if self._is_visible(entity)
             if self._matches(entity, target)
         ]
+
 
     def _matches(self, entity: Entity, target: str) -> bool:
         if self.current is None:
@@ -198,6 +162,7 @@ class World:
             return False
 
         return entity.matches(target, traits=side.traits)
+    
     
     def _is_visible(self, entity: Entity) -> bool:
         if self.current is None:
@@ -230,11 +195,3 @@ class World:
         container.components[Container.id].items.add(entity.id)
         entity.components[Containable.id].parent = container.id
         
-    def _connector_blocks_movement(self, entity: Entity) -> bool:
-        openable = entity.components.get(Openable.id)
-
-        return (
-            isinstance(openable, Openable)
-            and openable.state == OpenState.CLOSED
-        )
-    
