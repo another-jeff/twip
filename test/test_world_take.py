@@ -33,6 +33,29 @@ def coin_with_trait(world: World, trait: str):
         components=(Containable(),),
     )
 
+def statue(world: World):
+    return world.add(
+        names=("statue",),
+        traits=set(),
+        components=(),
+    )
+
+
+def test_take_visible_non_containable_fails_without_mutation():
+    world = World()
+
+    room_entity = room(world, "room")
+    player_entity = player(world)
+    statue_entity = statue(world)
+
+    world.current = room_entity.id
+    world.player_id = player_entity.id
+
+    result = world.handle("take statue")
+
+    assert not result.ok
+    assert statue_entity.id not in player_entity.component("container").items
+
 
 def test_take_disambiguated_visible_item_moves_only_that_item():
     world = World()
