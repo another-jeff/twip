@@ -17,6 +17,7 @@ class World:
     entities: dict[str, Entity] = field(default_factory=dict)
     parser: Parser = field(default_factory=Parser)
     current: str | None = None
+    player_id: str | None = None
     _next_entity_id: int = 1
 
     def add(
