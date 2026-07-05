@@ -314,3 +314,23 @@ def test_unlock_open_then_go_moves_through_door():
 
     assert moved.ok
     assert world.current == room_2.id
+    
+    
+def test_go_connector_without_side_direction_fails_without_moving():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+    room_2 = room(world, tt.ROOM_2)
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        traits={tt.WOODEN},
+        connections=((room_1, dir.N), (room_2, dir.S)),
+    )
+
+    world.current = room_1.id
+
+    result = world.handle("go wooden door")
+
+    assert not result.ok
+    assert world.current == room_1.id
