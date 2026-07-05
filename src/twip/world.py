@@ -335,4 +335,15 @@ class World:
             return Result.failure("You are nowhere.")
 
         room = self.entities[self.current]
-        return Result.success(f"You are in {room.names[-1]}.")
+        message = f"You are in {room.names[-1]}."
+
+        container = room.components.get("container")
+
+        if container and container.items:
+            names = [
+                self.entities[item_id].names[0]
+                for item_id in container.items
+            ]
+            message += f" You see {', '.join(names)} here."
+
+        return Result.success(message)
