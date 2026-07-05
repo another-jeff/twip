@@ -119,3 +119,75 @@ def test_movement_changes_visible_room_contents():
     assert world.current == room_2.id
     assert world.find(tt.COIN) is None
     assert world.find(tt.GEM) is gem
+    
+def test_go_ambiguous_direction_fails_without_moving():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+    room_2 = room(world, tt.ROOM_2)
+    room_3 = room(world, tt.ROOM_3)
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        traits={tt.WOODEN},
+        connections=((room_1, dir.N), (room_2, dir.S)),
+    )
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        traits={tt.STONE},
+        connections=((room_1, dir.N), (room_3, dir.S)),
+    )
+
+    world.current = room_1.id
+
+    result = world.handle("go north")
+
+    assert not result.ok
+    assert world.current == room_1.id
+    
+def test_go_direction_with_connector_traits_resolves_ambiguous_exit():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+    room_2 = room(world, tt.ROOM_2)
+    room_3 = room(world, tt.ROOM_3)
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        traits={tt.WOODEN},
+        connections=((room_1, dir.N), (room_2, dir.S)),
+    )
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        traits={tt.STONE},
+        connections=((room_1, dir.N), (room_3, dir.S)),
+    )
+
+    world.current = room_1.id
+
+    result = world.handle("go north wooden door")
+
+    assert result.ok
+    assert world.current == room_2.id
+    
+def test_go_direction_with_connector_traits_through_closed_door_fails():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+    room_2 = room(world, tt.ROOM_2)
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        traits={tt.WOODEN},
+        connections=((room_1, dir.N), (room_2, dir.S)),
+        components=(Openable(state=OpenState.CLOSED),),
+    )
+
+    world.current = room_1.id
+
+    result = world.handle("go north wooden door")
+
+    assert not result.ok
+    assert world.current == room_1.id

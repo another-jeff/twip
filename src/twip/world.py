@@ -96,9 +96,34 @@ class World:
 
         return result
 
-    def _move(self, direction: str) -> Result:
+    def _move(self, target: str) -> Result:
         if self.current is None:
             return Result.failure("You can't go that way.")
+
+        exits = self._matching_exits(target)
+
+        if not exits:
+            return Result.failure("You can't go that way.")
+
+        if len(exits) > 1:
+            return Result.failure(f"Which {target} way do you mean?")
+
+        entity, connector = exits[0]
+
+        if self._connector_blocks_movement(entity):
+            return Result.failure("It's closed.")
+
+        there = self._other_side(connector, self.current)
+
+        if there is None:
+            return Result.failure("You can't go that way.")
+
+        self.current = there.room
+        
+        return Result.success("You go that way.")
+
+    def _matching_exits(self, target: str) -> list[tuple[Entity, Connector]]:
+        exits = []
 
         for entity in self.entities.values():
             connector = entity.components.get(Connector.id)
@@ -111,22 +136,22 @@ class World:
             if here is None:
                 continue
 
-            if direction not in here.traits:
+            if target in here.traits:
+                exits.append((entity, connector))
                 continue
 
-            if self._connector_blocks_movement(entity):
-                return Result.failure("It's closed.")
+            if not self._target_mentions_side(target, here.traits):
+                continue
 
-            there = self._other_side(connector, self.current)
+            if entity.matches(target, traits=here.traits):
+                exits.append((entity, connector))
 
-            if there is None:
-                return Result.failure("You can't go that way.")
+        return exits
 
-            self.current = there.room
-            return Result.success("You go that way.")
+    def _target_mentions_side(self, target: str, side_traits: set[str]) -> bool:
+        words = set(target.split())
 
-        return Result.failure("You can't go that way.")
-
+        return bool(words & side_traits)
 
     def _other_side(self, connector: Connector, room_id: str):
         for side in connector.sides:
