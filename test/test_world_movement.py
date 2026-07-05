@@ -219,3 +219,31 @@ def test_open_door_then_go_direction_moves_to_connected_room():
 
     assert go_open.ok
     assert world.current == room_2.id
+    
+def test_movement_uses_other_side_direction_after_room_changes():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+    room_2 = room(world, tt.ROOM_2)
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        connections=((room_1, dir.N), (room_2, dir.S)),
+    )
+
+    world.current = room_1.id
+
+    north = world.handle("go north")
+
+    assert north.ok
+    assert world.current == room_2.id
+
+    wrong_way = world.handle("go north")
+
+    assert not wrong_way.ok
+    assert world.current == room_2.id
+
+    south = world.handle("go south")
+
+    assert south.ok
+    assert world.current == room_1.id
