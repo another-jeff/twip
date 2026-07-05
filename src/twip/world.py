@@ -79,6 +79,9 @@ class World:
         
         if action.verb == "take":
             return self._take(action.target)
+        
+        if action.verb == "drop":
+            return self._drop(action.target)
 
         if action.verb in {"go", "move"}:
             return self._move(action.target)
@@ -269,3 +272,37 @@ class World:
         containable.parent = player.id
 
         return Result.success(f"Taken.")
+        
+    def _drop(self, target: str) -> Result:
+        if not self.player_id:
+            return Result.failure("There is no player.")
+
+        if not self.current:
+            return Result.failure("You are nowhere.")
+
+        player = self.entities[self.player_id]
+        room = self.entities[self.current]
+
+        player_container = player.component("container")
+        room_container = room.component("container")
+
+        matching_entities = [
+            self.entities[item_id]
+            for item_id in player_container.items
+            if self._matches(self.entities[item_id], target)
+        ]
+
+        if not matching_entities:
+            return Result.failure(f"You aren't carrying {target}.")
+
+        if len(matching_entities) > 1:
+            return Result.failure(f"Which {target}?")
+
+        entity = matching_entities[0]
+        containable = entity.component("containable")
+
+        player_container.items.remove(entity.id)
+        room_container.items.add(entity.id)
+        containable.parent = room.id
+
+        return Result.success("Dropped.")
