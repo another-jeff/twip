@@ -3,6 +3,7 @@ from twip.extension.containable import Containable
 from twip.extension.container import Container
 from twip.extension.openable import Openable, OpenState
 from twip.extension.lockable import Lockable, LockState
+from twip.extension.lookable import Lookable
 
 __all__ = [
     "Connector",
@@ -12,4 +13,5 @@ __all__ = [
     "OpenState",
     "Lockable",
     "LockState",
+    "Lookable",
 ]

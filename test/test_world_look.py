@@ -1,6 +1,6 @@
 # test_world_look.py
 
-from twip.extension import Container, Containable
+from twip.extension import Container, Containable, Lookable
 from twip.world import World
 
 
@@ -201,3 +201,24 @@ def test_look_lists_room_contents_in_name_order():
 
     assert result.ok
     assert result.message.index("apple") < result.message.index("zebra")
+
+    
+def test_look_includes_current_room_lookable_text():
+    world = World()
+
+    room = world.add(
+        names=("room", "rotunda"),
+        traits={"room"},
+        components=(
+            Container(),
+            Lookable("A round stone chamber."),
+        ),
+    )
+
+    world.current = room.id
+
+    result = world.handle("look")
+
+    assert result.ok
+    assert "rotunda" in result.message
+    assert "A round stone chamber." in result.message

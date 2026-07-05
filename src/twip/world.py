@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 
 from twip.component import Component
 from twip.entity import Entity
-from twip.extension import Containable, Container, Connector, Openable, OpenState
+from twip.extension import Containable, Container, Connector, Openable, OpenState, Lookable
 from twip.parser import Parser
 from twip.result import Result
 
@@ -337,6 +337,11 @@ class World:
         room = self.entities[self.current]
         message = f"You are in {room.names[-1]}."
 
+        lookable = room.components.get("lookable")
+
+        if lookable:
+            message += f" {lookable.text}"
+
         container = room.components.get("container")
 
         if container and container.items:
@@ -347,3 +352,5 @@ class World:
             message += f" You see {', '.join(names)} here."
 
         return Result.success(message)
+    
+    
