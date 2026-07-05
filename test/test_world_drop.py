@@ -161,3 +161,19 @@ def test_drop_without_player_fails_without_mutation():
     assert coin_entity.id in player_entity.component("container").items
     assert coin_entity.id not in room_entity.component("container").items
     assert coin_entity.component("containable").parent == player_entity.id
+
+
+def test_drop_without_current_room_fails_without_mutation():
+    world = World()
+
+    player_entity = player(world)
+    coin_entity = coin(world)
+
+    world.player_id = player_entity.id
+    world.contain(player_entity, coin_entity)
+
+    result = world.handle("drop coin")
+
+    assert not result.ok
+    assert coin_entity.id in player_entity.component("container").items
+    assert coin_entity.component("containable").parent == player_entity.id
