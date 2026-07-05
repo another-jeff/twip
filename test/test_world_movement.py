@@ -1,7 +1,7 @@
 # test/test_world_movement.py
 
 from twip import dir
-from twip.extension import Container, Containable, Openable, OpenState
+from twip.extension import Container, Containable, Lockable, LockState, Openable, OpenState
 from twip.world import World
 
 import tt
@@ -53,6 +53,7 @@ def test_go_unknown_direction_fails_cleanly():
     assert not result.ok
     assert world.current == room_1.id
     
+    
 def test_go_direction_through_closed_door_fails_cleanly():
     world = World()
 
@@ -72,6 +73,7 @@ def test_go_direction_through_closed_door_fails_cleanly():
     assert not result.ok
     assert world.current == room_1.id
     
+    
 def test_go_direction_through_open_door_moves_to_connected_room():
     world = World()
 
@@ -90,6 +92,7 @@ def test_go_direction_through_open_door_moves_to_connected_room():
 
     assert result.ok
     assert world.current == room_2.id
+    
     
 def test_movement_changes_visible_room_contents():
     world = World()
@@ -120,6 +123,7 @@ def test_movement_changes_visible_room_contents():
     assert world.find(tt.COIN) is None
     assert world.find(tt.GEM) is gem
     
+    
 def test_go_ambiguous_direction_fails_without_moving():
     world = World()
 
@@ -145,6 +149,7 @@ def test_go_ambiguous_direction_fails_without_moving():
 
     assert not result.ok
     assert world.current == room_1.id
+    
     
 def test_go_direction_with_connector_traits_resolves_ambiguous_exit():
     world = World()
@@ -172,6 +177,7 @@ def test_go_direction_with_connector_traits_resolves_ambiguous_exit():
     assert result.ok
     assert world.current == room_2.id
     
+    
 def test_go_direction_with_connector_traits_through_closed_door_fails():
     world = World()
 
@@ -191,6 +197,7 @@ def test_go_direction_with_connector_traits_through_closed_door_fails():
 
     assert not result.ok
     assert world.current == room_1.id
+    
     
 def test_open_door_then_go_direction_moves_to_connected_room():
     world = World()
@@ -220,6 +227,7 @@ def test_open_door_then_go_direction_moves_to_connected_room():
     assert go_open.ok
     assert world.current == room_2.id
     
+    
 def test_movement_uses_other_side_direction_after_room_changes():
     world = World()
 
@@ -247,3 +255,62 @@ def test_movement_uses_other_side_direction_after_room_changes():
 
     assert south.ok
     assert world.current == room_1.id
+
+
+def test_locked_closed_door_cannot_be_opened_or_moved_through():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+    room_2 = room(world, tt.ROOM_2)
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        connections=((room_1, dir.N), (room_2, dir.S)),
+        components=(
+            Openable(state=OpenState.CLOSED),
+            Lockable(state=LockState.LOCKED),
+        ),
+    )
+
+    world.current = room_1.id
+
+    opened = world.handle("open north door")
+
+    assert not opened.ok
+    assert world.current == room_1.id
+
+    moved = world.handle("go north")
+
+    assert not moved.ok
+    assert world.current == room_1.id
+    
+    
+def test_unlock_open_then_go_moves_through_door():
+    world = World()
+
+    room_1 = room(world, tt.ROOM_1)
+    room_2 = room(world, tt.ROOM_2)
+
+    world.add_and_connect(
+        names=(tt.DOOR,),
+        connections=((room_1, dir.N), (room_2, dir.S)),
+        components=(
+            Openable(state=OpenState.CLOSED),
+            Lockable(state=LockState.LOCKED),
+        ),
+    )
+
+    world.current = room_1.id
+
+    unlocked = world.handle("unlock north door")
+
+    assert unlocked.ok
+
+    opened = world.handle("open north door")
+
+    assert opened.ok
+
+    moved = world.handle("go north")
+
+    assert moved.ok
+    assert world.current == room_2.id
