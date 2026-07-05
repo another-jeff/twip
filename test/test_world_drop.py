@@ -43,3 +43,70 @@ def test_drop_inventory_item_moves_it_to_current_room():
     assert coin_entity.id not in player_entity.component("container").items
     assert coin_entity.id in room_entity.component("container").items
     assert coin_entity.component("containable").parent == room_entity.id
+    
+    
+def test_drop_visible_room_item_not_in_inventory_fails_without_mutation():
+    world = World()
+
+    room_entity = room(world, "room")
+    player_entity = player(world)
+    coin_entity = coin(world)
+
+    world.current = room_entity.id
+    world.player_id = player_entity.id
+    world.contain(room_entity, coin_entity)
+
+    result = world.handle("drop coin")
+
+    assert not result.ok
+    assert coin_entity.id in room_entity.component("container").items
+    assert coin_entity.id not in player_entity.component("container").items
+    assert coin_entity.component("containable").parent == room_entity.id
+
+
+def test_take_ambiguous_visible_items_fails_without_mutation():
+    world = World()
+
+    room_entity = room(world, "room")
+    player_entity = player(world)
+    first_coin = coin(world)
+    second_coin = coin(world)
+
+    world.current = room_entity.id
+    world.player_id = player_entity.id
+    world.contain(room_entity, first_coin)
+    world.contain(room_entity, second_coin)
+
+    result = world.handle("take coin")
+
+    assert not result.ok
+    assert first_coin.id in room_entity.component("container").items
+    assert second_coin.id in room_entity.component("container").items
+    assert first_coin.id not in player_entity.component("container").items
+    assert second_coin.id not in player_entity.component("container").items
+    assert first_coin.component("containable").parent == room_entity.id
+    assert second_coin.component("containable").parent == room_entity.id
+    
+
+def test_drop_ambiguous_inventory_items_fails_without_mutation():
+    world = World()
+
+    room_entity = room(world, "room")
+    player_entity = player(world)
+    first_coin = coin(world)
+    second_coin = coin(world)
+
+    world.current = room_entity.id
+    world.player_id = player_entity.id
+    world.contain(player_entity, first_coin)
+    world.contain(player_entity, second_coin)
+
+    result = world.handle("drop coin")
+
+    assert not result.ok
+    assert first_coin.id in player_entity.component("container").items
+    assert second_coin.id in player_entity.component("container").items
+    assert first_coin.id not in room_entity.component("container").items
+    assert second_coin.id not in room_entity.component("container").items
+    assert first_coin.component("containable").parent == player_entity.id
+    assert second_coin.component("containable").parent == player_entity.id
