@@ -166,3 +166,38 @@ def test_look_lists_multiple_current_room_contents():
     assert "rotunda" in result.message
     assert "coin" in result.message
     assert "key" in result.message
+
+
+def test_look_lists_room_contents_in_name_order():
+    world = World()
+
+    room = world.add(
+        names=("room", "rotunda"),
+        traits={"room"},
+        components=(Container(),),
+    )
+
+    zebra = world.add(
+        names=("zebra",),
+        traits=set(),
+        components=(Containable(),),
+    )
+
+    apple = world.add(
+        names=("apple",),
+        traits=set(),
+        components=(Containable(),),
+    )
+
+    room.components["container"].items.add(zebra.id)
+    zebra.components["containable"].parent = room.id
+
+    room.components["container"].items.add(apple.id)
+    apple.components["containable"].parent = room.id
+
+    world.current = room.id
+
+    result = world.handle("look")
+
+    assert result.ok
+    assert result.message.index("apple") < result.message.index("zebra")

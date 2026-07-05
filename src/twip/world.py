@@ -340,10 +340,10 @@ class World:
         container = room.components.get("container")
 
         if container and container.items:
-            names = [
+            names = sorted(
                 self.entities[item_id].names[0]
                 for item_id in container.items
-            ]
+            )
             message += f" You see {', '.join(names)} here."
 
         return Result.success(message)
