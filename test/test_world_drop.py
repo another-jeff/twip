@@ -143,3 +143,21 @@ def test_drop_ambiguous_inventory_items_fails_without_mutation():
     assert second_coin.id not in room_entity.component("container").items
     assert first_coin.component("containable").parent == player_entity.id
     assert second_coin.component("containable").parent == player_entity.id
+
+
+def test_drop_without_player_fails_without_mutation():
+    world = World()
+
+    room_entity = room(world, "room")
+    player_entity = player(world)
+    coin_entity = coin(world)
+
+    world.current = room_entity.id
+    world.contain(player_entity, coin_entity)
+
+    result = world.handle("drop coin")
+
+    assert not result.ok
+    assert coin_entity.id in player_entity.component("container").items
+    assert coin_entity.id not in room_entity.component("container").items
+    assert coin_entity.component("containable").parent == player_entity.id
