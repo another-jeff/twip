@@ -8,7 +8,7 @@ from twip.extension import Containable, Container, Connector, Openable, OpenStat
 from twip.parser import Parser
 from twip.result import Result
 from twip.action import Action
-from twip.command import inventory
+from twip.command import inventory, move
 
 
 Connection = tuple[Entity | str, str | set[str]]
@@ -93,10 +93,10 @@ class World:
                 return self._take(action.target)
 
             case "drop":
-                return self._drop(action.target)
+                return self._drop(action.target) 
 
             case "go" | "move":
-                return self._move(action.target)
+                return move.handle(self, action.target)
 
         matching_entities = self.find_all(action.target)
 
