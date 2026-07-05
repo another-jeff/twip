@@ -134,3 +134,30 @@ def test_take_without_player_fails_without_mutation():
     assert not result.ok
     assert coin_entity.id in room_entity.component("container").items
     assert coin_entity.component("containable").parent == room_entity.id
+    
+    
+def test_take_same_named_item_in_other_room_does_not_create_ambiguity():
+    world = World()
+
+    current_room = room(world, "current-room")
+    other_room = room(world, "other-room")
+    player_entity = player(world)
+    visible_coin = coin(world)
+    hidden_coin = coin(world)
+
+    world.current = current_room.id
+    world.player_id = player_entity.id
+    world.contain(current_room, visible_coin)
+    world.contain(other_room, hidden_coin)
+
+    result = world.handle("take coin")
+
+    assert result.ok
+
+    assert visible_coin.id not in current_room.component("container").items
+    assert visible_coin.id in player_entity.component("container").items
+    assert visible_coin.component("containable").parent == player_entity.id
+
+    assert hidden_coin.id in other_room.component("container").items
+    assert hidden_coin.id not in player_entity.component("container").items
+    assert hidden_coin.component("containable").parent == other_room.id
