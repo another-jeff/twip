@@ -8,7 +8,7 @@ from twip.extension import Containable, Container, Connector, Openable, OpenStat
 from twip.parser import Parser
 from twip.result import Result
 from twip.action import Action
-from twip.command import drop, inventory, move, take
+from twip.command import drop, inventory, look, move, take
 
 
 Connection = tuple[Entity | str, str | set[str]]
@@ -81,13 +81,13 @@ class World:
                 return inventory.handle(self)
 
             case "look" if not action.target:
-                return self._look()
+                 return look.room(self)
 
             case _ if not action.target:
                 return Result.failure(f"{action.verb.capitalize()} what?")
 
             case "look":
-                return self._look_target(action)
+                 return look.target(self, action)
 
             case "take":
                 return take.handle(self, action.target)
@@ -227,65 +227,4 @@ class World:
             isinstance(openable, Openable)
             and openable.state == OpenState.CLOSED
         )
-    
-    
-    def _look(self) -> Result:
-        if not self.current:
-            return Result.failure("You are nowhere.")
-
-        room = self.entities[self.current]
-        message = f"You are in {room.names[-1]}."
-
-        lookable = room.components.get("lookable")
-
-        if lookable:
-            message += f" {lookable.text}"
-
-        container = room.components.get("container")
-
-        if container and container.items:
-            names = sorted(
-                self.entities[item_id].names[0]
-                for item_id in container.items
-            )
-            message += f" You see {', '.join(names)} here."
-
-        return Result.success(message)
-
-
-    def _look_target(self, action: Action) -> Result:
-        matching_entities = self.find_all(action.target)
-
-        if self.player_id:
-            player = self.entities[self.player_id]
-            inventory = player.components.get("container")
-
-            if inventory:
-                inventory_matches = [
-                    self.entities[item_id]
-                    for item_id in inventory.items
-                    if self.entities[item_id].matches(action.target)
-                ]
-
-                matching_entities.extend(inventory_matches)
-
-        matching_entities = list({
-            entity.id: entity
-            for entity in matching_entities
-        }.values())
-
-        if not matching_entities:
-            return Result.failure(f"You don't see {action.target} here.")
-
-        if len(matching_entities) > 1:
-            return Result.failure(f"Which {action.target}?")
-
-        entity = matching_entities[0]
-        result = entity.handle(action, self)
-
-        if result:
-            return result
-
-        return Result.failure("You can't do that.")
-    
     
