@@ -8,6 +8,7 @@ from twip.extension import Containable, Container, Connector, Openable, OpenStat
 from twip.parser import Parser
 from twip.result import Result
 from twip.action import Action
+from twip.command import inventory
 
 
 Connection = tuple[Entity | str, str | set[str]]
@@ -77,7 +78,7 @@ class World:
                 return Result.failure("Nothing happens.")
 
             case "inventory":
-                return self._inventory()
+                return inventory.handle(self)
 
             case "look" if not action.target:
                 return self._look()
@@ -319,22 +320,6 @@ class World:
 
         return Result.success("Dropped.")
     
-    def _inventory(self) -> Result:
-        if not self.player_id:
-            return Result.failure("There is no player.")
-
-        player = self.entities[self.player_id]
-        container = player.component(Container.id)
-
-        if not container.items:
-            return Result.success("You are carrying nothing.")
-
-        names = sorted(
-            self.entities[item_id].names[0]
-            for item_id in container.items
-        )
-
-        return Result.success("You are carrying: " + ", ".join(names))
     
     def _look(self) -> Result:
         if not self.current:
