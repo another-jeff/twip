@@ -8,7 +8,7 @@ from twip.extension import Containable, Container, Connector, Openable, OpenStat
 from twip.parser import Parser
 from twip.result import Result
 from twip.action import Action
-from twip.command import inventory, move
+from twip.command import inventory, move, take
 
 
 Connection = tuple[Entity | str, str | set[str]]
@@ -90,7 +90,7 @@ class World:
                 return self._look_target(action)
 
             case "take":
-                return self._take(action.target)
+                return take.handle(self, action.target)
 
             case "drop":
                 return self._drop(action.target) 
@@ -115,32 +115,6 @@ class World:
 
         return result
 
-
-    def _move(self, target: str) -> Result:
-        if self.current is None:
-            return Result.failure("You can't go that way.")
-
-        exits = self._matching_exits(target)
-
-        if not exits:
-            return Result.failure("You can't go that way.")
-
-        if len(exits) > 1:
-            return Result.failure(f"Which {target} way do you mean?")
-
-        entity, connector = exits[0]
-
-        if self._connector_blocks_movement(entity):
-            return Result.failure("It's closed.")
-
-        there = self._other_side(connector, self.current)
-
-        if there is None:
-            return Result.failure("You can't go that way.")
-
-        self.current = there.room
-        
-        return Result.success("You go that way.")
 
     def _matching_exits(self, target: str) -> list[tuple[Entity, Connector]]:
         exits = []
@@ -254,37 +228,6 @@ class World:
             and openable.state == OpenState.CLOSED
         )
         
-    def _take(self, target: str) -> Result:
-        if not self.player_id:
-            return Result.failure("There is no player.")
-
-        player = self.entities[self.player_id]
-        player_container = player.component("container")
-
-        matching_entities = self.find_all(target)
-
-        if not matching_entities:
-            return Result.failure(f"You don't see {target} here.")
-
-        if len(matching_entities) > 1:
-            return Result.failure(f"Which {target}?")
-
-        entity = matching_entities[0]
-
-        if "containable" not in entity.components:
-            return Result.failure(f"You can't take {target}.")
-
-        containable = entity.component("containable")
-
-        if containable.parent:
-            parent = self.entities[containable.parent]
-            parent_container = parent.component("container")
-            parent_container.items.remove(entity.id)
-
-        player_container.items.add(entity.id)
-        containable.parent = player.id
-
-        return Result.success(f"Taken.")
         
     def _drop(self, target: str) -> Result:
         if not self.player_id:
