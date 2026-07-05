@@ -74,6 +74,9 @@ class World:
         if not action.verb:
             return Result.failure("Nothing happens.")
 
+        if action.verb == "inventory":
+            return self._inventory()
+
         if not action.target:
             return Result.failure(f"{action.verb.capitalize()} what?")
         
@@ -306,3 +309,20 @@ class World:
         containable.parent = room.id
 
         return Result.success("Dropped.")
+    
+    def _inventory(self) -> Result:
+        if not self.player_id:
+            return Result.failure("There is no player.")
+
+        player = self.entities[self.player_id]
+        container = player.component(Container.id)
+
+        if not container.items:
+            return Result.success("You are carrying nothing.")
+
+        names = sorted(
+            self.entities[item_id].names[0]
+            for item_id in container.items
+        )
+
+        return Result.success("You are carrying: " + ", ".join(names))
