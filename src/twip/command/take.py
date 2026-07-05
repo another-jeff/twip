@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from twip.extension import Containable, Container
 from twip.result import Result
 
 if TYPE_CHECKING:
@@ -13,7 +14,7 @@ def handle(world: World, target: str) -> Result:
         return Result.failure("There is no player.")
 
     player = world.entities[world.player_id]
-    player_container = player.component("container")
+    player_container = player.component(Container.id)
 
     matching_entities = world.find_all(target)
 
@@ -25,14 +26,14 @@ def handle(world: World, target: str) -> Result:
 
     entity = matching_entities[0]
 
-    if "containable" not in entity.components:
+    if Containable.id not in entity.components:
         return Result.failure(f"You can't take {target}.")
 
-    containable = entity.component("containable")
+    containable = entity.component(Containable.id)
 
     if containable.parent:
         parent = world.entities[containable.parent]
-        parent_container = parent.component("container")
+        parent_container = parent.component(Container.id)
         parent_container.items.remove(entity.id)
 
     player_container.items.add(entity.id)
