@@ -95,3 +95,19 @@ def test_take_inventory_item_fails_without_mutation():
     assert coin_entity.id in player_entity.component("container").items
     assert coin_entity.id not in room_entity.component("container").items
     assert coin_entity.component("containable").parent == player_entity.id
+
+
+def test_take_without_player_fails_without_mutation():
+    world = World()
+
+    room_entity = room(world, "room")
+    coin_entity = coin(world)
+
+    world.current = room_entity.id
+    world.contain(room_entity, coin_entity)
+
+    result = world.handle("take coin")
+
+    assert not result.ok
+    assert coin_entity.id in room_entity.component("container").items
+    assert coin_entity.component("containable").parent == room_entity.id
