@@ -13,5 +13,5 @@ if TYPE_CHECKING:
 class Component:
     key: ClassVar[str] = "component"
 
-    def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
+    def handle(self, action: Action, entity: Entity, world: object) -> Result | None:
         return None
