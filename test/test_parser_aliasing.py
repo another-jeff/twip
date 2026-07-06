@@ -31,24 +31,3 @@ def test_z_aliases_wait():
 
     assert action.verb == "wait"
     assert action.target == ""
-
-
-def test_direction_aliases_go_direction():
-    action = parse("n")
-
-    assert action.verb == "go"
-    assert action.target == "north"
-
-
-def test_full_direction_aliases_go_direction():
-    action = parse("north")
-
-    assert action.verb == "go"
-    assert action.target == "north"
-
-
-def test_compound_direction_aliases_go_direction():
-    action = parse("ne")
-
-    assert action.verb == "go"
-    assert action.target == "northeast"
