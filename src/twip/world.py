@@ -9,7 +9,7 @@ from twip.parser import Parser
 from twip.result import Result
 from twip.action import Action
 from twip.command import drop, inventory, look, move, take
-
+from twip.verb import VERBS
 
 Connection = tuple[Entity | str, str | set[str]]
 
@@ -83,8 +83,11 @@ class World:
             case "look" if not action.target:
                 return look.room(self)
 
-            case _ if not action.target:
+            case _ if not action.target and self._verb_requires_target(action.verb):
                 return Result.failure(f"{action.verb.capitalize()} what?")
+
+            case _ if not action.target:
+                return Result.failure("Nothing happens.")
 
             case "look":
                 return look.target(self, action)
@@ -105,7 +108,7 @@ class World:
     def _handle_entity_action(self, action: Action) -> Result:
         target = action.target
 
-        if target is None:
+        if not target:
             return Result.failure(f"{action.verb.capitalize()} what?")
 
         matching_entities = self.find_all(target)
@@ -195,4 +198,13 @@ class World:
     def contain(self, container: Entity, entity: Entity) -> None:
         container.components[Container.id].items.add(entity.id)
         entity.components[Containable.id].parent = container.id
+        
+        
+    def _verb_requires_target(self, verb: str) -> bool:
+        policy = VERBS.get(verb)
+
+        if policy is None:
+            return True
+
+        return policy.requires_target
     
