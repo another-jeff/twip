@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from twip.action import Action
-from twip.command import drop, inventory, look, move, take
+from twip.command import drop, inventory, look, move, take, wait
 from twip.result import Result
 from twip.verb import VERBS
 
@@ -21,6 +21,9 @@ def dispatch(world: World, action: Action) -> Result:
 
         case "look" if not action.target:
             return look.room(world)
+
+        case "wait":
+            return wait.handle()
 
         case _ if not action.target:
             return _handle_targetless_action(world, action)
