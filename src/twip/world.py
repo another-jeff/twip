@@ -2,14 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from twip.action import Action
-from twip.command import drop, inventory, look, move, take
 from twip.component import Component
+from twip.dispatcher import dispatch
 from twip.entity import Entity
 from twip.extension import Containable, Container, Connector
 from twip.parser import Parser
 from twip.result import Result
-from twip.verb import VERBS
 
 
 Connection = tuple[Entity | str, str | set[str]]
@@ -73,95 +71,7 @@ class World:
 
     def handle(self, text: str) -> Result:
         action = self.parser.parse(text)
-
-        match action.verb:
-            case None | "":
-                return Result.failure("Nothing happens.")
-
-            case "inventory":
-                return inventory.handle(self)
-
-            case "look" if not action.target:
-                return look.room(self)
-
-            case _ if not action.target:
-                return self._handle_targetless_action(action)
-
-            case "look":
-                return look.target(self, action)
-
-            case "take":
-                return take.handle(self, action.target)
-
-            case "drop":
-                return drop.handle(self, action.target)
-
-            case "go" | "move":
-                return move.handle(self, action.target)
-
-            case _:
-                return self._handle_entity_action(action)
-
-    def _handle_entity_action(self, action: Action) -> Result:
-        target = action.target
-
-        if not target:
-            return Result.failure(f"{action.verb.capitalize()} what?")
-
-        matching_entities = self.find_accessible_all(target)
-
-        if not matching_entities:
-            return Result.failure(f"You don't see {target} here.")
-
-        if len(matching_entities) > 1:
-            return Result.failure(f"Which {target} do you mean?")
-
-        entity = matching_entities[0]
-
-        result = entity.handle(action, self)
-
-        if result is None:
-            return Result.failure("You can't do that.")
-
-        return result
-
-    def _handle_targetless_action(self, action: Action) -> Result:
-        result = self._handle_current_room_action(action)
-
-        if result is not None:
-            return result
-
-        result = self._handle_player_action(action)
-
-        if result is not None:
-            return result
-
-        if self._verb_requires_target(action.verb):
-            return Result.failure(f"{action.verb.capitalize()} what?")
-
-        return Result.failure("Nothing happens.")
-
-    def _handle_current_room_action(self, action: Action) -> Result | None:
-        if self.current is None:
-            return None
-
-        entity = self.entities.get(self.current)
-
-        if entity is None:
-            return None
-
-        return entity.handle(action, self)
-
-    def _handle_player_action(self, action: Action) -> Result | None:
-        if self.player_id is None:
-            return None
-
-        entity = self.entities.get(self.player_id)
-
-        if entity is None:
-            return None
-
-        return entity.handle(action, self)
+        return dispatch(self, action)
 
     def find(self, target: str) -> Entity | None:
         matching_entities = self.find_all(target)
@@ -241,14 +151,6 @@ class World:
     def contain(self, container: Entity, entity: Entity) -> None:
         container.components[Container.kind].items.add(entity.id)
         entity.components[Containable.kind].parent = container.id
-
-    def _verb_requires_target(self, verb: str) -> bool:
-        policy = VERBS.get(verb)
-
-        if policy is None:
-            return True
-
-        return policy.requires_target
 
     def _is_in_player_inventory(self, entity: Entity) -> bool:
         if self.player_id is None:
