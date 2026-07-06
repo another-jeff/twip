@@ -14,7 +14,7 @@ def handle(world: World) -> Result:
         return Result.failure("There is no player.")
 
     player = world.entities[world.player_id]
-    container = player.component(Container.id)
+    container = player.component(Container.kind)
 
     if not container.items:
         return Result.success("You are carrying nothing.")

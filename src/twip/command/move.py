@@ -41,7 +41,7 @@ def _matching_exits(world: World, target: str) -> list[tuple[Entity, Connector]]
     exits = []
 
     for entity in world.entities.values():
-        connector = entity.components.get(Connector.id)
+        connector = entity.components.get(Connector.kind)
 
         if not isinstance(connector, Connector):
             continue
@@ -79,7 +79,7 @@ def _other_side(connector: Connector, room_id: str):
 
 
 def _connector_blocks_movement(entity: Entity) -> bool:
-    openable = entity.components.get(Openable.id)
+    openable = entity.components.get(Openable.kind)
 
     return (
         isinstance(openable, Openable)

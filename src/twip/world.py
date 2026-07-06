@@ -205,10 +205,10 @@ class World:
         if self.current is None:
             return entity.matches(target)
 
-        if not entity.has_component(Connector.id):
+        if not entity.has_component(Connector.kind):
             return entity.matches(target)
 
-        connector = entity.component(Connector.id)
+        connector = entity.component(Connector.kind)
 
         if not isinstance(connector, Connector):
             return False
@@ -228,11 +228,11 @@ class World:
         if entity.id == self.current:
             return True
 
-        if Connector.id in entity.components:
+        if Connector.kind in entity.components:
             return self._connector_is_visible(entity)
 
         current_room = self.entity(self.current)
-        container = current_room.components.get(Container.id)
+        container = current_room.components.get(Container.kind)
 
         return (
             container is not None
@@ -240,7 +240,7 @@ class World:
         )
 
     def _connector_is_visible(self, entity: Entity) -> bool:
-        connector = entity.component(Connector.id)
+        connector = entity.component(Connector.kind)
 
         if not isinstance(connector, Connector):
             return False
@@ -249,8 +249,8 @@ class World:
 
 
     def contain(self, container: Entity, entity: Entity) -> None:
-        container.components[Container.id].items.add(entity.id)
-        entity.components[Containable.id].parent = container.id
+        container.components[Container.kind].items.add(entity.id)
+        entity.components[Containable.kind].parent = container.id
         
         
     def _verb_requires_target(self, verb: str) -> bool:
@@ -271,7 +271,7 @@ class World:
         if player is None:
             return False
 
-        container = player.components.get(Container.id)
+        container = player.components.get(Container.kind)
 
         return (
             container is not None

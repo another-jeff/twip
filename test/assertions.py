@@ -1,14 +1,15 @@
 from twip.entity import Entity
+from twip.extension import Containable, Container
 
 
 def assert_contains(container: Entity, entity: Entity):
-    assert entity.id in container.component("container").items
-    assert entity.component("containable").parent == container.id
+    assert entity.id in container.component(Container.kind).items
+    assert entity.component(Containable.kind).parent == container.id
 
 
 def assert_does_not_contain(container: Entity, entity: Entity):
-    assert entity.id not in container.component("container").items
-    
+    assert entity.id not in container.component(Container.kind).items
+
 
 def assert_ok_message(result, message: str):
     assert result.ok

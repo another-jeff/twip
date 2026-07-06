@@ -23,6 +23,6 @@ def test_player_inventory_is_an_ordinary_container():
     world = World()
     player_entity = player(world)
 
-    container = player_entity.component("container")
+    container = player_entity.component(Container.kind)
 
     assert container.items == set()

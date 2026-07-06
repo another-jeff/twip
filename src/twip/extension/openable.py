@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from enum import StrEnum
+from typing import ClassVar
 
 from twip.action import Action
 from twip.component import Component
 from twip.entity import Entity
-from twip.extension.lockable import LockState
+from twip.extension.lockable import Lockable, LockState
 from twip.result import Result
 
 
@@ -15,7 +16,7 @@ class OpenState(StrEnum):
 
 @dataclass
 class Openable(Component):
-    id = "openable"
+    kind: ClassVar[str] = "openable"
 
     state: OpenState = OpenState.CLOSED
 
@@ -40,7 +41,7 @@ class Openable(Component):
         if self.is_open:
             return Result.success(f"The {entity.name} is already open.")
 
-        lockable = entity.components.get("lockable")
+        lockable = entity.components.get(Lockable.kind)
 
         if lockable is not None and lockable.state == LockState.LOCKED:
             return Result.failure(f"The {entity.name} is locked.")

@@ -14,7 +14,7 @@ def handle(world: World, target: str) -> Result:
         return Result.failure("There is no player.")
 
     player = world.entities[world.player_id]
-    player_container = player.component(Container.id)
+    player_container = player.component(Container.kind)
 
     matching_entities = world.find_all(target)
 
@@ -26,14 +26,14 @@ def handle(world: World, target: str) -> Result:
 
     entity = matching_entities[0]
 
-    if Containable.id not in entity.components:
+    if Containable.kind not in entity.components:
         return Result.failure(f"You can't take {target}.")
 
-    containable = entity.component(Containable.id)
+    containable = entity.component(Containable.kind)
 
     if containable.parent:
         parent = world.entities[containable.parent]
-        parent_container = parent.component(Container.id)
+        parent_container = parent.component(Container.kind)
         parent_container.items.remove(entity.id)
 
     player_container.items.add(entity.id)

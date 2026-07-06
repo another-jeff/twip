@@ -27,7 +27,7 @@ def test_open_locked_entity_fails():
 
     assert not result.ok
     assert "locked" in result.message
-    assert entity.component(Openable.id).state == OpenState.CLOSED
+    assert entity.component(Openable.kind).state == OpenState.CLOSED
 
 
 def test_open_unlocked_entity_succeeds():
@@ -37,4 +37,4 @@ def test_open_unlocked_entity_succeeds():
     result = world.handle("open thing")
 
     assert result.ok
-    assert entity.component(Openable.id).state == OpenState.OPEN
+    assert entity.component(Openable.kind).state == OpenState.OPEN

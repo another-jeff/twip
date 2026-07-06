@@ -34,23 +34,23 @@ class Entity:
     def name(self) -> str:
         return self.names[0]
 
-    def _assign_id(self, id: str) -> None:
+    def _assign_id(self, entity_id: str) -> None:
         if self._id is not None:
             raise ValueError(f"Entity already has id: {self._id}")
 
-        self._id = id
+        self._id = entity_id
 
-    def add_component(self, *components: Component) -> Self: 
-        for component in components: 
-            self.components[component.id] = component 
-            
+    def add_component(self, *components: Component) -> Self:
+        for component in components:
+            self.components[component.kind] = component
+
         return self
 
-    def component(self, id: str) -> Component:
-        return self.components[id]
+    def component(self, kind: str) -> Component:
+        return self.components[kind]
 
-    def has_component(self, id: str) -> bool:
-        return id in self.components
+    def has_component(self, kind: str) -> bool:
+        return kind in self.components
 
     def parser_names(self) -> set[str]:
         return {name.lower() for name in self.names}

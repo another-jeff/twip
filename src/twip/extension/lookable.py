@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import FrozenSet
+from typing import ClassVar, FrozenSet
 
 from twip.action import Action
 from twip.component import Component
@@ -13,7 +13,8 @@ from twip.result import Result
 class Lookable(Component):
     text: str
     verbs: FrozenSet[str] = frozenset(("look", "examine"))
-    id: str = "lookable"
+
+    kind: ClassVar[str] = "lookable"
 
     def handle(
         self,

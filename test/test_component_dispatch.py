@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from twip.action import Action
 from twip.component import Component
 from twip.entity import Entity
@@ -7,7 +9,7 @@ from twip.world import World
 
 
 class BlockingComponent(Component):
-    id = "blocking"
+    kind: ClassVar[str] = "blocking"
 
     def handle(
         self,
@@ -22,7 +24,7 @@ class BlockingComponent(Component):
 
 
 class LaterComponent(Component):
-    id = "later"
+    kind: ClassVar[str] = "later"
 
     def handle(
         self,

@@ -19,8 +19,8 @@ def handle(world: World, target: str) -> Result:
     player = world.entities[world.player_id]
     room = world.entities[world.current]
 
-    player_container = player.component(Container.id)
-    room_container = room.component(Container.id)
+    player_container = player.component(Container.kind)
+    room_container = room.component(Container.kind)
 
     matching_entities = [
         world.entities[item_id]
@@ -35,7 +35,7 @@ def handle(world: World, target: str) -> Result:
         return Result.failure(f"Which {target}?")
 
     entity = matching_entities[0]
-    containable = entity.component(Containable.id)
+    containable = entity.component(Containable.kind)
 
     player_container.items.remove(entity.id)
     room_container.items.add(entity.id)

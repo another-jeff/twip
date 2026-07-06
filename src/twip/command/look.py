@@ -17,12 +17,12 @@ def room(world: World) -> Result:
     room = world.entities[world.current]
     message = f"You are in {room.names[-1]}."
 
-    lookable = room.components.get(Lookable.id)
+    lookable = room.components.get(Lookable.kind)
 
     if lookable:
         message += f" {lookable.text}"
 
-    container = room.components.get(Container.id)
+    container = room.components.get(Container.kind)
 
     if container and container.items:
         names = sorted(
@@ -39,7 +39,7 @@ def target(world: World, action: Action) -> Result:
 
     if world.player_id:
         player = world.entities[world.player_id]
-        inventory = player.components.get(Container.id)
+        inventory = player.components.get(Container.kind)
 
         if inventory:
             inventory_matches = [

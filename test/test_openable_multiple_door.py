@@ -11,8 +11,8 @@ def test_open_door_is_ambiguous_when_multiple_doors_visible():
     result = world.handle("open door")
 
     assert not result.ok
-    assert north_door.component(Openable.id).state == OpenState.CLOSED
-    assert south_door.component(Openable.id).state == OpenState.CLOSED
+    assert north_door.component(Openable.kind).state == OpenState.CLOSED
+    assert south_door.component(Openable.kind).state == OpenState.CLOSED
 
 
 def test_open_north_door_opens_only_north_door():
@@ -21,8 +21,8 @@ def test_open_north_door_opens_only_north_door():
     result = world.handle("open north door")
 
     assert result.ok
-    assert north_door.component(Openable.id).state == OpenState.OPEN
-    assert south_door.component(Openable.id).state == OpenState.CLOSED
+    assert north_door.component(Openable.kind).state == OpenState.OPEN
+    assert south_door.component(Openable.kind).state == OpenState.CLOSED
 
 
 def _world_with_two_visible_doors():

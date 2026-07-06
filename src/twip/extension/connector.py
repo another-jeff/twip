@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import Enum
+from typing import ClassVar
 
 from twip.component import Component
 from twip.entity import Entity
@@ -37,7 +40,7 @@ class ConnectorSide:
 
 @dataclass
 class Connector(Component):
-    id = "connector"
+    kind: ClassVar[str] = "connector"
 
     sides: tuple[ConnectorSide, ...]
 
