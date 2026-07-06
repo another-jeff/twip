@@ -1,5 +1,7 @@
 # test/test_world_extension_dispatch.py
 
+from typing import ClassVar
+
 from twip.action import Action
 from twip.component import Component
 from twip.entity import Entity
@@ -7,19 +9,21 @@ from twip.extension import Containable, Container
 from twip.result import Result
 from twip.world import World
 
+from scenario import bs
+
 
 class Searchable(Component):
-    id = "searchable"
+    kind: ClassVar[str] = "searchable"
 
     def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
         if action.verb != "search":
             return None
 
         return Result.success("You find a brass key.")
-    
-    
+
+
 class Diggable(Component):
-    id = "diggable"
+    kind: ClassVar[str] = "diggable"
 
     def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
         if action.verb != "dig":
@@ -32,7 +36,7 @@ class Diggable(Component):
 
 
 class UnlockableWith(Component):
-    id = "unlockable_with"
+    kind: ClassVar[str] = "unlockable_with"
 
     def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
         if action.verb != "unlock":
@@ -45,10 +49,10 @@ class UnlockableWith(Component):
             return Result.failure("That doesn't fit the lock.")
 
         return Result.success("You unlock the door with the key.")
-    
-    
+
+
 class Listenable(Component):
-    id = "listenable"
+    kind: ClassVar[str] = "listenable"
 
     def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
         if action.verb != "listen":
@@ -61,7 +65,7 @@ class Listenable(Component):
 
 
 class Jumping(Component):
-    id = "jumping"
+    kind: ClassVar[str] = "jumping"
 
     def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
         if action.verb != "jump":
@@ -71,10 +75,10 @@ class Jumping(Component):
             return None
 
         return Result.success("You jump on the spot.")
-    
+
 
 class Edible(Component):
-    id = "edible"
+    kind: ClassVar[str] = "edible"
 
     def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
         if action.verb != "eat":
@@ -83,218 +87,123 @@ class Edible(Component):
         return Result.success("You eat the apple.")
 
 
-def test_extension_component_can_claim_uniform_zebra_verb():
-    world = World()
+def scenario():
+    return bs().one_room()
 
-    room = world.add(
-        names=("room",),
-        traits={"room"},
+
+def player_scenario():
+    s = scenario()
+
+    player = s.world.add(
+        names=("player",),
+        traits={"player"},
         components=(Container(),),
     )
 
-    box = world.add(
-        names=("box",),
+    s.player = player
+    s.world.player_id = player.id
+
+    return s
+
+
+def room_item(s, name: str, *components: Component) -> Entity:
+    entity = s.world.add(
+        names=(name,),
         traits=set(),
         components=(
-            Searchable(),
+            *components,
             Containable(),
         ),
     )
 
-    room.components["container"].items.add(box.id)
-    box.components["containable"].parent = room.id
-    world.current = room.id
+    s.world.contain(s.room_one, entity)
 
-    result = world.handle("search box")
+    return entity
+
+
+def inventory_item(s, name: str, *components: Component) -> Entity:
+    entity = s.world.add(
+        names=(name,),
+        traits=set(),
+        components=(
+            *components,
+            Containable(),
+        ),
+    )
+
+    s.world.contain(s.player, entity)
+
+    return entity
+
+
+def test_extension_component_can_claim_uniform_zebra_verb():
+    s = scenario()
+    room_item(s, "box", Searchable())
+
+    result = s.handle("search box")
 
     assert result.ok
     assert result.message == "You find a brass key."
-    
-    
+
+
 def test_extension_component_can_claim_prepositional_uniform_zebra_verb():
-    world = World()
+    s = scenario()
+    room_item(s, "dirt", Diggable())
 
-    room = world.add(
-        names=("room",),
-        traits={"room"},
-        components=(Container(),),
-    )
-
-    dirt = world.add(
-        names=("dirt",),
-        traits=set(),
-        components=(
-            Diggable(),
-            Containable(),
-        ),
-    )
-
-    room.components["container"].items.add(dirt.id)
-    dirt.components["containable"].parent = room.id
-    world.current = room.id
-
-    result = world.handle("dig in dirt")
+    result = s.handle("dig in dirt")
 
     assert result.ok
     assert result.message == "You dig in the dirt and find nothing."
-    
-    
+
+
 def test_extension_component_can_claim_indirect_target_phrase():
-    world = World()
+    s = scenario()
+    room_item(s, "door", UnlockableWith())
+    room_item(s, "key")
 
-    room = world.add(
-        names=("room",),
-        traits={"room"},
-        components=(Container(),),
-    )
-
-    door = world.add(
-        names=("door",),
-        traits=set(),
-        components=(
-            UnlockableWith(),
-            Containable(),
-        ),
-    )
-
-    key = world.add(
-        names=("key",),
-        traits=set(),
-        components=(Containable(),),
-    )
-
-    room.components["container"].items.update({door.id, key.id})
-    door.components["containable"].parent = room.id
-    key.components["containable"].parent = room.id
-    world.current = room.id
-
-    result = world.handle("unlock door with key")
+    result = s.handle("unlock door with key")
 
     assert result.ok
     assert result.message == "You unlock the door with the key."
-    
-    
+
+
 def test_current_room_component_can_claim_targetless_action():
-    world = World()
+    s = scenario()
+    s.room_one.add_component(Listenable())
 
-    room = world.add(
-        names=("room",),
-        traits={"room"},
-        components=(
-            Container(),
-            Listenable(),
-        ),
-    )
-
-    world.current = room.id
-
-    result = world.handle("listen")
+    result = s.handle("listen")
 
     assert result.ok
     assert result.message == "You hear water dripping somewhere nearby."
-    
-    
+
+
 def test_player_component_can_claim_targetless_action():
-    world = World()
+    s = player_scenario()
+    s.player.add_component(Jumping())
 
-    room = world.add(
-        names=("room",),
-        traits={"room"},
-        components=(Container(),),
-    )
-
-    player = world.add(
-        names=("player",),
-        traits={"player"},
-        components=(
-            Container(),
-            Jumping(),
-        ),
-    )
-
-    world.current = room.id
-    world.player_id = player.id
-
-    result = world.handle("jump")
+    result = s.handle("jump")
 
     assert result.ok
     assert result.message == "You jump on the spot."
-    
-    
+
+
 def test_extension_component_can_claim_action_on_inventory_item():
-    world = World()
+    s = player_scenario()
+    inventory_item(s, "apple", Edible())
 
-    room = world.add(
-        names=("room",),
-        traits={"room"},
-        components=(Container(),),
-    )
-
-    player = world.add(
-        names=("player",),
-        traits={"player"},
-        components=(Container(),),
-    )
-
-    apple = world.add(
-        names=("apple",),
-        traits=set(),
-        components=(
-            Containable(),
-            Edible(),
-        ),
-    )
-
-    world.contain(player, apple)
-    world.current = room.id
-    world.player_id = player.id
-
-    result = world.handle("eat apple")
+    result = s.handle("eat apple")
 
     assert result.ok
     assert result.message == "You eat the apple."
-    
-    
+
+
 def test_extension_action_is_ambiguous_between_room_and_inventory_items():
-    world = World()
+    s = player_scenario()
 
-    room = world.add(
-        names=("room",),
-        traits={"room"},
-        components=(Container(),),
-    )
+    room_item(s, "apple", Edible())
+    inventory_item(s, "apple", Edible())
 
-    player = world.add(
-        names=("player",),
-        traits={"player"},
-        components=(Container(),),
-    )
-
-    room_apple = world.add(
-        names=("apple",),
-        traits=set(),
-        components=(
-            Containable(),
-            Edible(),
-        ),
-    )
-
-    inventory_apple = world.add(
-        names=("apple",),
-        traits=set(),
-        components=(
-            Containable(),
-            Edible(),
-        ),
-    )
-
-    world.contain(room, room_apple)
-    world.contain(player, inventory_apple)
-
-    world.current = room.id
-    world.player_id = player.id
-
-    result = world.handle("eat apple")
+    result = s.handle("eat apple")
 
     assert not result.ok
     assert result.message == "Which apple do you mean?"
