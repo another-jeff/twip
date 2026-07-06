@@ -83,11 +83,8 @@ class World:
             case "look" if not action.target:
                 return look.room(self)
 
-            case _ if not action.target and self._verb_requires_target(action.verb):
-                return Result.failure(f"{action.verb.capitalize()} what?")
-
             case _ if not action.target:
-                return Result.failure("Nothing happens.")
+                return self._handle_targetless_action(action)
 
             case "look":
                 return look.target(self, action)
@@ -111,7 +108,7 @@ class World:
         if not target:
             return Result.failure(f"{action.verb.capitalize()} what?")
 
-        matching_entities = self.find_all(target)
+        matching_entities = self.find_accessible_all(target)
 
         if not matching_entities:
             return Result.failure(f"You don't see {target} here.")
@@ -127,6 +124,47 @@ class World:
             return Result.failure("You can't do that.")
 
         return result
+    
+    
+    def _handle_targetless_action(self, action: Action) -> Result:
+        result = self._handle_current_room_action(action)
+
+        if result is not None:
+            return result
+
+        result = self._handle_player_action(action)
+
+        if result is not None:
+            return result
+
+        if self._verb_requires_target(action.verb):
+            return Result.failure(f"{action.verb.capitalize()} what?")
+
+        return Result.failure("Nothing happens.")
+
+
+    def _handle_current_room_action(self, action: Action) -> Result | None:
+        if self.current is None:
+            return None
+
+        entity = self.entities.get(self.current)
+
+        if entity is None:
+            return None
+
+        return entity.handle(action, self)
+
+
+    def _handle_player_action(self, action: Action) -> Result | None:
+        if self.player_id is None:
+            return None
+
+        entity = self.entities.get(self.player_id)
+
+        if entity is None:
+            return None
+
+        return entity.handle(action, self)
 
 
     def find(self, target: str) -> Entity | None:
@@ -145,6 +183,22 @@ class World:
             if self._is_visible(entity)
             if self._matches(entity, target)
         ]
+        
+
+    def find_accessible_all(self, target: str) -> list[Entity]:
+        return [
+            entity
+            for entity in self.entities.values()
+            if self._is_accessible(entity)
+            if self._matches(entity, target)
+        ]
+
+
+    def _is_accessible(self, entity: Entity) -> bool:
+        return (
+            self._is_visible(entity)
+            or self._is_in_player_inventory(entity)
+        )
 
 
     def _matches(self, entity: Entity, target: str) -> bool:
@@ -185,7 +239,6 @@ class World:
             and entity.id in container.items
         )
 
-
     def _connector_is_visible(self, entity: Entity) -> bool:
         connector = entity.component(Connector.id)
 
@@ -207,4 +260,21 @@ class World:
             return True
 
         return policy.requires_target
+    
+    
+    def _is_in_player_inventory(self, entity: Entity) -> bool:
+        if self.player_id is None:
+            return False
+
+        player = self.entities.get(self.player_id)
+
+        if player is None:
+            return False
+
+        container = player.components.get(Container.id)
+
+        return (
+            container is not None
+            and entity.id in container.items
+        )
     
