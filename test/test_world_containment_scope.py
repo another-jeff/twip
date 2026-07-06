@@ -1,25 +1,7 @@
-# test/test_world_containment_scope.py
-
-from twip.extension import Containable, Container
 from twip.world import World
 
+from helpers import item, room
 import tt
-
-
-def room(world: World, trait: str):
-    return world.add(
-        names=(tt.ROOM,),
-        traits={trait},
-        components=(Container(),),
-    )
-
-
-def item(world: World, name: str):
-    return world.add(
-        names=(name,),
-        traits=set(),
-        components=(Containable(),),
-    )
 
 
 def test_current_room_contents_are_visible():

@@ -1,663 +1,219 @@
-# test_world_look.py
+from assertions import (
+    assert_not_ok_contains,
+    assert_not_ok_contains_any,
+    assert_ok_contains,
+    assert_ok_message,
+    assert_ok_omits,
+)
+from helpers import (
+    coin_copper,
+    coin_silver,
+    item,
+)
+from scenario import bs
 
-from twip.extension import Container, Containable, Lookable
-from twip.world import World
+import tt
+
+
+def item_factory(name: str):
+    return lambda world: item(world, name)
 
 
 def test_look_describes_current_room():
-    world = World()
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
-    world.current = room.id
+    s = bs().one_room()
 
-    result = world.handle("look")
+    result = s.handle("look")
 
-    assert result.ok
-    assert "rotunda" in result.message
+    assert_ok_contains(result, tt.ROOM_1)
 
 
 def test_look_without_current_room_fails_cleanly():
-    world = World()
+    s = bs()
 
-    result = world.handle("look")
+    result = s.handle("look")
 
-    assert not result.ok
-    assert "nowhere" in result.message.lower() or "current" in result.message.lower()
+    assert_not_ok_contains_any(result, "nowhere", "current")
 
 
 def test_look_lists_current_room_contents():
-    world = World()
+    s = bs().one_room()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_room(s.room_one, item_factory(tt.COIN))
 
-    coin = world.add(
-        names=("coin",),
-        traits=set(),
-        components=(Containable(),),
-    )
+    result = s.handle("look")
 
-    room.components["container"].items.add(coin.id)
-    coin.components["containable"].parent = room.id
-    world.current = room.id
+    assert_ok_contains(result, tt.ROOM_1, tt.COIN)
 
-    result = world.handle("look")
 
-    assert result.ok
-    assert "rotunda" in result.message
-    assert "coin" in result.message
-    
-    
 def test_look_lists_only_current_room_contents():
-    world = World()
+    s = bs().two_rooms()
 
-    rotunda = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_room(s.room_one, item_factory(tt.COIN))
+    s.put_room(s.room_two, item_factory(tt.GEM))
 
-    library = world.add(
-        names=("room", "library"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    result = s.handle("look")
 
-    coin = world.add(
-        names=("coin",),
-        traits=set(),
-        components=(Containable(),),
-    )
+    assert_ok_contains(result, tt.ROOM_1, tt.COIN)
+    assert_ok_omits(result, tt.GEM)
 
-    gem = world.add(
-        names=("gem",),
-        traits=set(),
-        components=(Containable(),),
-    )
 
-    rotunda.components["container"].items.add(coin.id)
-    coin.components["containable"].parent = rotunda.id
-
-    library.components["container"].items.add(gem.id)
-    gem.components["containable"].parent = library.id
-
-    world.current = rotunda.id
-
-    result = world.handle("look")
-
-    assert result.ok
-    assert "rotunda" in result.message
-    assert "coin" in result.message
-    assert "gem" not in result.message
-    
-    
 def test_look_does_not_list_inventory_contents():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_inventory(item_factory(tt.COIN))
 
-    player = world.add(
-        names=("player",),
-        traits={"player"},
-        components=(Container(),),
-    )
+    result = s.handle("look")
 
-    coin = world.add(
-        names=("coin",),
-        traits=set(),
-        components=(Containable(),),
-    )
+    assert_ok_contains(result, tt.ROOM_1)
+    assert_ok_omits(result, tt.COIN)
 
-    player.components["container"].items.add(coin.id)
-    coin.components["containable"].parent = player.id
 
-    world.current = room.id
-    world.player_id = player.id
-
-    result = world.handle("look")
-
-    assert result.ok
-    assert "rotunda" in result.message
-    assert "coin" not in result.message
-    
-    
 def test_look_lists_multiple_current_room_contents():
-    world = World()
+    s = bs().one_room()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
+    s.put_room(
+        s.room_one,
+        item_factory(tt.COIN),
+        item_factory(tt.KEY),
     )
 
-    coin = world.add(
-        names=("coin",),
-        traits=set(),
-        components=(Containable(),),
-    )
+    result = s.handle("look")
 
-    key = world.add(
-        names=("key",),
-        traits=set(),
-        components=(Containable(),),
-    )
-
-    room.components["container"].items.add(coin.id)
-    coin.components["containable"].parent = room.id
-
-    room.components["container"].items.add(key.id)
-    key.components["containable"].parent = room.id
-
-    world.current = room.id
-
-    result = world.handle("look")
-
-    assert result.ok
-    assert "rotunda" in result.message
-    assert "coin" in result.message
-    assert "key" in result.message
+    assert_ok_contains(result, tt.ROOM_1, tt.COIN, tt.KEY)
 
 
 def test_look_lists_room_contents_in_name_order():
-    world = World()
+    s = bs().one_room()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
+    s.put_room(
+        s.room_one,
+        item_factory(tt.ZEBRA),
+        item_factory(tt.APPLE),
     )
 
-    zebra = world.add(
-        names=("zebra",),
-        traits=set(),
-        components=(Containable(),),
-    )
-
-    apple = world.add(
-        names=("apple",),
-        traits=set(),
-        components=(Containable(),),
-    )
-
-    room.components["container"].items.add(zebra.id)
-    zebra.components["containable"].parent = room.id
-
-    room.components["container"].items.add(apple.id)
-    apple.components["containable"].parent = room.id
-
-    world.current = room.id
-
-    result = world.handle("look")
+    result = s.handle("look")
 
     assert result.ok
-    assert result.message.index("apple") < result.message.index("zebra")
+    assert result.message.index(tt.APPLE) < result.message.index(tt.ZEBRA)
 
-    
+
 def test_look_includes_current_room_lookable_text():
-    world = World()
+    s = bs().one_room()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(
-            Container(),
-            Lookable("A round stone chamber."),
-        ),
-    )
+    result = s.handle("look")
 
-    world.current = room.id
-
-    result = world.handle("look")
-
-    assert result.ok
-    assert "rotunda" in result.message
-    assert "A round stone chamber." in result.message
+    assert_ok_contains(result, tt.ROOM_1, tt.ROOM_DESCRIPTION)
 
 
 def test_look_target_describes_visible_lookable_entity():
-    world = World()
+    s = bs().one_room()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_room(s.room_one, coin_copper)
 
-    coin = world.add(
-        names=("coin",),
-        traits=set(),
-        components=(
-            Containable(),
-            Lookable("A dull copper coin."),
-        ),
-    )
+    result = s.handle("look coin")
 
-    room.components["container"].items.add(coin.id)
-    coin.components["containable"].parent = room.id
+    assert_ok_message(result, tt.COPPER_COIN_DESCRIPTION)
 
-    world.current = room.id
 
-    result = world.handle("look coin")
-
-    assert result.ok
-    assert result.message == "A dull copper coin."
-    
-    
 def test_look_target_ignores_lookable_entity_in_other_room():
-    world = World()
+    s = bs().two_rooms()
 
-    rotunda = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_room(s.room_two, coin_copper)
 
-    library = world.add(
-        names=("room", "library"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    result = s.handle("look coin")
 
-    coin = world.add(
-        names=("coin",),
-        traits=set(),
-        components=(
-            Containable(),
-            Lookable("A dull copper coin."),
-        ),
-    )
+    assert_not_ok_contains(result, tt.COIN)
 
-    library.components["container"].items.add(coin.id)
-    coin.components["containable"].parent = library.id
 
-    world.current = rotunda.id
-
-    result = world.handle("look coin")
-
-    assert not result.ok
-    assert "coin" in result.message
-    
-    
 def test_look_target_ambiguity_fails_cleanly():
-    world = World()
+    s = bs().one_room()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_room(s.room_one, coin_copper, coin_silver)
 
-    copper_coin = world.add(
-        names=("coin",),
-        traits={"copper"},
-        components=(
-            Containable(),
-            Lookable("A dull copper coin."),
-        ),
-    )
+    result = s.handle("look coin")
 
-    silver_coin = world.add(
-        names=("coin",),
-        traits={"silver"},
-        components=(
-            Containable(),
-            Lookable("A bright silver coin."),
-        ),
-    )
+    assert_not_ok_contains(result, "Which coin")
 
-    room.components["container"].items.add(copper_coin.id)
-    copper_coin.components["containable"].parent = room.id
 
-    room.components["container"].items.add(silver_coin.id)
-    silver_coin.components["containable"].parent = room.id
-
-    world.current = room.id
-
-    result = world.handle("look coin")
-
-    assert not result.ok
-    assert "Which coin" in result.message
-    
-    
 def test_look_target_disambiguation_describes_selected_entity():
-    world = World()
+    s = bs().one_room()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_room(s.room_one, coin_copper, coin_silver)
 
-    copper_coin = world.add(
-        names=("coin",),
-        traits={"copper"},
-        components=(
-            Containable(),
-            Lookable("A dull copper coin."),
-        ),
-    )
+    result = s.handle("look silver coin")
 
-    silver_coin = world.add(
-        names=("coin",),
-        traits={"silver"},
-        components=(
-            Containable(),
-            Lookable("A bright silver coin."),
-        ),
-    )
+    assert_ok_message(result, tt.SILVER_COIN_DESCRIPTION)
 
-    room.components["container"].items.add(copper_coin.id)
-    copper_coin.components["containable"].parent = room.id
 
-    room.components["container"].items.add(silver_coin.id)
-    silver_coin.components["containable"].parent = room.id
-
-    world.current = room.id
-
-    result = world.handle("look silver coin")
-
-    assert result.ok
-    assert result.message == "A bright silver coin."
-    
-    
 def test_look_target_visible_non_lookable_fails_cleanly():
-    world = World()
+    s = bs().one_room()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_room(s.room_one, item_factory(tt.ROCK))
 
-    rock = world.add(
-        names=("rock",),
-        traits=set(),
-        components=(Containable(),),
-    )
+    result = s.handle("look rock")
 
-    room.components["container"].items.add(rock.id)
-    rock.components["containable"].parent = room.id
+    assert_not_ok_contains(result, "can't do that")
 
-    world.current = room.id
 
-    result = world.handle("look rock")
-
-    assert not result.ok
-    assert "can't do that" in result.message
-    
-    
 def test_look_target_can_describe_inventory_item():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_inventory(coin_copper)
 
-    player = world.add(
-        names=("player",),
-        traits={"player"},
-        components=(Container(),),
-    )
+    result = s.handle("look coin")
 
-    coin = world.add(
-        names=("coin",),
-        traits=set(),
-        components=(
-            Containable(),
-            Lookable("A dull copper coin."),
-        ),
-    )
+    assert_ok_message(result, tt.COPPER_COIN_DESCRIPTION)
 
-    player.components["container"].items.add(coin.id)
-    coin.components["containable"].parent = player.id
 
-    world.current = room.id
-    world.player_id = player.id
-
-    result = world.handle("look coin")
-
-    assert result.ok
-    assert result.message == "A dull copper coin."
-    
-    
 def test_look_target_ambiguity_includes_room_and_inventory_items():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_room(s.room_one, coin_copper)
+    s.put_inventory(coin_silver)
 
-    player = world.add(
-        names=("player",),
-        traits={"player"},
-        components=(Container(),),
-    )
+    result = s.handle("look coin")
 
-    room_coin = world.add(
-        names=("coin",),
-        traits={"copper"},
-        components=(
-            Containable(),
-            Lookable("A dull copper coin."),
-        ),
-    )
+    assert_not_ok_contains(result, "Which coin")
 
-    inventory_coin = world.add(
-        names=("coin",),
-        traits={"silver"},
-        components=(
-            Containable(),
-            Lookable("A bright silver coin."),
-        ),
-    )
 
-    room.components["container"].items.add(room_coin.id)
-    room_coin.components["containable"].parent = room.id
-
-    player.components["container"].items.add(inventory_coin.id)
-    inventory_coin.components["containable"].parent = player.id
-
-    world.current = room.id
-    world.player_id = player.id
-
-    result = world.handle("look coin")
-
-    assert not result.ok
-    assert "Which coin" in result.message
-    
-    
 def test_look_target_disambiguation_selects_inventory_item_over_room_item():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_room(s.room_one, coin_copper)
+    s.put_inventory(coin_silver)
 
-    player = world.add(
-        names=("player",),
-        traits={"player"},
-        components=(Container(),),
-    )
+    result = s.handle("look silver coin")
 
-    room_coin = world.add(
-        names=("coin",),
-        traits={"copper"},
-        components=(
-            Containable(),
-            Lookable("A dull copper coin."),
-        ),
-    )
+    assert_ok_message(result, tt.SILVER_COIN_DESCRIPTION)
 
-    inventory_coin = world.add(
-        names=("coin",),
-        traits={"silver"},
-        components=(
-            Containable(),
-            Lookable("A bright silver coin."),
-        ),
-    )
 
-    room.components["container"].items.add(room_coin.id)
-    room_coin.components["containable"].parent = room.id
-
-    player.components["container"].items.add(inventory_coin.id)
-    inventory_coin.components["containable"].parent = player.id
-
-    world.current = room.id
-    world.player_id = player.id
-
-    result = world.handle("look silver coin")
-
-    assert result.ok
-    assert result.message == "A bright silver coin."
-    
-    
 def test_look_target_disambiguation_selects_room_item_over_inventory_item():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_room(s.room_one, coin_copper)
+    s.put_inventory(coin_silver)
 
-    player = world.add(
-        names=("player",),
-        traits={"player"},
-        components=(Container(),),
-    )
+    result = s.handle("look copper coin")
 
-    room_coin = world.add(
-        names=("coin",),
-        traits={"copper"},
-        components=(
-            Containable(),
-            Lookable("A dull copper coin."),
-        ),
-    )
-
-    inventory_coin = world.add(
-        names=("coin",),
-        traits={"silver"},
-        components=(
-            Containable(),
-            Lookable("A bright silver coin."),
-        ),
-    )
-
-    room.components["container"].items.add(room_coin.id)
-    room_coin.components["containable"].parent = room.id
-
-    player.components["container"].items.add(inventory_coin.id)
-    inventory_coin.components["containable"].parent = player.id
-
-    world.current = room.id
-    world.player_id = player.id
-
-    result = world.handle("look copper coin")
-
-    assert result.ok
-    assert result.message == "A dull copper coin."
+    assert_ok_message(result, tt.COPPER_COIN_DESCRIPTION)
 
 
 def test_look_target_inventory_non_lookable_fails_cleanly():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_inventory(item_factory(tt.ROCK))
 
-    player = world.add(
-        names=("player",),
-        traits={"player"},
-        components=(Container(),),
-    )
+    result = s.handle("look rock")
 
-    rock = world.add(
-        names=("rock",),
-        traits=set(),
-        components=(Containable(),),
-    )
+    assert_not_ok_contains(result, "can't do that")
 
-    player.components["container"].items.add(rock.id)
-    rock.components["containable"].parent = player.id
 
-    world.current = room.id
-    world.player_id = player.id
-
-    result = world.handle("look rock")
-
-    assert not result.ok
-    assert "can't do that" in result.message
-    
-    
 def test_look_target_inventory_item_ignores_same_named_item_in_other_room():
-    world = World()
+    s = bs().two_rooms().with_player()
 
-    rotunda = world.add(
-        names=("room", "rotunda"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    s.put_inventory(coin_silver)
+    s.put_room(s.room_two, coin_copper)
 
-    library = world.add(
-        names=("room", "library"),
-        traits={"room"},
-        components=(Container(),),
-    )
+    result = s.handle("look coin")
 
-    player = world.add(
-        names=("player",),
-        traits={"player"},
-        components=(Container(),),
-    )
-
-    library_coin = world.add(
-        names=("coin",),
-        traits={"copper"},
-        components=(
-            Containable(),
-            Lookable("A dull copper coin."),
-        ),
-    )
-
-    inventory_coin = world.add(
-        names=("coin",),
-        traits={"silver"},
-        components=(
-            Containable(),
-            Lookable("A bright silver coin."),
-        ),
-    )
-
-    library.components["container"].items.add(library_coin.id)
-    library_coin.components["containable"].parent = library.id
-
-    player.components["container"].items.add(inventory_coin.id)
-    inventory_coin.components["containable"].parent = player.id
-
-    world.current = rotunda.id
-    world.player_id = player.id
-
-    result = world.handle("look coin")
-
-    assert result.ok
-    assert result.message == "A bright silver coin."
+    assert_ok_message(result, tt.SILVER_COIN_DESCRIPTION)

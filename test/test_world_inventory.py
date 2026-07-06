@@ -1,107 +1,64 @@
-from twip.extension import Containable, Container
-from twip.world import World
+from assertions import assert_ok_contains, assert_ok_omits
+from helpers import item
+from scenario import bs
 
-
-def player(world: World):
-    return world.add(
-        names=("player",),
-        traits=set(),
-        components=(Container(),),
-    )
-
-
-def coin(world: World):
-    return world.add(
-        names=("coin",),
-        traits=set(),
-        components=(Containable(),),
-    )
-
-def key(world: World):
-    return world.add(
-        names=("key",),
-        traits=set(),
-        components=(Containable(),),
-    )
-    
-def room(world: World, name: str):
-    return world.add(
-        names=(name,),
-        traits=set(),
-        components=(Container(),),
-    )
+import tt
 
 
 def test_inventory_lists_only_carried_items_not_room_items():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room_entity = room(world, "room")
-    player_entity = player(world)
-    carried_key = key(world)
-    room_coin = coin(world)
+    carried_key = item(s.world, tt.KEY)
+    room_coin = item(s.world, tt.COIN)
 
-    world.current = room_entity.id
-    world.player_id = player_entity.id
-    world.contain(player_entity, carried_key)
-    world.contain(room_entity, room_coin)
+    s.world.contain(s.player, carried_key)
+    s.world.contain(s.room_one, room_coin)
 
-    result = world.handle("inventory")
+    result = s.handle("inventory")
 
-    assert result.ok
-    assert "key" in result.message
-    assert "coin" not in result.message
+    assert_ok_contains(result, tt.KEY)
+    assert_ok_omits(result, tt.COIN)
 
 
 def test_inventory_lists_multiple_carried_items():
-    world = World()
+    s = bs().with_player()
 
-    player_entity = player(world)
-    coin_entity = coin(world)
-    key_entity = key(world)
+    coin_entity = item(s.world, tt.COIN)
+    key_entity = item(s.world, tt.KEY)
 
-    world.player_id = player_entity.id
-    world.contain(player_entity, coin_entity)
-    world.contain(player_entity, key_entity)
+    s.world.contain(s.player, coin_entity)
+    s.world.contain(s.player, key_entity)
 
-    result = world.handle("inventory")
+    result = s.handle("inventory")
 
-    assert result.ok
-    assert "coin" in result.message
-    assert "key" in result.message
+    assert_ok_contains(result, tt.COIN)
+    assert_ok_contains(result, tt.KEY)
 
 
 def test_inventory_lists_carried_item():
-    world = World()
+    s = bs().with_player()
 
-    player_entity = player(world)
-    coin_entity = coin(world)
+    coin_entity = item(s.world, tt.COIN)
 
-    world.player_id = player_entity.id
-    world.contain(player_entity, coin_entity)
+    s.world.contain(s.player, coin_entity)
 
-    result = world.handle("inventory")
+    result = s.handle("inventory")
 
-    assert result.ok
-    assert "coin" in result.message
-    
-    
+    assert_ok_contains(result, tt.COIN)
+
+
 def test_inventory_empty_reports_nothing_carried():
-    world = World()
+    s = bs().with_player()
 
-    player_entity = player(world)
+    result = s.handle("inventory")
 
-    world.player_id = player_entity.id
-
-    result = world.handle("inventory")
-
-    assert result.ok
-    assert "nothing" in result.message
+    assert_ok_contains(result, "nothing")
 
 
 def test_inventory_without_player_fails():
-    world = World()
+    s = bs()
 
-    result = world.handle("inventory")
+    result = s.handle("inventory")
 
     assert not result.ok
-    assert "player" in result.message
+    assert tt.PLAYER in result.message

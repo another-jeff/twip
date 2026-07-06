@@ -174,11 +174,12 @@ class World:
         if Connector.id in entity.components:
             return self._connector_is_visible(entity)
 
-        containable = entity.components.get(Containable.id)
+        current_room = self.entity(self.current)
+        container = current_room.components.get(Container.id)
 
         return (
-            containable is not None
-            and containable.parent == self.current
+            container is not None
+            and entity.id in container.items
         )
 
 
@@ -194,4 +195,4 @@ class World:
     def contain(self, container: Entity, entity: Entity) -> None:
         container.components[Container.id].items.add(entity.id)
         entity.components[Containable.id].parent = container.id
-        
+    

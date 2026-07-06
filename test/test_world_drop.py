@@ -1,229 +1,139 @@
-from twip.extension import Containable, Container
-from twip.world import World
+from assertions import assert_contains, assert_does_not_contain
+from helpers import coin, coin_blue, coin_red, player
+from scenario import bs
 
-
-def room(world: World, name: str):
-    return world.add(
-        names=(name,),
-        traits=set(),
-        components=(Container(),),
-    )
-
-
-def player(world: World):
-    return world.add(
-        names=("player",),
-        traits=set(),
-        components=(Container(),),
-    )
-
-
-def coin(world: World):
-    return world.add(
-        names=("coin",),
-        traits=set(),
-        components=(Containable(),),
-    )
-    
-
-def coin_with_trait(world: World, trait: str):
-    return world.add(
-        names=("coin",),
-        traits={trait},
-        components=(Containable(),),
-    )
+import tt
 
 
 def test_drop_disambiguated_inventory_item_moves_only_that_item():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room_entity = room(world, "room")
-    player_entity = player(world)
-    red_coin = coin_with_trait(world, "red")
-    blue_coin = coin_with_trait(world, "blue")
+    red = s.put_inventory(coin_red)
+    blue = s.put_inventory(coin_blue)
 
-    world.current = room_entity.id
-    world.player_id = player_entity.id
-    world.contain(player_entity, red_coin)
-    world.contain(player_entity, blue_coin)
-
-    result = world.handle("drop red coin")
+    result = s.handle("drop red coin")
 
     assert result.ok
-    assert red_coin.id not in player_entity.component("container").items
-    assert red_coin.id in room_entity.component("container").items
-    assert red_coin.component("containable").parent == room_entity.id
 
-    assert blue_coin.id in player_entity.component("container").items
-    assert blue_coin.id not in room_entity.component("container").items
-    assert blue_coin.component("containable").parent == player_entity.id
+    assert_does_not_contain(s.player, red)
+    assert_contains(s.room_one, red)
+
+    assert_contains(s.player, blue)
+    assert_does_not_contain(s.room_one, blue)
 
 
 def test_drop_inventory_item_moves_it_to_current_room():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room_entity = room(world, "room")
-    player_entity = player(world)
-    coin_entity = coin(world)
+    inventory_item = s.put_inventory(coin)
 
-    world.current = room_entity.id
-    world.player_id = player_entity.id
-    world.contain(player_entity, coin_entity)
-
-    result = world.handle("drop coin")
+    result = s.handle("drop coin")
 
     assert result.ok
-    assert coin_entity.id not in player_entity.component("container").items
-    assert coin_entity.id in room_entity.component("container").items
-    assert coin_entity.component("containable").parent == room_entity.id
-    
-    
+    assert_does_not_contain(s.player, inventory_item)
+    assert_contains(s.room_one, inventory_item)
+
+
 def test_drop_visible_room_item_not_in_inventory_fails_without_mutation():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room_entity = room(world, "room")
-    player_entity = player(world)
-    coin_entity = coin(world)
+    room_item = s.put_room(s.room_one, coin)
 
-    world.current = room_entity.id
-    world.player_id = player_entity.id
-    world.contain(room_entity, coin_entity)
-
-    result = world.handle("drop coin")
+    result = s.handle("drop coin")
 
     assert not result.ok
-    assert coin_entity.id in room_entity.component("container").items
-    assert coin_entity.id not in player_entity.component("container").items
-    assert coin_entity.component("containable").parent == room_entity.id
+    assert_contains(s.room_one, room_item)
+    assert_does_not_contain(s.player, room_item)
 
 
 def test_take_ambiguous_visible_items_fails_without_mutation():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room_entity = room(world, "room")
-    player_entity = player(world)
-    first_coin = coin(world)
-    second_coin = coin(world)
+    first_coin = s.put_room(s.room_one, coin)
+    second_coin = s.put_room(s.room_one, coin)
 
-    world.current = room_entity.id
-    world.player_id = player_entity.id
-    world.contain(room_entity, first_coin)
-    world.contain(room_entity, second_coin)
-
-    result = world.handle("take coin")
+    result = s.handle("take coin")
 
     assert not result.ok
-    assert first_coin.id in room_entity.component("container").items
-    assert second_coin.id in room_entity.component("container").items
-    assert first_coin.id not in player_entity.component("container").items
-    assert second_coin.id not in player_entity.component("container").items
-    assert first_coin.component("containable").parent == room_entity.id
-    assert second_coin.component("containable").parent == room_entity.id
-    
+
+    assert_contains(s.room_one, first_coin)
+    assert_contains(s.room_one, second_coin)
+
+    assert_does_not_contain(s.player, first_coin)
+    assert_does_not_contain(s.player, second_coin)
+
 
 def test_drop_ambiguous_inventory_items_fails_without_mutation():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room_entity = room(world, "room")
-    player_entity = player(world)
-    first_coin = coin(world)
-    second_coin = coin(world)
+    first_coin = s.put_inventory(coin)
+    second_coin = s.put_inventory(coin)
 
-    world.current = room_entity.id
-    world.player_id = player_entity.id
-    world.contain(player_entity, first_coin)
-    world.contain(player_entity, second_coin)
-
-    result = world.handle("drop coin")
+    result = s.handle("drop coin")
 
     assert not result.ok
-    assert first_coin.id in player_entity.component("container").items
-    assert second_coin.id in player_entity.component("container").items
-    assert first_coin.id not in room_entity.component("container").items
-    assert second_coin.id not in room_entity.component("container").items
-    assert first_coin.component("containable").parent == player_entity.id
-    assert second_coin.component("containable").parent == player_entity.id
+
+    assert_contains(s.player, first_coin)
+    assert_contains(s.player, second_coin)
+
+    assert_does_not_contain(s.room_one, first_coin)
+    assert_does_not_contain(s.room_one, second_coin)
 
 
 def test_drop_without_player_fails_without_mutation():
-    world = World()
+    s = bs().one_room()
 
-    room_entity = room(world, "room")
-    player_entity = player(world)
-    coin_entity = coin(world)
+    player_entity = player(s.world)
+    coin_entity = coin(s.world)
 
-    world.current = room_entity.id
-    world.contain(player_entity, coin_entity)
+    s.world.contain(player_entity, coin_entity)
 
-    result = world.handle("drop coin")
+    result = s.handle("drop coin")
 
     assert not result.ok
-    assert coin_entity.id in player_entity.component("container").items
-    assert coin_entity.id not in room_entity.component("container").items
-    assert coin_entity.component("containable").parent == player_entity.id
+    assert_contains(player_entity, coin_entity)
+    assert_does_not_contain(s.room_one, coin_entity)
 
 
 def test_drop_without_current_room_fails_without_mutation():
-    world = World()
+    s = bs().with_player()
 
-    player_entity = player(world)
-    coin_entity = coin(world)
+    coin_entity = s.put_inventory(coin)
 
-    world.player_id = player_entity.id
-    world.contain(player_entity, coin_entity)
-
-    result = world.handle("drop coin")
+    result = s.handle("drop coin")
 
     assert not result.ok
-    assert coin_entity.id in player_entity.component("container").items
-    assert coin_entity.component("containable").parent == player_entity.id
-    
+    assert_contains(s.player, coin_entity)
+
 
 def test_drop_same_named_visible_room_item_does_not_create_ambiguity():
-    world = World()
+    s = bs().one_room().with_player()
 
-    room_entity = room(world, "room")
-    player_entity = player(world)
-    carried_coin = coin(world)
-    room_coin = coin(world)
+    room_coin = s.put_room(s.room_one, coin)
+    carried_coin = s.put_inventory(coin)
 
-    world.current = room_entity.id
-    world.player_id = player_entity.id
-    world.contain(player_entity, carried_coin)
-    world.contain(room_entity, room_coin)
-
-    result = world.handle("drop coin")
+    result = s.handle("drop coin")
 
     assert result.ok
 
-    assert carried_coin.id not in player_entity.component("container").items
-    assert carried_coin.id in room_entity.component("container").items
-    assert carried_coin.component("containable").parent == room_entity.id
+    assert_does_not_contain(s.player, carried_coin)
+    assert_contains(s.room_one, carried_coin)
 
-    assert room_coin.id in room_entity.component("container").items
-    assert room_coin.id not in player_entity.component("container").items
-    assert room_coin.component("containable").parent == room_entity.id
+    assert_contains(s.room_one, room_coin)
+    assert_does_not_contain(s.player, room_coin)
 
 
 def test_drop_after_room_change_puts_item_in_new_current_room():
-    world = World()
+    s = bs().two_rooms().with_player()
 
-    first_room = room(world, "first-room")
-    second_room = room(world, "second-room")
-    player_entity = player(world)
-    coin_entity = coin(world)
+    coin_entity = s.put_inventory(coin)
 
-    world.current = first_room.id
-    world.player_id = player_entity.id
-    world.contain(player_entity, coin_entity)
+    s.world.current = s.room_two.id
 
-    world.current = second_room.id
-
-    result = world.handle("drop coin")
+    result = s.handle("drop coin")
 
     assert result.ok
 
-    assert coin_entity.id not in player_entity.component("container").items
-    assert coin_entity.id not in first_room.component("container").items
-    assert coin_entity.id in second_room.component("container").items
-    assert coin_entity.component("containable").parent == second_room.id
+    assert_does_not_contain(s.player, coin_entity)
+    assert_does_not_contain(s.room_one, coin_entity)
+    assert_contains(s.room_two, coin_entity)
