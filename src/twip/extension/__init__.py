@@ -11,6 +11,7 @@ from twip.extension.pushable import Pushable
 from twip.extension.readable import Readable
 from twip.extension.searchable import Searchable
 from twip.extension.smellable import Smellable
+from twip.extension.tasteable import Tasteable
 from twip.extension.touchable import Touchable
 from twip.extension.turnable import Turnable
 
@@ -30,6 +31,7 @@ __all__ = [
     "Readable",
     "Searchable",
     "Smellable",
+    "Tasteable",
     "Touchable",
     "Turnable",
 ]
