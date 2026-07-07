@@ -2,6 +2,7 @@
 
 from importlib import import_module
 from types import ModuleType
+from collections.abc import Iterable
 
 
 Extension = ModuleType | str
@@ -19,6 +20,10 @@ def load_extension(extension: Extension) -> ModuleType:
 
     register()
     return module
+
+
+def load_extensions(extensions: Iterable[Extension]) -> list[ModuleType]:
+    return [load_extension(extension) for extension in extensions]
 
 
 def _import_extension(extension: Extension) -> ModuleType:
