@@ -1,11 +1,28 @@
 from typing import ClassVar
 
 from twip.action import Action
-from twip.behavior import Behavior
+from twip.behavior import Behavior, Containable
 from twip.entity import Entity
-from twip.behavior import Containable, Container, Lookable, Openable
 from twip.result import Result
 from twip.world import World
+
+from assertions import assert_ok_message
+from scenario import bs
+
+
+SWITCH = "switch"
+
+
+class IgnoringBehavior(Behavior):
+    kind: ClassVar[str] = "ignoring"
+
+    def handle(
+        self,
+        action: Action,
+        entity: Entity,
+        world: World,
+    ) -> Result | None:
+        return None
 
 
 class BlockingBehavior(Behavior):
@@ -15,7 +32,7 @@ class BlockingBehavior(Behavior):
         self,
         action: Action,
         entity: Entity,
-        world: object,
+        world: World,
     ) -> Result | None:
         if action.verb == "poke":
             return Result.failure("Blocked.")
@@ -30,7 +47,7 @@ class LaterBehavior(Behavior):
         self,
         action: Action,
         entity: Entity,
-        world: object,
+        world: World,
     ) -> Result | None:
         if action.verb == "poke":
             return Result.success("Handled later.")
@@ -38,58 +55,46 @@ class LaterBehavior(Behavior):
         return None
 
 
+def switch_with(*behaviors: Behavior):
+    def factory(world: World):
+        return world.add(
+            names=(SWITCH,),
+            traits=set(),
+            behaviors=(
+                *behaviors,
+                Containable(),
+            ),
+        )
+
+    return factory
+
+
 def test_behavior_that_does_not_claim_action_allows_later_behavior_to_handle():
-    world = World()
-
-    room = world.add(
-        names=("room",),
-        traits={"room"},
-        behaviors=(Container(),),
-    )
-
-    box = world.add(
-        names=("box",),
-        traits=set(),
-        behaviors=(
-            Lookable("A plain wooden box."),
-            Openable(),
-            Containable(),
+    s = bs().one_room()
+    s.put_room(
+        s.room_one,
+        switch_with(
+            IgnoringBehavior(),
+            LaterBehavior(),
         ),
     )
 
-    room.behaviors["container"].items.add(box.id)
-    box.behaviors["containable"].parent = room.id
-    world.current = room.id
+    result = s.handle("poke switch")
 
-    result = world.handle("open box")
-
-    assert result.ok
+    assert_ok_message(result, "Handled later.")
 
 
 def test_claimed_failure_stops_behavior_dispatch():
-    world = World()
-
-    room = world.add(
-        names=("room",),
-        traits={"room"},
-        behaviors=(Container(),),
-    )
-
-    switch = world.add(
-        names=("switch",),
-        traits=set(),
-        behaviors=(
+    s = bs().one_room()
+    s.put_room(
+        s.room_one,
+        switch_with(
             BlockingBehavior(),
             LaterBehavior(),
-            Containable(),
         ),
     )
 
-    room.behaviors["container"].items.add(switch.id)
-    switch.behaviors["containable"].parent = room.id
-    world.current = room.id
-
-    result = world.handle("poke switch")
+    result = s.handle("poke switch")
 
     assert not result.ok
     assert result.message == "Blocked."
