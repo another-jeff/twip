@@ -78,9 +78,10 @@ class Entity:
 
         return trait_words <= available_traits
 
-    def handle(self, action: Action, world: object) -> Result | None:
+    def handle(self, action: Action, world: World) -> Result | None:
         for behavior in self.behaviors.values():
             result = behavior.handle(action, self, world)
+
             if result is not None:
                 return result
 
