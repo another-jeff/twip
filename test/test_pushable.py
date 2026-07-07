@@ -3,7 +3,7 @@ from fake_extension import pushable as extension_pushable
 from fake_extension.pushable import Pushable
 from twip.behavior import Containable
 
-from twip.extension_loader import load_extension
+from twip.extensions import load_extension
 from twip.world import World
 
 from assertions import assert_not_ok_contains, assert_ok_message

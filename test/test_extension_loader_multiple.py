@@ -1,4 +1,4 @@
-from twip.extension_loader import load_extensions
+from twip.extensions import load_extensions
 from twip.verb import VERBS
 
 

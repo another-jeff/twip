@@ -1,6 +1,6 @@
 import pytest
 
-from twip.extension_loader import load_extension
+from twip.extensions import load_extension
 
 
 def test_loading_same_extension_twice_fails_cleanly(restore_verbs):

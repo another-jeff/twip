@@ -1,6 +1,6 @@
 from helpers import item
 from scenario import bs
-from twip.extension_loader import load_extension
+from twip.extensions import load_extension
 from twip.verb import VERBS
 
 
