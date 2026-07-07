@@ -6,6 +6,8 @@ class Verb:
     name: str
     requires_target: bool = True
 
+def register_verb(name: str, *, requires_target: bool = True) -> None:
+    VERBS[name] = Verb(name, requires_target=requires_target)
 
 VERBS = {
     "about": Verb("about", requires_target=False),
