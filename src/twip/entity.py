@@ -40,8 +40,12 @@ class Entity:
 
         self._id = entity_id
 
-    def add_behavior(self, *behaviors: Behavior) -> Self:
+
+    def add_behavior(self, *behaviors: Behavior, replace: bool = False) -> Self:
         for behavior in behaviors:
+            if not replace and behavior.kind in self.behaviors:
+                raise ValueError(f"Behavior is already attached: {behavior.kind}")
+
             self.behaviors[behavior.kind] = behavior
 
         return self
