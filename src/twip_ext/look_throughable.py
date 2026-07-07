@@ -1,45 +1,41 @@
-# src/twip_ext/look_throughable.py
-
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from typing import ClassVar
 
-from twip.action import Action
 from twip.behavior import Behavior
 from twip.result import Result
 from twip_ext.breakable import Breakable
-
-if TYPE_CHECKING:
-    from twip.entity import Entity
-    from twip.world import World
+from twip_ext.shuttered import Shuttered
 
 
 @dataclass
 class LookThroughable(Behavior):
-    kind: ClassVar[str] = "look-throughable"
+    kind: ClassVar[str] = "look_throughable"
 
-    blocked_message: str
     view_message: str
+    broken_view_message: str | None = None
 
-    def handle(
-        self,
-        action: Action,
-        entity: Entity,
-        world: World,
-    ) -> Result | None:
+    def handle(self, action, entity, world):
         if action.verb != "look":
             return None
 
         if action.preposition != "through":
             return None
 
+        shuttered = entity.behaviors.get(Shuttered.kind)
+        if isinstance(shuttered, Shuttered) and not shuttered.open:
+            return Result.failure(shuttered.closed_message)
+
         breakable = entity.behaviors.get(Breakable.kind)
+        if (
+            isinstance(breakable, Breakable)
+            and breakable.broken
+            and self.broken_view_message is not None
+        ):
+            return Result.success(self.broken_view_message)
 
-        if isinstance(breakable, Breakable) and breakable.broken:
-            return Result.success(self.view_message)
-
-        return Result.failure(self.blocked_message)
+        return Result.success(self.view_message)
 
 
 def register() -> None:
