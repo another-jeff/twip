@@ -2,14 +2,14 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.extension import Containable, Drinkable
+from twip.behavior import Containable, Drinkable
 
 
 def drinkable_water(world):
     return world.add(
         names=("water",),
         traits=set(),
-        components=(
+        behaviors=(
             Containable(),
             Drinkable("You drink the water. It tastes clean and cold."),
         ),

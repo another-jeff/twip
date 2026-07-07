@@ -1,7 +1,7 @@
 import tt
 
 from twip import direction
-from twip.extension.openable import Openable, OpenState
+from twip.behavior.openable import Openable, OpenState
 from twip.world import World
 
 
@@ -11,8 +11,8 @@ def test_open_door_is_ambiguous_when_multiple_doors_visible():
     result = world.handle("open door")
 
     assert not result.ok
-    assert north_door.component(Openable.kind).state == OpenState.CLOSED
-    assert south_door.component(Openable.kind).state == OpenState.CLOSED
+    assert north_door.behavior(Openable.kind).state == OpenState.CLOSED
+    assert south_door.behavior(Openable.kind).state == OpenState.CLOSED
 
 
 def test_open_north_door_opens_only_north_door():
@@ -21,8 +21,8 @@ def test_open_north_door_opens_only_north_door():
     result = world.handle("open north door")
 
     assert result.ok
-    assert north_door.component(Openable.kind).state == OpenState.OPEN
-    assert south_door.component(Openable.kind).state == OpenState.CLOSED
+    assert north_door.behavior(Openable.kind).state == OpenState.OPEN
+    assert south_door.behavior(Openable.kind).state == OpenState.CLOSED
 
 
 def _world_with_two_visible_doors():
@@ -35,7 +35,7 @@ def _world_with_two_visible_doors():
     north_door = world.add_and_connect(
         names=(tt.DOOR,),
         traits={tt.WOODEN},
-        components=(Openable(),),
+        behaviors=(Openable(),),
         connections=(
             (room_1, direction.N),
             (room_2, direction.S),
@@ -45,7 +45,7 @@ def _world_with_two_visible_doors():
     south_door = world.add_and_connect(
         names=(tt.DOOR,),
         traits={tt.WOODEN},
-        components=(Openable(),),
+        behaviors=(Openable(),),
         connections=(
             (room_1, direction.S),
             (room_3, direction.N),

@@ -1,5 +1,5 @@
 from twip.entity import Entity
-from twip.extension import Containable, Container, Lookable
+from twip.behavior import Containable, Container, Lookable
 from twip.world import World
 
 import tt
@@ -8,7 +8,7 @@ def room(world: World, trait: str) -> Entity:
     return world.add(
         names=(tt.ROOM,),
         traits={trait},
-        components=(Container(),),
+        behaviors=(Container(),),
     )
 
 
@@ -16,7 +16,7 @@ def named_room(world: World, name: str) -> Entity:
     return world.add(
         names=(tt.ROOM, name),
         traits=set(),
-        components=(Container(),),
+        behaviors=(Container(),),
     )
 
 
@@ -24,7 +24,7 @@ def described_room(world: World, name: str = tt.ROTUNDA) -> Entity:
     return world.add(
         names=(tt.ROOM, name),
         traits=set(),
-        components=(
+        behaviors=(
             Container(),
             Lookable(tt.ROOM_DESCRIPTION),
         ),
@@ -35,7 +35,7 @@ def player(world: World) -> Entity:
     return world.add(
         names=(tt.PLAYER,),
         traits=set(),
-        components=(Container(),),
+        behaviors=(Container(),),
     )
 
 
@@ -43,7 +43,7 @@ def item(world: World, name: str) -> Entity:
     return world.add(
         names=(name,),
         traits=set(),
-        components=(Containable(),),
+        behaviors=(Containable(),),
     )
 
 
@@ -51,7 +51,7 @@ def item_with_trait(world: World, name: str, trait: str) -> Entity:
     return world.add(
         names=(name,),
         traits={trait},
-        components=(Containable(),),
+        behaviors=(Containable(),),
     )
 
 
@@ -59,7 +59,7 @@ def lookable_item(world: World, name: str, text: str) -> Entity:
     return world.add(
         names=(name,),
         traits=set(),
-        components=(
+        behaviors=(
             Containable(),
             Lookable(text),
         ),
@@ -75,7 +75,7 @@ def lookable_item_with_trait(
     return world.add(
         names=(name,),
         traits={trait},
-        components=(
+        behaviors=(
             Containable(),
             Lookable(text),
         ),
@@ -115,5 +115,5 @@ def statue(world: World) -> Entity:
     return world.add(
         names=(tt.STATUE,),
         traits=set(),
-        components=(),
+        behaviors=(),
     )

@@ -1,4 +1,4 @@
-from twip.extension import Container
+from twip.behavior import Container
 from twip.world import World
 
 
@@ -6,7 +6,7 @@ def player(world: World):
     return world.add(
         names=("player",),
         traits=set(),
-        components=(Container(),),
+        behaviors=(Container(),),
     )
 
 
@@ -23,6 +23,6 @@ def test_player_inventory_is_an_ordinary_container():
     world = World()
     player_entity = player(world)
 
-    container = player_entity.component(Container.kind)
+    container = player_entity.behavior(Container.kind)
 
     assert container.items == set()

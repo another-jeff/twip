@@ -2,14 +2,14 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.extension import Containable, Searchable
+from twip.behavior import Containable, Searchable
 
 
 def searchable_desk(world):
     return world.add(
         names=("desk",),
         traits=set(),
-        components=(
+        behaviors=(
             Containable(),
             Searchable("You find a tiny brass key taped underneath."),
         ),

@@ -1,10 +1,10 @@
-# src/twip/extension/listenable.py
+# src/twip/behavior/listenable.py
 
 from __future__ import annotations
 
 from typing import ClassVar
 
-from twip.extension.message_action import MessageAction
+from twip.behavior.message_action import MessageAction
 
 
 class Listenable(MessageAction):

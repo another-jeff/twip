@@ -1,6 +1,6 @@
 import tt
 
-from twip.extension import Openable
+from twip.behavior import Openable
 from twip.world import World
 
 
@@ -8,7 +8,7 @@ def test_unknown_target_fails_cleanly():
     world = World()
     world.add(
         names=(tt.THING,),
-        components=(Openable(),),
+        behaviors=(Openable(),),
     )
 
     result = world.handle("open window")

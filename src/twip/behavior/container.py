@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
 from typing import ClassVar
 
-from twip.component import Component
+from twip.behavior.base import Behavior
 
 
 @dataclass
-class Container(Component):
+class Container(Behavior):
     kind: ClassVar[str] = "container"
 
     items: set[str] = field(default_factory=set)

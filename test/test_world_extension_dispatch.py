@@ -3,16 +3,16 @@
 from typing import ClassVar
 
 from twip.action import Action
-from twip.component import Component
+from twip.behavior import Behavior
 from twip.entity import Entity
-from twip.extension import Containable, Container
+from twip.behavior import Containable, Container
 from twip.result import Result
 from twip.world import World
 
 from scenario import bs
 
 
-class Searchable(Component):
+class Searchable(Behavior):
     kind: ClassVar[str] = "searchable"
 
     def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
@@ -22,7 +22,7 @@ class Searchable(Component):
         return Result.success("You find a brass key.")
 
 
-class Diggable(Component):
+class Diggable(Behavior):
     kind: ClassVar[str] = "diggable"
 
     def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
@@ -35,7 +35,7 @@ class Diggable(Component):
         return Result.success("You dig in the dirt and find nothing.")
 
 
-class UnlockableWith(Component):
+class UnlockableWith(Behavior):
     kind: ClassVar[str] = "unlockable_with"
 
     def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
@@ -51,7 +51,7 @@ class UnlockableWith(Component):
         return Result.success("You unlock the door with the key.")
 
 
-class Listenable(Component):
+class Listenable(Behavior):
     kind: ClassVar[str] = "listenable"
 
     def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
@@ -64,7 +64,7 @@ class Listenable(Component):
         return Result.success("You hear water dripping somewhere nearby.")
 
 
-class Jumping(Component):
+class Jumping(Behavior):
     kind: ClassVar[str] = "jumping"
 
     def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
@@ -77,7 +77,7 @@ class Jumping(Component):
         return Result.success("You jump on the spot.")
 
 
-class Edible(Component):
+class Edible(Behavior):
     kind: ClassVar[str] = "edible"
 
     def handle(self, action: Action, entity: Entity, world: World) -> Result | None:
@@ -97,7 +97,7 @@ def player_scenario():
     player = s.world.add(
         names=("player",),
         traits={"player"},
-        components=(Container(),),
+        behaviors=(Container(),),
     )
 
     s.player = player
@@ -106,12 +106,12 @@ def player_scenario():
     return s
 
 
-def room_item(s, name: str, *components: Component) -> Entity:
+def room_item(s, name: str, *behaviors: Behavior) -> Entity:
     entity = s.world.add(
         names=(name,),
         traits=set(),
-        components=(
-            *components,
+        behaviors=(
+            *behaviors,
             Containable(),
         ),
     )
@@ -121,12 +121,12 @@ def room_item(s, name: str, *components: Component) -> Entity:
     return entity
 
 
-def inventory_item(s, name: str, *components: Component) -> Entity:
+def inventory_item(s, name: str, *behaviors: Behavior) -> Entity:
     entity = s.world.add(
         names=(name,),
         traits=set(),
-        components=(
-            *components,
+        behaviors=(
+            *behaviors,
             Containable(),
         ),
     )
@@ -136,7 +136,7 @@ def inventory_item(s, name: str, *components: Component) -> Entity:
     return entity
 
 
-def test_extension_component_can_claim_uniform_zebra_verb():
+def test_extension_behavior_can_claim_uniform_zebra_verb():
     s = scenario()
     room_item(s, "box", Searchable())
 
@@ -146,7 +146,7 @@ def test_extension_component_can_claim_uniform_zebra_verb():
     assert result.message == "You find a brass key."
 
 
-def test_extension_component_can_claim_prepositional_uniform_zebra_verb():
+def test_extension_behavior_can_claim_prepositional_uniform_zebra_verb():
     s = scenario()
     room_item(s, "dirt", Diggable())
 
@@ -156,7 +156,7 @@ def test_extension_component_can_claim_prepositional_uniform_zebra_verb():
     assert result.message == "You dig in the dirt and find nothing."
 
 
-def test_extension_component_can_claim_target_indirect_phrase():
+def test_extension_behavior_can_claim_target_indirect_phrase():
     s = scenario()
     room_item(s, "door", UnlockableWith())
     room_item(s, "key")
@@ -167,9 +167,9 @@ def test_extension_component_can_claim_target_indirect_phrase():
     assert result.message == "You unlock the door with the key."
 
 
-def test_current_room_component_can_claim_targetless_action():
+def test_current_room_behavior_can_claim_targetless_action():
     s = scenario()
-    s.room_one.add_component(Listenable())
+    s.room_one.add_behavior(Listenable())
 
     result = s.handle("listen")
 
@@ -177,9 +177,9 @@ def test_current_room_component_can_claim_targetless_action():
     assert result.message == "You hear water dripping somewhere nearby."
 
 
-def test_player_component_can_claim_targetless_action():
+def test_player_behavior_can_claim_targetless_action():
     s = player_scenario()
-    s.player.add_component(Jumping())
+    s.player.add_behavior(Jumping())
 
     result = s.handle("jump")
 
@@ -187,7 +187,7 @@ def test_player_component_can_claim_targetless_action():
     assert result.message == "You jump on the spot."
 
 
-def test_extension_component_can_claim_action_on_inventory_item():
+def test_extension_behavior_can_claim_action_on_inventory_item():
     s = player_scenario()
     inventory_item(s, "apple", Edible())
 

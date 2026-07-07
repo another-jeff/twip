@@ -1,5 +1,5 @@
 from twip import direction
-from twip.extension.connector import Connector, ConnectorSide
+from twip.behavior.connector import Connector, ConnectorSide
 
 import tt
 

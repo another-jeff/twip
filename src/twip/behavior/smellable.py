@@ -1,4 +1,4 @@
-# src/twip/extension/smellable.py
+# src/twip/behavior/smellable.py
 
 from __future__ import annotations
 
@@ -6,13 +6,13 @@ from dataclasses import dataclass
 from typing import ClassVar
 
 from twip.action import Action
-from twip.component import Component
+from twip.behavior.base import Behavior
 from twip.entity import Entity
 from twip.result import Result
 
 
 @dataclass
-class Smellable(Component):
+class Smellable(Behavior):
     message: str
 
     kind: ClassVar[str] = "smellable"

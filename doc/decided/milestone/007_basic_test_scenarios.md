@@ -41,7 +41,7 @@ And simple default movement setup:
 s.connect()
 s.connect(s.room_three)
 s.connect(traits={tt.WOODEN})
-s.connect(components=(Openable(state=OpenState.CLOSED),))
+s.connect(behaviors=(Openable(state=OpenState.CLOSED),))
 ```
 
 `BasicScenario.connect()` is deliberately opinionated:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from twip.extension import Container
+from twip.behavior import Container
 from twip.result import Result
 
 if TYPE_CHECKING:
@@ -14,7 +14,7 @@ def handle(world: World) -> Result:
         return Result.failure("There is no player.")
 
     player = world.entities[world.player_id]
-    container = player.component(Container.kind)
+    container = player.behavior(Container.kind)
 
     if not container.items:
         return Result.success("You are carrying nothing.")

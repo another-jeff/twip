@@ -1,6 +1,6 @@
 from twip.action import Action
 from twip.entity import Entity
-from twip.extension import Lookable
+from twip.behavior import Lookable
 from twip.world import World
 
 
@@ -8,7 +8,7 @@ def test_lookable_describes_entity():
     entity = Entity(
         names=("coin",),
         traits=set(),
-        components={},
+        behaviors={},
     )
 
     lookable = Lookable("A dull copper coin.")

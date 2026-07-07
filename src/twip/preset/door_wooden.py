@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 
 from twip.entity import Entity
-from twip.extension import Openable, OpenState
+from twip.behavior import Openable, OpenState
 
 
 def door_wooden(
@@ -14,6 +14,6 @@ def door_wooden(
         traits={"wooden", *traits},
     )
 
-    entity.add_component(Openable(state=state))
+    entity.add_behavior(Openable(state=state))
 
     return entity

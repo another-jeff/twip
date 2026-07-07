@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from typing import ClassVar
 
-from twip.component import Component
+from twip.behavior.base import Behavior
 
 
 @dataclass
-class Containable(Component):
+class Containable(Behavior):
     kind: ClassVar[str] = "containable"
 
     parent: str | None = None

@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Self
 
 from twip.action import Action
-from twip.component import Component
+from twip.behavior import Behavior
 from twip.result import Result
 
 
@@ -12,7 +12,7 @@ from twip.result import Result
 class Entity:
     names: tuple[str, ...]
     traits: set[str] = field(default_factory=set)
-    components: dict[str, Component] = field(default_factory=dict)
+    behaviors: dict[str, Behavior] = field(default_factory=dict)
     _id: str | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -40,17 +40,17 @@ class Entity:
 
         self._id = entity_id
 
-    def add_component(self, *components: Component) -> Self:
-        for component in components:
-            self.components[component.kind] = component
+    def add_behavior(self, *behaviors: Behavior) -> Self:
+        for behavior in behaviors:
+            self.behaviors[behavior.kind] = behavior
 
         return self
 
-    def component(self, kind: str) -> Component:
-        return self.components[kind]
+    def behavior(self, kind: str) -> Behavior:
+        return self.behaviors[kind]
 
-    def has_component(self, kind: str) -> bool:
-        return kind in self.components
+    def has_behavior(self, kind: str) -> bool:
+        return kind in self.behaviors
 
     def parser_names(self) -> set[str]:
         return {name.lower() for name in self.names}
@@ -79,8 +79,8 @@ class Entity:
         return trait_words <= available_traits
 
     def handle(self, action: Action, world: object) -> Result | None:
-        for component in self.components.values():
-            result = component.handle(action, self, world)
+        for behavior in self.behaviors.values():
+            result = behavior.handle(action, self, world)
             if result is not None:
                 return result
 

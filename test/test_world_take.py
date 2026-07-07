@@ -7,12 +7,12 @@ def test_take_visible_non_containable_fails_without_mutation():
     s = bs().one_room().with_player()
 
     statue_entity = statue(s.world)
-    s.room_one.components["container"].items.add(statue_entity.id)
+    s.room_one.behaviors["container"].items.add(statue_entity.id)
 
     result = s.handle("take statue")
 
     assert not result.ok
-    assert statue_entity.id in s.room_one.components["container"].items
+    assert statue_entity.id in s.room_one.behaviors["container"].items
     assert_does_not_contain(s.player, statue_entity)
 
 

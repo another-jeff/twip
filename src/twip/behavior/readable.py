@@ -1,10 +1,10 @@
-# src/twip/extension/readable.py
+# src/twip/behavior/readable.py
 
 from __future__ import annotations
 
 from typing import ClassVar
 
-from twip.extension.message_action import MessageAction
+from twip.behavior.message_action import MessageAction
 
 
 class Readable(MessageAction):

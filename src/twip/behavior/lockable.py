@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import ClassVar
 
-from twip.component import Component
+from twip.behavior.base import Behavior
 from twip.result import Result
 
 
@@ -12,7 +12,7 @@ class LockState(Enum):
     UNLOCKED = "unlocked"
 
 
-class Lockable(Component):
+class Lockable(Behavior):
     kind: ClassVar[str] = "lockable"
 
     def __init__(self, *, state: LockState = LockState.UNLOCKED):

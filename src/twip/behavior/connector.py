@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import ClassVar
 
-from twip.component import Component
+from twip.behavior.base import Behavior
 from twip.entity import Entity
 
 
@@ -39,7 +39,7 @@ class ConnectorSide:
 
 
 @dataclass
-class Connector(Component):
+class Connector(Behavior):
     kind: ClassVar[str] = "connector"
 
     sides: tuple[ConnectorSide, ...]

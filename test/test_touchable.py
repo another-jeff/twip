@@ -2,14 +2,14 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.extension import Containable, Touchable
+from twip.behavior import Containable, Touchable
 
 
 def touchable_stone(world):
     return world.add(
         names=("stone",),
         traits=set(),
-        components=(
+        behaviors=(
             Containable(),
             Touchable("The stone is cold and faintly damp."),
         ),

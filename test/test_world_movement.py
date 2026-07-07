@@ -1,4 +1,4 @@
-from twip.extension import Lockable, LockState, Openable, OpenState
+from twip.behavior import Lockable, LockState, Openable, OpenState
 
 from helpers import item
 from scenario import bs
@@ -29,7 +29,7 @@ def test_go_unknown_direction_fails_cleanly():
 def test_go_direction_through_closed_door_fails_cleanly():
     s = bs().two_rooms()
 
-    s.connect(components=(Openable(state=OpenState.CLOSED),))
+    s.connect(behaviors=(Openable(state=OpenState.CLOSED),))
 
     result = s.handle("go north")
 
@@ -40,7 +40,7 @@ def test_go_direction_through_closed_door_fails_cleanly():
 def test_go_direction_through_open_door_moves_to_connected_room():
     s = bs().two_rooms()
 
-    s.connect(components=(Openable(state=OpenState.OPEN),))
+    s.connect(behaviors=(Openable(state=OpenState.OPEN),))
 
     result = s.handle("go north")
 
@@ -99,7 +99,7 @@ def test_go_direction_with_connector_traits_through_closed_door_fails():
 
     s.connect(
         traits={tt.WOODEN},
-        components=(Openable(state=OpenState.CLOSED),),
+        behaviors=(Openable(state=OpenState.CLOSED),),
     )
 
     result = s.handle("go north wooden door")
@@ -111,7 +111,7 @@ def test_go_direction_with_connector_traits_through_closed_door_fails():
 def test_open_door_then_go_direction_moves_to_connected_room():
     s = bs().two_rooms()
 
-    s.connect(components=(Openable(state=OpenState.CLOSED),))
+    s.connect(behaviors=(Openable(state=OpenState.CLOSED),))
 
     go_closed = s.handle("go north")
 
@@ -153,7 +153,7 @@ def test_locked_closed_door_cannot_be_opened_or_moved_through():
     s = bs().two_rooms()
 
     s.connect(
-        components=(
+        behaviors=(
             Openable(state=OpenState.CLOSED),
             Lockable(state=LockState.LOCKED),
         ),
@@ -174,7 +174,7 @@ def test_unlock_open_then_go_moves_through_door():
     s = bs().two_rooms()
 
     s.connect(
-        components=(
+        behaviors=(
             Openable(state=OpenState.CLOSED),
             Lockable(state=LockState.LOCKED),
         ),

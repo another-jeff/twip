@@ -1,6 +1,6 @@
 # test/test_pushable.py
 
-from twip.extension import Containable, Pushable
+from twip.behavior import Containable, Pushable
 from twip.world import World
 
 from assertions import assert_not_ok_contains, assert_ok_message
@@ -17,7 +17,7 @@ def pushable_button(world: World):
     return world.add(
         names=(BUTTON,),
         traits=set(),
-        components=(
+        behaviors=(
             Containable(),
             Pushable(PUSH_MESSAGE),
         ),

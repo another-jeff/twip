@@ -2,14 +2,14 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.extension import Containable, Eatable
+from twip.behavior import Containable, Eatable
 
 
 def eatable_apple(world):
     return world.add(
         names=("apple",),
         traits=set(),
-        components=(
+        behaviors=(
             Containable(),
             Eatable("You eat the apple. It is crisp and sharp."),
         ),

@@ -2,7 +2,7 @@ from helpers import item, item_with_trait, player, room, statue
 
 import tt
 
-from twip.extension import Containable, Container
+from twip.behavior import Containable, Container
 from twip.world import World
 
 
@@ -14,7 +14,7 @@ def test_room_adds_named_container_with_trait():
     assert entity.id in world.entities
     assert entity.names == (tt.ROOM,)
     assert entity.traits == {tt.ROOM_1}
-    assert Container.kind in entity.components
+    assert Container.kind in entity.behaviors
 
 
 def test_player_adds_named_container():
@@ -25,7 +25,7 @@ def test_player_adds_named_container():
     assert entity.id in world.entities
     assert entity.names == (tt.PLAYER,)
     assert entity.traits == set()
-    assert Container.kind in entity.components
+    assert Container.kind in entity.behaviors
 
 
 def test_player_does_not_set_world_player_id():
@@ -45,7 +45,7 @@ def test_item_adds_named_containable():
     assert entity.id in world.entities
     assert entity.names == (tt.COIN,)
     assert entity.traits == set()
-    assert Containable.kind in entity.components
+    assert Containable.kind in entity.behaviors
 
 
 def test_item_with_trait_adds_named_containable_with_trait():
@@ -56,10 +56,10 @@ def test_item_with_trait_adds_named_containable_with_trait():
     assert entity.id in world.entities
     assert entity.names == (tt.COIN,)
     assert entity.traits == {tt.TREASURE}
-    assert Containable.kind in entity.components
+    assert Containable.kind in entity.behaviors
 
 
-def test_statue_adds_named_entity_without_components():
+def test_statue_adds_named_entity_without_behaviors():
     world = World()
 
     entity = statue(world)
@@ -67,4 +67,4 @@ def test_statue_adds_named_entity_without_components():
     assert entity.id in world.entities
     assert entity.names == (tt.STATUE,)
     assert entity.traits == set()
-    assert entity.components == {}
+    assert entity.behaviors == {}

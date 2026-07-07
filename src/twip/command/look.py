@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from twip.extension import Container, Lookable
+from twip.behavior import Container, Lookable
 from twip.result import Result
 
 if TYPE_CHECKING:
@@ -17,12 +17,12 @@ def room(world: World) -> Result:
     room = world.entities[world.current]
     message = f"You are in {room.names[-1]}."
 
-    lookable = room.components.get(Lookable.kind)
+    lookable = room.behaviors.get(Lookable.kind)
 
     if lookable:
         message += f" {lookable.text}"
 
-    container = room.components.get(Container.kind)
+    container = room.behaviors.get(Container.kind)
 
     if container and container.items:
         names = sorted(
@@ -39,7 +39,7 @@ def target(world: World, action: Action) -> Result:
 
     if world.player_id:
         player = world.entities[world.player_id]
-        inventory = player.components.get(Container.kind)
+        inventory = player.behaviors.get(Container.kind)
 
         if inventory:
             inventory_matches = [

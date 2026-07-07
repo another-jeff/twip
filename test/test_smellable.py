@@ -2,14 +2,14 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.extension import Containable, Smellable
+from twip.behavior import Containable, Smellable
 
 
 def smellable_flower(world):
     return world.add(
         names=("flower",),
         traits=set(),
-        components=(
+        behaviors=(
             Containable(),
             Smellable("The flower smells faintly sweet."),
         ),

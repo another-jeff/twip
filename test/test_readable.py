@@ -2,14 +2,14 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.extension import Containable, Readable
+from twip.behavior import Containable, Readable
 
 
 def readable_note(world):
     return world.add(
         names=("note",),
         traits=set(),
-        components=(
+        behaviors=(
             Containable(),
             Readable("The note says: beware the cellar."),
         ),

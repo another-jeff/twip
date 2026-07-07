@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from twip import direction
-from twip.component import Component
+from twip.behavior import Behavior
 from twip.entity import Entity
 from twip.world import World
 
@@ -69,7 +69,7 @@ class BasicScenario:
         room: Entity | None = None,
         *,
         traits: set[str] | None = None,
-        components: tuple[Component, ...] = (),
+        behaviors: tuple[Behavior, ...] = (),
     ) -> Entity:
         return self.world.add_and_connect(
             names=(tt.DOOR,),
@@ -78,7 +78,7 @@ class BasicScenario:
                 (room or self.room_two, direction.S),
             ),
             traits=traits,
-            components=components,
+            behaviors=behaviors,
         )
 
 

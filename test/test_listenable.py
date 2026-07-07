@@ -2,14 +2,14 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.extension import Containable, Listenable
+from twip.behavior import Containable, Listenable
 
 
 def listenable_shell(world):
     return world.add(
         names=("shell",),
         traits=set(),
-        components=(
+        behaviors=(
             Containable(),
             Listenable("You hear the faint hush of the sea."),
         ),
@@ -18,7 +18,7 @@ def listenable_shell(world):
 
 def test_listen_current_room_succeeds():
     s = bs().one_room()
-    s.room_one.add_component(Listenable("Water drips somewhere in the dark."))
+    s.room_one.add_behavior(Listenable("Water drips somewhere in the dark."))
 
     result = s.handle("listen")
 

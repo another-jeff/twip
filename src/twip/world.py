@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from twip.component import Component
+from twip.behavior import Behavior
 from twip.dispatcher import dispatch
 from twip.entity import Entity
-from twip.extension import Containable, Container, Connector
+from twip.behavior import Containable, Container, Connector
 from twip.parser import Parser
 from twip.result import Result
 
@@ -25,14 +25,14 @@ class World:
         self,
         names: tuple[str, ...],
         traits: set[str] | None = None,
-        components: tuple[Component, ...] = (),
+        behaviors: tuple[Behavior, ...] = (),
     ) -> Entity:
         entity = Entity(
             names=names,
             traits=traits or set(),
         )
 
-        entity.add_component(*components)
+        entity.add_behavior(*behaviors)
 
         return self._add_entity(entity)
 
@@ -41,14 +41,14 @@ class World:
         names: tuple[str, ...],
         connections: tuple[Connection, ...],
         traits: set[str] | None = None,
-        components: tuple[Component, ...] = (),
+        behaviors: tuple[Behavior, ...] = (),
     ) -> Entity:
         connector = Connector.from_connections(connections)
 
         return self.add(
             names=names,
             traits=traits,
-            components=(*components, connector),
+            behaviors=(*behaviors, connector),
         )
 
     def _add_entity(self, entity: Entity) -> Entity:
@@ -107,10 +107,10 @@ class World:
         if self.current is None:
             return entity.matches(target)
 
-        if not entity.has_component(Connector.kind):
+        if not entity.has_behavior(Connector.kind):
             return entity.matches(target)
 
-        connector = entity.component(Connector.kind)
+        connector = entity.behavior(Connector.kind)
 
         if not isinstance(connector, Connector):
             return False
@@ -129,11 +129,11 @@ class World:
         if entity.id == self.current:
             return True
 
-        if Connector.kind in entity.components:
+        if Connector.kind in entity.behaviors:
             return self._connector_is_visible(entity)
 
         current_room = self.entity(self.current)
-        container = current_room.components.get(Container.kind)
+        container = current_room.behaviors.get(Container.kind)
 
         return (
             container is not None
@@ -141,7 +141,7 @@ class World:
         )
 
     def _connector_is_visible(self, entity: Entity) -> bool:
-        connector = entity.component(Connector.kind)
+        connector = entity.behavior(Connector.kind)
 
         if not isinstance(connector, Connector):
             return False
@@ -149,8 +149,8 @@ class World:
         return connector.side_for(self.current) is not None
 
     def contain(self, container: Entity, entity: Entity) -> None:
-        container.components[Container.kind].items.add(entity.id)
-        entity.components[Containable.kind].parent = container.id
+        container.behaviors[Container.kind].items.add(entity.id)
+        entity.behaviors[Containable.kind].parent = container.id
 
     def _is_in_player_inventory(self, entity: Entity) -> bool:
         if self.player_id is None:
@@ -161,7 +161,7 @@ class World:
         if player is None:
             return False
 
-        container = player.components.get(Container.kind)
+        container = player.behaviors.get(Container.kind)
 
         return (
             container is not None

@@ -1,10 +1,10 @@
-# src/twip/extension/pullable.py
+# src/twip/behavior/pullable.py
 
 from __future__ import annotations
 
 from typing import ClassVar
 
-from twip.extension.message_action import MessageAction
+from twip.behavior.message_action import MessageAction
 
 
 class Pullable(MessageAction):

@@ -1,11 +1,11 @@
-from twip.extension import Openable, OpenState
+from twip.behavior import Openable, OpenState
 from twip.preset import door_wooden
 
 
 def test_door_wooden_has_openable():
     entity = door_wooden()
 
-    assert entity.component(Openable.kind).state == OpenState.CLOSED
+    assert entity.behavior(Openable.kind).state == OpenState.CLOSED
 
 
 def test_door_wooden_matches_door_name():
