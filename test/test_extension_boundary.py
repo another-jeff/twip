@@ -1,39 +1,8 @@
-from dataclasses import dataclass
-from typing import ClassVar
-
-from twip.action import Action
-from twip.behavior import Behavior
-from twip.result import Result
-from twip.verb import VERBS, register_verb
-
-
-def test_external_style_behavior_registers_verb_and_handles_targeted_action():
-    try:
-        register_verb("knock")
-
-        s = bs().one_room()
-        s.put_room(s.room_one, knockable_door)
-
-        result = s.handle("knock door")
-
-        assert result.ok
-        assert result.message == "You knock on it."
-    finally:
-        VERBS.pop("knock", None)
+from twip.verb import VERBS
 
 from helpers import item
 from scenario import bs
-
-
-@dataclass
-class Knockable(Behavior):
-    kind: ClassVar[str] = "knockable"
-
-    def handle(self, action: Action, entity, world) -> Result | None:
-        if action.verb != "knock":
-            return None
-
-        return Result.success("You knock on it.")
+from fake_extension.knockable import Knockable, register
 
 
 def knockable_door(world):
@@ -42,19 +11,9 @@ def knockable_door(world):
     return door
 
 
-def test_external_style_behavior_handles_targeted_action_without_dispatcher_change():
-    s = bs().one_room()
-    s.put_room(s.room_one, knockable_door)
-
-    result = s.handle("knock door")
-
-    assert result.ok
-    assert result.message == "You knock on it."
-    
-
-def test_external_style_behavior_registers_verb_and_handles_targeted_action():
+def test_external_module_registers_verb_and_handles_targeted_action():
     try:
-        register_verb("knock")
+        register()
 
         s = bs().one_room()
         s.put_room(s.room_one, knockable_door)
@@ -65,3 +24,13 @@ def test_external_style_behavior_registers_verb_and_handles_targeted_action():
         assert result.message == "You knock on it."
     finally:
         VERBS.pop("knock", None)
+        
+        
+def test_external_style_behavior_handles_targeted_action_without_dispatcher_change():
+    s = bs().one_room()
+    s.put_room(s.room_one, knockable_door)
+
+    result = s.handle("knock door")
+
+    assert result.ok
+    assert result.message == "You knock on it."
