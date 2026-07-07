@@ -1,4 +1,4 @@
-# src/twip/extension_loader.py
+# src/twip/extensions.py
 
 from importlib import import_module
 from types import ModuleType
