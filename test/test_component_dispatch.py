@@ -53,6 +53,21 @@ class LaterBehavior(Behavior):
             return Result.success("Handled later.")
 
         return None
+    
+
+class FirstHandlingBehavior(Behavior):
+    kind: ClassVar[str] = "first-handling"
+
+    def handle(
+        self,
+        action: Action,
+        entity: Entity,
+        world: World,
+    ) -> Result | None:
+        if action.verb == "poke":
+            return Result.success("Handled first.")
+
+        return None
 
 
 def switch_with(*behaviors: Behavior):
@@ -98,3 +113,18 @@ def test_claimed_failure_stops_behavior_dispatch():
 
     assert not result.ok
     assert result.message == "Blocked."
+    
+    
+def test_claimed_success_stops_behavior_dispatch():
+    s = bs().one_room()
+    s.put_room(
+        s.room_one,
+        switch_with(
+            FirstHandlingBehavior(),
+            LaterBehavior(),
+        ),
+    )
+
+    result = s.handle("poke switch")
+
+    assert_ok_message(result, "Handled first.")
