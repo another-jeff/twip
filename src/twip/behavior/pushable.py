@@ -1,7 +1,4 @@
-# src/twip/behavior/pushable.py
-
 from twip.behavior.verb_message_behavior import VerbMessageBehavior
-from twip.verb import register_verb
 
 
 class Pushable(VerbMessageBehavior):
@@ -10,4 +7,4 @@ class Pushable(VerbMessageBehavior):
 
 
 def register() -> None:
-    register_verb("push")
+    Pushable.register_verb()
