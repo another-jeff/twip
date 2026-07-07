@@ -1,3 +1,4 @@
+from twip import direction
 from twip.action import Action
 
 
@@ -9,39 +10,18 @@ ALIASES = {
     "g": "again",
 }
 
-DIRECTIONS = {
-    "n": "north",
-    "north": "north",
-    "e": "east",
-    "east": "east",
-    "s": "south",
-    "south": "south",
-    "w": "west",
-    "west": "west",
-    "ne": "northeast",
-    "northeast": "northeast",
-    "se": "southeast",
-    "southeast": "southeast",
-    "nw": "northwest",
-    "northwest": "northwest",
-    "sw": "southwest",
-    "southwest": "southwest",
-    "u": "up",
-    "up": "up",
-    "d": "down",
-    "down": "down",
-    "in": "in",
-    "out": "out",
-}
-
 PREPOSITIONS = {
-    "about",
+    "at",
     "in",
-    "off",
+    "into",
     "on",
-    "to",
+    "onto",
     "under",
+    "behind",
     "with",
+    "to",
+    "from",
+    "about",
 }
 
 PREFIX_PREPOSITIONS = {
@@ -57,6 +37,7 @@ POSTFIX_PREPOSITIONS = {
     "on",
 }
 
+
 class Parser:
     def parse(self, text: str) -> Action:
         normalized = " ".join(text.strip().lower().split())
@@ -64,10 +45,10 @@ class Parser:
         if not normalized:
             return Action(verb="", target="", text=text)
 
-        if normalized in DIRECTIONS:
+        if normalized in direction.ALIASES:
             return Action(
                 verb="go",
-                target=DIRECTIONS[normalized],
+                target=direction.normalize(normalized),
                 text=text,
             )
 
@@ -78,14 +59,14 @@ class Parser:
             return Action(verb=verb, target="", text=text)
 
         target = self._clean_target(words[1])
-        target, preposition, indirect_target = self._split_preposition(target)
+        target, preposition, target_indirect = self._split_preposition(target)
 
         return Action(
             verb=verb,
             target=target,
             text=text,
             preposition=preposition,
-            indirect_target=indirect_target,
+            target_indirect=target_indirect,
         )
 
     def _split_preposition(self, target: str) -> tuple[str, str, str]:

@@ -45,7 +45,7 @@ class UnlockableWith(Component):
         if action.preposition != "with":
             return None
 
-        if action.indirect_target != "key":
+        if action.target_indirect != "key":
             return Result.failure("That doesn't fit the lock.")
 
         return Result.success("You unlock the door with the key.")
@@ -156,7 +156,7 @@ def test_extension_component_can_claim_prepositional_uniform_zebra_verb():
     assert result.message == "You dig in the dirt and find nothing."
 
 
-def test_extension_component_can_claim_indirect_target_phrase():
+def test_extension_component_can_claim_target_indirect_phrase():
     s = scenario()
     room_item(s, "door", UnlockableWith())
     room_item(s, "key")

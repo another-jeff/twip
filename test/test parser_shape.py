@@ -13,7 +13,7 @@ def test_parses_verb_only():
     assert action.verb == "look"
     assert action.target is None
     assert action.preposition is None
-    assert action.indirect_target is None
+    assert action.target_indirect is None
 
 
 def test_parses_verb_target():
@@ -22,7 +22,7 @@ def test_parses_verb_target():
     assert action.verb == "open"
     assert action.target == "mailbox"
     assert action.preposition is None
-    assert action.indirect_target is None
+    assert action.target_indirect is None
 
 
 def test_parses_verb_target_preposition_target():
@@ -31,7 +31,7 @@ def test_parses_verb_target_preposition_target():
     assert action.verb == "put"
     assert action.target == "coin"
     assert action.preposition == "in"
-    assert action.indirect_target == "slot"
+    assert action.target_indirect == "slot"
 
 
 def test_parses_multiword_target_preposition_target():
@@ -40,7 +40,7 @@ def test_parses_multiword_target_preposition_target():
     assert action.verb == "unlock"
     assert action.target == "front door"
     assert action.preposition == "with"
-    assert action.indirect_target == "brass key"
+    assert action.target_indirect == "brass key"
 
 
 def test_parses_verb_preposition_target():
@@ -49,4 +49,4 @@ def test_parses_verb_preposition_target():
     assert action.verb == "look"
     assert action.target == "rug"
     assert action.preposition == "under"
-    assert action.indirect_target is None
+    assert action.target_indirect is None

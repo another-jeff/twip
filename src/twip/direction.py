@@ -61,12 +61,9 @@ ALIASES = {
 }
 
 
-def normalize(value: str | None) -> str | None:
-    if value is None:
-        return None
-
-    return ALIASES.get(value)
+def normalize(value: str) -> str:
+    return ALIASES.get(value, "")
 
 
-def is_direction(value: str | None) -> bool:
-    return normalize(value) is not None
+def is_direction(value: str) -> bool:
+    return normalize(value) != ""

@@ -8,7 +8,7 @@ def parse(text: str):
 
 
 @pytest.mark.parametrize(
-    ("text", "verb", "target", "preposition", "indirect_target"),
+    ("text", "verb", "target", "preposition", "target_indirect"),
     [
         ("put coin in slot", "put", "coin", "in", "slot"),
         ("put book on table", "put", "book", "on", "table"),
@@ -24,11 +24,11 @@ def test_uniform_zebra_indirect_commands(
     verb,
     target,
     preposition,
-    indirect_target,
+    target_indirect,
 ):
     action = parse(text)
 
     assert action.verb == verb
     assert action.target == target
     assert action.preposition == preposition
-    assert action.indirect_target == indirect_target
+    assert action.target_indirect == target_indirect

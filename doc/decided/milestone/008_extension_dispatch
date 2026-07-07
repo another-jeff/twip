@@ -33,7 +33,7 @@ Important semantic boundary:
 * `target`
 * `text`
 * `preposition`
-* `indirect_target`
+* `target_indirect`
 
 This supports ordinary target commands, prepositional commands, and indirect-target command shapes such as:
 

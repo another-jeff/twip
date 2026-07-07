@@ -13,7 +13,7 @@ def test_listen_to_target():
     assert action.verb == "listen"
     assert action.target == "door"
     assert action.preposition == "to"
-    assert action.indirect_target == ""
+    assert action.target_indirect == ""
 
 
 def test_look_under_target():
@@ -22,7 +22,7 @@ def test_look_under_target():
     assert action.verb == "look"
     assert action.target == "rug"
     assert action.preposition == "under"
-    assert action.indirect_target == ""
+    assert action.target_indirect == ""
 
 
 def test_turn_target_on():
@@ -31,7 +31,7 @@ def test_turn_target_on():
     assert action.verb == "turn"
     assert action.target == "lamp"
     assert action.preposition == "on"
-    assert action.indirect_target == ""
+    assert action.target_indirect == ""
 
 
 def test_turn_on_target():
@@ -40,7 +40,7 @@ def test_turn_on_target():
     assert action.verb == "turn"
     assert action.target == "lamp"
     assert action.preposition == "on"
-    assert action.indirect_target == ""
+    assert action.target_indirect == ""
 
 
 def test_take_target_off():
@@ -49,7 +49,7 @@ def test_take_target_off():
     assert action.verb == "take"
     assert action.target == "hat"
     assert action.preposition == "off"
-    assert action.indirect_target == ""
+    assert action.target_indirect == ""
 
 
 def test_take_off_target():
@@ -58,7 +58,7 @@ def test_take_off_target():
     assert action.verb == "take"
     assert action.target == "hat"
     assert action.preposition == "off"
-    assert action.indirect_target == ""
+    assert action.target_indirect == ""
 
 
 def test_wake_up_is_phrase_verb():
@@ -67,7 +67,7 @@ def test_wake_up_is_phrase_verb():
     assert action.verb == "wake"
     assert action.target == ""
     assert action.preposition == "up"
-    assert action.indirect_target == ""
+    assert action.target_indirect == ""
 
 
 def test_talk_to_target():
@@ -76,7 +76,7 @@ def test_talk_to_target():
     assert action.verb == "talk"
     assert action.target == "guard"
     assert action.preposition == "to"
-    assert action.indirect_target == ""
+    assert action.target_indirect == ""
     
 
 def test_dig_in_target():
@@ -85,4 +85,4 @@ def test_dig_in_target():
     assert action.verb == "dig"
     assert action.target == "dirt"
     assert action.preposition == "in"
-    assert action.indirect_target == ""
+    assert action.target_indirect == ""
