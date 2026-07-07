@@ -35,7 +35,6 @@ VERBS = {
     "wake": Verb("wake", requires_target=False),
 
     "ask": Verb("ask"),
-    "break": Verb("break"),
     "burn": Verb("burn"),
     "climb": Verb("climb"),
     "dig": Verb("dig"),

@@ -8,7 +8,6 @@ def test_uniform_zebra_verbs_are_registered():
         "about",
         "again",
         "ask",
-        "break",
         "burn",
         "climb",
         "curse",
