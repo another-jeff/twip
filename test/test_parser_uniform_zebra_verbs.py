@@ -14,7 +14,6 @@ def parse(text: str):
         ("take coin", "take", "coin"),
         ("drop coin", "drop", "coin"),
         ("open door", "open", "door"),
-        ("push button", "push", "button"),
         ("pull rope", "pull", "rope"),
         ("turn dial", "turn", "dial"),
         ("feel wall", "feel", "wall"),

@@ -31,7 +31,6 @@ def test_uniform_zebra_verbs_are_registered():
         "open",
         "pray",
         "pull",
-        "push",
         "put",
         "search",
         "show",

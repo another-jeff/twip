@@ -1,12 +1,13 @@
 # src/twip/behavior/pushable.py
 
-from __future__ import annotations
-
-from typing import ClassVar
-
 from twip.behavior.verb_message_behavior import VerbMessageBehavior
+from twip.verb import register_verb
 
 
 class Pushable(VerbMessageBehavior):
-    kind: ClassVar[str] = "pushable"
-    verb: ClassVar[str] = "push"
+    kind = "pushable"
+    verb = "push"
+
+
+def register() -> None:
+    register_verb("push")

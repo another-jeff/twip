@@ -50,7 +50,6 @@ VERBS = {
     "go": Verb("go"),
     "open": Verb("open"),
     "pull": Verb("pull"),
-    "push": Verb("push"),
     "put": Verb("put"),
     "search": Verb("search"),
     "show": Verb("show"),
