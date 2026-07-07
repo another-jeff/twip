@@ -9,6 +9,7 @@ from twip.extension.openable import Openable, OpenState
 from twip.extension.pullable import Pullable
 from twip.extension.pushable import Pushable
 from twip.extension.readable import Readable
+from twip.extension.searchable import Searchable
 from twip.extension.smellable import Smellable
 from twip.extension.touchable import Touchable
 from twip.extension.turnable import Turnable
@@ -27,6 +28,7 @@ __all__ = [
     "Pullable",
     "Pushable",
     "Readable",
+    "Searchable",
     "Smellable",
     "Touchable",
     "Turnable",
