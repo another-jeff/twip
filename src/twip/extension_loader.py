@@ -1,3 +1,5 @@
+# src/twip/extension_loader.py
+
 from importlib import import_module
 from types import ModuleType
 
@@ -11,6 +13,9 @@ def load_extension(extension: Extension) -> ModuleType:
 
     if register is None:
         raise ValueError(f"Extension module has no register(): {module.__name__}")
+
+    if not callable(register):
+        raise TypeError(f"Extension register is not callable: {module.__name__}")
 
     register()
     return module
