@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from twip.behavior.message_action import MessageAction
+from twip.behavior.verb_message_behavior import VerbMessageBehavior
 
 
-class Tasteable(MessageAction):
+class Tasteable(VerbMessageBehavior):
     kind: ClassVar[str] = "tasteable"
     verb: ClassVar[str] = "taste"

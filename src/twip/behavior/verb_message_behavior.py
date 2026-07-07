@@ -12,7 +12,7 @@ from twip.result import Result
 
 
 @dataclass
-class MessageAction(Behavior):
+class VerbMessageBehavior(Behavior):
     message: str
 
     verb: ClassVar[str]
