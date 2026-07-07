@@ -50,3 +50,12 @@ def test_parses_verb_preposition_target():
     assert action.target == "rug"
     assert action.preposition == "under"
     assert action.target_indirect is None
+    
+
+def test_parse_verb_preposition_target_command():
+    action = parse("look through window")
+
+    assert action.verb == "look"
+    assert action.target == "window"
+    assert action.preposition == "through"
+    assert action.target_indirect is None

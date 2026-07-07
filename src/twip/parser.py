@@ -1,3 +1,7 @@
+# src/twip/parser.py
+
+from __future__ import annotations
+
 from twip import direction
 from twip.action import Action
 
@@ -22,6 +26,7 @@ PREPOSITIONS = {
     "to",
     "from",
     "about",
+    "through",
 }
 
 PREFIX_PREPOSITIONS = {
@@ -29,6 +34,7 @@ PREFIX_PREPOSITIONS = {
     "off",
     "on",
     "to",
+    "through",
     "under",
 }
 
@@ -43,50 +49,53 @@ class Parser:
         normalized = " ".join(text.strip().lower().split())
 
         if not normalized:
-            return Action(verb="", target="", text=text)
+            return Action(verb="", text=text)
 
         if normalized in direction.ALIASES:
             return Action(
                 verb="go",
-                target=direction.normalize(normalized),
                 text=text,
+                target=direction.normalize(normalized),
             )
 
         words = normalized.split(" ", 1)
         verb = ALIASES.get(words[0], words[0])
 
         if len(words) == 1:
-            return Action(verb=verb, target="", text=text)
+            return Action(verb=verb, text=text)
 
         target = self._clean_target(words[1])
         target, preposition, target_indirect = self._split_preposition(target)
 
         return Action(
             verb=verb,
-            target=target,
             text=text,
+            target=target,
             preposition=preposition,
             target_indirect=target_indirect,
         )
 
-    def _split_preposition(self, target: str) -> tuple[str, str, str]:
+    def _split_preposition(
+        self,
+        target: str,
+    ) -> tuple[str | None, str | None, str | None]:
         words = target.split()
 
         if len(words) == 1 and words[0] == "up":
-            return "", "up", ""
+            return None, "up", None
 
         if words and words[0] in PREFIX_PREPOSITIONS:
             return (
-                self._clean_target(" ".join(words[1:])),
+                self._clean_optional_target(" ".join(words[1:])),
                 words[0],
-                "",
+                None,
             )
 
         if words and words[-1] in POSTFIX_PREPOSITIONS:
             return (
-                self._clean_target(" ".join(words[:-1])),
+                self._clean_optional_target(" ".join(words[:-1])),
                 words[-1],
-                "",
+                None,
             )
 
         for index, word in enumerate(words):
@@ -103,7 +112,15 @@ class Parser:
                     self._clean_target(indirect),
                 )
 
-        return target, "", ""
+        return target, None, None
+
+    def _clean_optional_target(self, target: str) -> str | None:
+        cleaned = self._clean_target(target)
+
+        if not cleaned:
+            return None
+
+        return cleaned
 
     def _clean_target(self, target: str) -> str:
         for article in ("the ", "a ", "an "):

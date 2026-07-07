@@ -22,7 +22,7 @@ def test_parser_parses_prefix_preposition():
     assert action.verb == "look"
     assert action.target == "rug"
     assert action.preposition == "under"
-    assert action.target_indirect == ""
+    assert action.target_indirect == None
 
 
 def test_parser_parses_postfix_preposition():
@@ -31,7 +31,7 @@ def test_parser_parses_postfix_preposition():
     assert action.verb == "turn"
     assert action.target == "lamp"
     assert action.preposition == "on"
-    assert action.target_indirect == ""
+    assert action.target_indirect == None
 
 
 def test_parser_parses_articles_around_target_indirect():

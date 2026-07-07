@@ -7,8 +7,8 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Action:
-    verb: str = ""
-    target: str = ""
-    text: str = ""
-    preposition: str = ""
-    target_indirect: str = ""
+    verb: str
+    text: str
+    target: str | None = None
+    preposition: str | None = None
+    target_indirect: str | None = None

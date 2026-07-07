@@ -18,7 +18,7 @@ def test_parser_parses_look_under_target():
     assert action.verb == "look"
     assert action.target == "rug"
     assert action.preposition == "under"
-    assert action.target_indirect == ""
+    assert action.target_indirect == None
 
 
 def test_parser_parses_put_target_in_indirect():
