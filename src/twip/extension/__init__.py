@@ -1,6 +1,7 @@
 from twip.extension.connector import Connector
 from twip.extension.containable import Containable
 from twip.extension.container import Container
+from twip.extension.drinkable import Drinkable
 from twip.extension.eatable import Eatable
 from twip.extension.listenable import Listenable
 from twip.extension.lockable import Lockable, LockState
@@ -20,6 +21,7 @@ __all__ = [
     "Connector",
     "Containable",
     "Container",
+    "Drinkable",
     "Eatable",
     "Listenable",
     "Lockable",
