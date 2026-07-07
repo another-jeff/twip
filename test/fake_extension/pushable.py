@@ -1,4 +1,6 @@
-from twip.behavior.verb_message_behavior import VerbMessageBehavior
+# test/fake_extension/pushable.py
+
+from twip.behavior import VerbMessageBehavior
 
 
 class Pushable(VerbMessageBehavior):

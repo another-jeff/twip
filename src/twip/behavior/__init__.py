@@ -10,13 +10,14 @@ from twip.behavior.lookable import Lookable
 from twip.behavior.movable import Movable
 from twip.behavior.openable import Openable, OpenState
 from twip.behavior.pullable import Pullable
-from twip.behavior.pushable import Pushable
 from twip.behavior.readable import Readable
 from twip.behavior.searchable import Searchable
 from twip.behavior.smellable import Smellable
 from twip.behavior.tasteable import Tasteable
 from twip.behavior.touchable import Touchable
 from twip.behavior.turnable import Turnable
+
+from twip.behavior.verb_message_behavior import VerbMessageBehavior
 
 __all__ = [
     "Behavior",
@@ -33,11 +34,11 @@ __all__ = [
     "Openable",
     "OpenState",
     "Pullable",
-    "Pushable",
     "Readable",
     "Searchable",
     "Smellable",
     "Tasteable",
     "Touchable",
     "Turnable",
+    "VerbMessageBehavior",
 ]

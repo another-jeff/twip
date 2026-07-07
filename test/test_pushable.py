@@ -1,8 +1,8 @@
 # test/test_pushable.py
+from fake_extension import pushable as extension_pushable
+from fake_extension.pushable import Pushable
+from twip.behavior import Containable
 
-import twip.behavior.pushable as extension_pushable
-
-from twip.behavior import Containable, Pushable
 from twip.extension_loader import load_extension
 from twip.world import World
 
