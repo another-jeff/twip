@@ -1,4 +1,4 @@
-# test/fake_extension/pushable.py
+# src/twip_ext/pushable.py
 
 from twip.behavior import VerbMessageBehavior
 

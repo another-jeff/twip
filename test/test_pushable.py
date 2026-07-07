@@ -1,10 +1,9 @@
 # test/test_pushable.py
-from fake_extension import pushable as extension_pushable
-from fake_extension.pushable import Pushable
-from twip.behavior import Containable
 
+from twip.behavior import Containable
 from twip.extensions import load_extension
 from twip.world import World
+from twip_ext.pushable import Pushable
 
 from assertions import assert_not_ok_contains, assert_ok_message
 from helpers import item
@@ -32,7 +31,7 @@ def plain_rock(world: World):
 
 
 def test_push_pushable_target_succeeds(restore_verbs):
-    load_extension(extension_pushable)
+    load_extension("twip_ext.pushable")
 
     s = bs().one_room()
     s.put_room(s.room_one, pushable_button)
@@ -43,7 +42,7 @@ def test_push_pushable_target_succeeds(restore_verbs):
 
 
 def test_push_non_pushable_target_fails_cleanly(restore_verbs):
-    load_extension(extension_pushable)
+    load_extension("twip_ext.pushable")
 
     s = bs().one_room()
     s.put_room(s.room_one, plain_rock)
@@ -54,7 +53,7 @@ def test_push_non_pushable_target_fails_cleanly(restore_verbs):
 
 
 def test_push_missing_target_asks_what(restore_verbs):
-    load_extension(extension_pushable)
+    load_extension("twip_ext.pushable")
 
     s = bs().one_room()
 
