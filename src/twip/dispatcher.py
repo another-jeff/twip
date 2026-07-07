@@ -6,6 +6,7 @@ from twip.action import Action
 from twip.command import drop, inventory, look, move, take, wait
 from twip.result import Result
 from twip.verb import VERBS
+from twip import direction
 
 if TYPE_CHECKING:
     from twip.world import World
@@ -37,8 +38,11 @@ def dispatch(world: World, action: Action) -> Result:
         case "drop":
             return drop.handle(world, action.target)
 
-        case "go" | "move":
+        case "go":
             return move.handle(world, action.target)
+
+        case "move" if direction.is_direction(action.target):
+            return move.handle(world, direction.normalize(action.target))
 
         case _:
             return _handle_targeted_action(world, action)

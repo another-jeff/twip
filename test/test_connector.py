@@ -1,4 +1,4 @@
-from twip import dir
+from twip import direction
 from twip.extension.connector import Connector, ConnectorSide
 
 import tt
@@ -7,8 +7,8 @@ import tt
 def test_connector_touches_room():
     connector = Connector(
         sides=(
-            ConnectorSide(room=tt.ROOM_1, traits={dir.N}),
-            ConnectorSide(room=tt.ROOM_2, traits={dir.S}),
+            ConnectorSide(room=tt.ROOM_1, traits={direction.N}),
+            ConnectorSide(room=tt.ROOM_2, traits={direction.S}),
         )
     )
 
@@ -19,8 +19,8 @@ def test_connector_touches_room():
 def test_connector_does_not_touch_unconnected_room():
     connector = Connector(
         sides=(
-            ConnectorSide(room=tt.ROOM_1, traits={dir.N}),
-            ConnectorSide(room=tt.ROOM_2, traits={dir.S}),
+            ConnectorSide(room=tt.ROOM_1, traits={direction.N}),
+            ConnectorSide(room=tt.ROOM_2, traits={direction.S}),
         )
     )
 
@@ -30,8 +30,8 @@ def test_connector_does_not_touch_unconnected_room():
 def test_connector_returns_side_for_room():
     connector = Connector(
         sides=(
-            ConnectorSide(room=tt.ROOM_1, traits={dir.N}),
-            ConnectorSide(room=tt.ROOM_2, traits={dir.S}),
+            ConnectorSide(room=tt.ROOM_1, traits={direction.N}),
+            ConnectorSide(room=tt.ROOM_2, traits={direction.S}),
         )
     )
 
@@ -39,14 +39,14 @@ def test_connector_returns_side_for_room():
 
     assert side is not None
     assert side.room == tt.ROOM_1
-    assert side.traits == {dir.N}
+    assert side.traits == {direction.N}
 
 
 def test_connector_returns_none_for_missing_side():
     connector = Connector(
         sides=(
-            ConnectorSide(room=tt.ROOM_1, traits={dir.N}),
-            ConnectorSide(room=tt.ROOM_2, traits={dir.S}),
+            ConnectorSide(room=tt.ROOM_1, traits={direction.N}),
+            ConnectorSide(room=tt.ROOM_2, traits={direction.S}),
         )
     )
 
@@ -56,8 +56,8 @@ def test_connector_returns_none_for_missing_side():
 def test_connector_returns_other_side():
     connector = Connector(
         sides=(
-            ConnectorSide(room=tt.ROOM_1, traits={dir.N}),
-            ConnectorSide(room=tt.ROOM_2, traits={dir.S}),
+            ConnectorSide(room=tt.ROOM_1, traits={direction.N}),
+            ConnectorSide(room=tt.ROOM_2, traits={direction.S}),
         )
     )
 
@@ -65,14 +65,14 @@ def test_connector_returns_other_side():
 
     assert side is not None
     assert side.room == tt.ROOM_2
-    assert side.traits == {dir.S}
+    assert side.traits == {direction.S}
 
 
 def test_connector_returns_none_for_other_side_when_room_missing():
     connector = Connector(
         sides=(
-            ConnectorSide(room=tt.ROOM_1, traits={dir.N}),
-            ConnectorSide(room=tt.ROOM_2, traits={dir.S}),
+            ConnectorSide(room=tt.ROOM_1, traits={direction.N}),
+            ConnectorSide(room=tt.ROOM_2, traits={direction.S}),
         )
     )
 

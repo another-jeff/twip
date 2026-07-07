@@ -4,6 +4,7 @@ from twip.extension.container import Container
 from twip.extension.listenable import Listenable
 from twip.extension.lockable import Lockable, LockState
 from twip.extension.lookable import Lookable
+from twip.extension.movable import Movable
 from twip.extension.openable import Openable, OpenState
 from twip.extension.pullable import Pullable
 from twip.extension.pushable import Pushable
@@ -19,6 +20,7 @@ __all__ = [
     "Lockable",
     "LockState",
     "Lookable",
+    "Movable",
     "Openable",
     "OpenState",
     "Pullable",

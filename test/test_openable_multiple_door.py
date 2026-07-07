@@ -1,6 +1,6 @@
 import tt
 
-from twip import dir
+from twip import direction
 from twip.extension.openable import Openable, OpenState
 from twip.world import World
 
@@ -37,8 +37,8 @@ def _world_with_two_visible_doors():
         traits={tt.WOODEN},
         components=(Openable(),),
         connections=(
-            (room_1, dir.N),
-            (room_2, dir.S),
+            (room_1, direction.N),
+            (room_2, direction.S),
         ),
     )
 
@@ -47,8 +47,8 @@ def _world_with_two_visible_doors():
         traits={tt.WOODEN},
         components=(Openable(),),
         connections=(
-            (room_1, dir.S),
-            (room_3, dir.N),
+            (room_1, direction.S),
+            (room_3, direction.N),
         ),
     )
 

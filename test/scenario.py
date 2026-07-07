@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Callable
 
-from twip import dir
+from twip import direction
 from twip.component import Component
 from twip.entity import Entity
 from twip.world import World
@@ -74,8 +74,8 @@ class BasicScenario:
         return self.world.add_and_connect(
             names=(tt.DOOR,),
             connections=(
-                (self.room_one, dir.N),
-                (room or self.room_two, dir.S),
+                (self.room_one, direction.N),
+                (room or self.room_two, direction.S),
             ),
             traits=traits,
             components=components,
