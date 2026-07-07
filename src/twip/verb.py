@@ -6,7 +6,15 @@ class Verb:
     name: str
     requires_target: bool = True
 
-def register_verb(name: str, *, requires_target: bool = True) -> None:
+def register_verb(
+    name: str,
+    *,
+    requires_target: bool = True,
+    replace: bool = False,
+) -> None:
+    if not replace and name in VERBS:
+        raise ValueError(f"Verb is already registered: {name}")
+
     VERBS[name] = Verb(name, requires_target=requires_target)
 
 VERBS = {
