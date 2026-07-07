@@ -1,21 +1,18 @@
-from fake_extension import knockable as extension_knockable
 from helpers import item
 from scenario import bs
 from twip.extension_loader import load_extension
 from twip.verb import VERBS
 
-Knockable = extension_knockable.Knockable
 
-
-def knockable_door(world):
-    door = item(world, "door")
-    door.add_behavior(Knockable())
-    return door
-
-
-def test_external_module_loads_registers_verb_and_handles_targeted_action():
+def test_external_module_loads_from_import_path_and_handles_targeted_action():
     try:
-        load_extension(extension_knockable)
+        extension_knockable = load_extension("fake_extension.knockable")
+        Knockable = extension_knockable.Knockable
+
+        def knockable_door(world):
+            door = item(world, "door")
+            door.add_behavior(Knockable())
+            return door
 
         s = bs().one_room()
         s.put_room(s.room_one, knockable_door)
