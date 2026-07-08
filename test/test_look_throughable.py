@@ -6,6 +6,7 @@ from twip.world import World
 from twip_ext.breakable import Breakable
 from twip_ext.look_throughable import LookThroughable
 from twip_ext.shuttered import Shuttered
+from twip_ext.blindered import Blindered
 
 from assertions import assert_ok_message
 from scenario import bs
@@ -17,6 +18,8 @@ BREAK_MESSAGE = "The window shatters."
 VIEW_MESSAGE = "Through the window, you see a dark garden."
 BROKEN_VIEW_MESSAGE = "Through the broken window, you see a dark garden."
 SHUTTERED_MESSAGE = "The shutters are closed."
+BLINDS_CLOSED_MESSAGE = "The blinds are closed."
+BLINDS_OPEN_VIEW_MESSAGE = "Through the open blinds, you see a dark garden."
 
 
 def breakable_window(world: World):
@@ -44,6 +47,30 @@ def shuttered_breakable_window(*, shutters_open: bool):
                 Shuttered(
                     open=shutters_open,
                     closed_message=SHUTTERED_MESSAGE,
+                ),
+                Breakable(break_message=BREAK_MESSAGE),
+                LookThroughable(
+                    view_message=VIEW_MESSAGE,
+                    broken_view_message=BROKEN_VIEW_MESSAGE,
+                ),
+            ),
+        )
+
+    return factory
+
+
+def blindered_breakable_window(*, blinds_raised: bool, blinds_open: bool):
+    def factory(world: World):
+        return world.add(
+            names=(WINDOW,),
+            traits=set(),
+            behaviors=(
+                Containable(),
+                Blindered(
+                    raised=blinds_raised,
+                    open=blinds_open,
+                    closed_message=BLINDS_CLOSED_MESSAGE,
+                    open_view_message=BLINDS_OPEN_VIEW_MESSAGE,
                 ),
                 Breakable(break_message=BREAK_MESSAGE),
                 LookThroughable(
@@ -121,3 +148,102 @@ def test_look_through_closed_shutters_beat_broken_window(restore_verbs):
 
     assert not result.ok
     assert result.message == SHUTTERED_MESSAGE
+    
+    
+def test_look_through_lowered_closed_blinds_fails(restore_verbs):
+    load_extension("twip_ext.breakable")
+    load_extension("twip_ext.look_throughable")
+    load_extension("twip_ext.blindered")
+
+    s = bs().one_room()
+    s.put_room(
+        s.room_one,
+        blindered_breakable_window(
+            blinds_raised=False,
+            blinds_open=False,
+        ),
+    )
+
+    result = s.handle("look through window")
+
+    assert not result.ok
+    assert result.message == BLINDS_CLOSED_MESSAGE
+
+
+def test_look_through_lowered_open_blinds_succeeds_with_blinds_message(restore_verbs):
+    load_extension("twip_ext.breakable")
+    load_extension("twip_ext.look_throughable")
+    load_extension("twip_ext.blindered")
+
+    s = bs().one_room()
+    s.put_room(
+        s.room_one,
+        blindered_breakable_window(
+            blinds_raised=False,
+            blinds_open=True,
+        ),
+    )
+
+    result = s.handle("look through window")
+
+    assert_ok_message(result, BLINDS_OPEN_VIEW_MESSAGE)
+
+
+def test_look_through_raised_blinds_uses_normal_view(restore_verbs):
+    load_extension("twip_ext.breakable")
+    load_extension("twip_ext.look_throughable")
+    load_extension("twip_ext.blindered")
+
+    s = bs().one_room()
+    s.put_room(
+        s.room_one,
+        blindered_breakable_window(
+            blinds_raised=True,
+            blinds_open=False,
+        ),
+    )
+
+    result = s.handle("look through window")
+
+    assert_ok_message(result, VIEW_MESSAGE)
+
+
+def test_look_through_closed_blinds_beat_broken_window(restore_verbs):
+    load_extension("twip_ext.breakable")
+    load_extension("twip_ext.look_throughable")
+    load_extension("twip_ext.blindered")
+
+    s = bs().one_room()
+    s.put_room(
+        s.room_one,
+        blindered_breakable_window(
+            blinds_raised=False,
+            blinds_open=False,
+        ),
+    )
+
+    s.handle("break window")
+    result = s.handle("look through window")
+
+    assert not result.ok
+    assert result.message == BLINDS_CLOSED_MESSAGE
+
+
+def test_look_through_broken_window_beats_open_blinds_flavor(restore_verbs):
+    load_extension("twip_ext.breakable")
+    load_extension("twip_ext.look_throughable")
+    load_extension("twip_ext.blindered")
+
+    s = bs().one_room()
+    s.put_room(
+        s.room_one,
+        blindered_breakable_window(
+            blinds_raised=False,
+            blinds_open=True,
+        ),
+    )
+
+    s.handle("break window")
+    result = s.handle("look through window")
+
+    assert_ok_message(result, BROKEN_VIEW_MESSAGE)

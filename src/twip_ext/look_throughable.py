@@ -5,6 +5,7 @@ from typing import ClassVar
 
 from twip.behavior import Behavior
 from twip.result import Result
+from twip_ext.blindered import Blindered
 from twip_ext.breakable import Breakable
 from twip_ext.shuttered import Shuttered
 
@@ -27,6 +28,11 @@ class LookThroughable(Behavior):
         if isinstance(shuttered, Shuttered) and not shuttered.open:
             return Result.failure(shuttered.closed_message)
 
+        blindered = entity.behaviors.get(Blindered.kind)
+        if isinstance(blindered, Blindered) and not blindered.raised:
+            if not blindered.open:
+                return Result.failure(blindered.closed_message)
+
         breakable = entity.behaviors.get(Breakable.kind)
         if (
             isinstance(breakable, Breakable)
@@ -34,6 +40,14 @@ class LookThroughable(Behavior):
             and self.broken_view_message is not None
         ):
             return Result.success(self.broken_view_message)
+
+        if (
+            isinstance(blindered, Blindered)
+            and not blindered.raised
+            and blindered.open
+            and blindered.open_view_message is not None
+        ):
+            return Result.success(blindered.open_view_message)
 
         return Result.success(self.view_message)
 
