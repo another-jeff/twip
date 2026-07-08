@@ -5,20 +5,23 @@ from typing import ClassVar
 
 from twip.behavior import Behavior
 from twip.result import Result
-from twip_ext.blindered import Blindered
 from twip_ext.breakable import Breakable
 from twip_ext.shuttered import Shuttered
+from twip_ext.view_covering import ViewCovering
 
 
-def _blindered_for(entity, world):
-    blindered = entity.behaviors.get(Blindered.kind)
-    if isinstance(blindered, Blindered):
-        return blindered
+def _view_covering_for(entity, world):
+    for behavior in entity.behaviors.values():
+        if isinstance(behavior, ViewCovering):
+            return behavior
 
     for other in world.entities.values():
-        blindered = other.behaviors.get(Blindered.kind)
-        if isinstance(blindered, Blindered) and blindered.covers == entity.id:
-            return blindered
+        for behavior in other.behaviors.values():
+            if (
+                isinstance(behavior, ViewCovering)
+                and behavior.covers == entity.id
+            ):
+                return behavior
 
     return None
 
@@ -41,10 +44,10 @@ class LookThroughable(Behavior):
         if isinstance(shuttered, Shuttered) and not shuttered.open:
             return Result.failure(shuttered.closed_message)
 
-        blindered = _blindered_for(entity, world)
-        if isinstance(blindered, Blindered) and not blindered.raised:
-            if not blindered.open:
-                return Result.failure(blindered.closed_message)
+        view_covering = _view_covering_for(entity, world)
+        if isinstance(view_covering, ViewCovering):
+            if view_covering.blocks_view():
+                return Result.failure(view_covering.closed_message)
 
         breakable = entity.behaviors.get(Breakable.kind)
         if (
@@ -55,12 +58,10 @@ class LookThroughable(Behavior):
             return Result.success(self.broken_view_message)
 
         if (
-            isinstance(blindered, Blindered)
-            and not blindered.raised
-            and blindered.open
-            and blindered.open_view_message is not None
+            isinstance(view_covering, ViewCovering)
+            and view_covering.changes_view()
         ):
-            return Result.success(blindered.open_view_message)
+            return Result.success(view_covering.open_view_message)
 
         return Result.success(self.view_message)
 
