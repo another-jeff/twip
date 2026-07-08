@@ -5,7 +5,6 @@ from twip.extensions import load_extension
 from twip.world import World
 from twip_ext.breakable import Breakable
 from twip_ext.look_throughable import LookThroughable
-from twip_ext.shuttered import Shuttered
 from twip_ext.view_covering import ViewCovering
 
 from assertions import assert_ok_message
@@ -20,7 +19,7 @@ BREAK_MESSAGE = "The window shatters."
 VIEW_MESSAGE = "Through the window, you see a dark garden."
 BROKEN_VIEW_MESSAGE = "Through the broken window, you see a dark garden."
 
-SHUTTERED_MESSAGE = "The shutters are closed."
+SHUTTERS_CLOSED_MESSAGE = "The shutters are closed."
 
 COVERING_CLOSED_MESSAGE = "The blinds are closed."
 COVERING_OPEN_VIEW_MESSAGE = "Through the open blinds, you see a dark garden."
@@ -45,32 +44,15 @@ def breakable_window(world: World):
     )
 
 
-def shuttered_breakable_window(*, shutters_open: bool):
-    def factory(world: World):
-        return world.add(
-            names=(WINDOW,),
-            traits=set(),
-            behaviors=(
-                Containable(),
-                Shuttered(
-                    open=shutters_open,
-                    closed_message=SHUTTERED_MESSAGE,
-                ),
-                Breakable(break_message=BREAK_MESSAGE),
-                LookThroughable(
-                    view_message=VIEW_MESSAGE,
-                    broken_view_message=BROKEN_VIEW_MESSAGE,
-                ),
-            ),
-        )
-
-    return factory
-
-
 def view_covered_breakable_window(
     *,
     covering: bool,
     covering_open: bool,
+    closed_message: str = COVERING_CLOSED_MESSAGE,
+    open_view_message: str | None = COVERING_OPEN_VIEW_MESSAGE,
+    open_message: str = OPEN_COVERING_MESSAGE,
+    close_message: str = CLOSE_COVERING_MESSAGE,
+    open_uncovers: bool = False,
 ):
     def factory(world: World):
         return world.add(
@@ -81,10 +63,11 @@ def view_covered_breakable_window(
                 ViewCovering(
                     covering=covering,
                     open=covering_open,
-                    closed_message=COVERING_CLOSED_MESSAGE,
-                    open_view_message=COVERING_OPEN_VIEW_MESSAGE,
-                    open_message=OPEN_COVERING_MESSAGE,
-                    close_message=CLOSE_COVERING_MESSAGE,
+                    closed_message=closed_message,
+                    open_view_message=open_view_message,
+                    open_message=open_message,
+                    close_message=close_message,
+                    open_uncovers=open_uncovers,
                 ),
                 Breakable(break_message=BREAK_MESSAGE),
                 LookThroughable(
@@ -150,11 +133,6 @@ def load_look_through_extensions():
     load_extension("twip_ext.look_throughable")
 
 
-def load_shuttered_extensions():
-    load_look_through_extensions()
-    load_extension("twip_ext.shuttered")
-
-
 def load_view_covering_extensions():
     load_look_through_extensions()
     load_extension("twip_ext.view_covering")
@@ -184,22 +162,40 @@ def test_look_through_broken_window_uses_broken_view_message(restore_verbs):
 
 
 def test_look_through_closed_shutters_fails(restore_verbs):
-    load_shuttered_extensions()
+    load_view_covering_extensions()
 
     s = bs().one_room()
-    s.put_room(s.room_one, shuttered_breakable_window(shutters_open=False))
+    s.put_room(
+        s.room_one,
+        view_covered_breakable_window(
+            covering=True,
+            covering_open=False,
+            closed_message=SHUTTERS_CLOSED_MESSAGE,
+            open_view_message=None,
+            open_uncovers=True,
+        ),
+    )
 
     result = s.handle("look through window")
 
     assert not result.ok
-    assert result.message == SHUTTERED_MESSAGE
+    assert result.message == SHUTTERS_CLOSED_MESSAGE
 
 
 def test_look_through_open_shutters_succeeds(restore_verbs):
-    load_shuttered_extensions()
+    load_view_covering_extensions()
 
     s = bs().one_room()
-    s.put_room(s.room_one, shuttered_breakable_window(shutters_open=True))
+    s.put_room(
+        s.room_one,
+        view_covered_breakable_window(
+            covering=False,
+            covering_open=True,
+            closed_message=SHUTTERS_CLOSED_MESSAGE,
+            open_view_message=None,
+            open_uncovers=True,
+        ),
+    )
 
     result = s.handle("look through window")
 
@@ -207,16 +203,25 @@ def test_look_through_open_shutters_succeeds(restore_verbs):
 
 
 def test_look_through_closed_shutters_beat_broken_window(restore_verbs):
-    load_shuttered_extensions()
+    load_view_covering_extensions()
 
     s = bs().one_room()
-    s.put_room(s.room_one, shuttered_breakable_window(shutters_open=False))
+    s.put_room(
+        s.room_one,
+        view_covered_breakable_window(
+            covering=True,
+            covering_open=False,
+            closed_message=SHUTTERS_CLOSED_MESSAGE,
+            open_view_message=None,
+            open_uncovers=True,
+        ),
+    )
 
     s.handle("break window")
     result = s.handle("look through window")
 
     assert not result.ok
-    assert result.message == SHUTTERED_MESSAGE
+    assert result.message == SHUTTERS_CLOSED_MESSAGE
 
 
 def test_look_through_same_entity_view_covering_closed_fails(restore_verbs):

@@ -6,7 +6,6 @@ from typing import ClassVar
 from twip.behavior import Behavior
 from twip.result import Result
 from twip_ext.breakable import Breakable
-from twip_ext.shuttered import Shuttered
 from twip_ext.view_covering import ViewCovering
 
 
@@ -39,10 +38,6 @@ class LookThroughable(Behavior):
 
         if action.preposition != "through":
             return None
-
-        shuttered = entity.behaviors.get(Shuttered.kind)
-        if isinstance(shuttered, Shuttered) and not shuttered.open:
-            return Result.failure(shuttered.closed_message)
 
         view_covering = _view_covering_for(entity, world)
         if isinstance(view_covering, ViewCovering):
