@@ -10,6 +10,19 @@ from twip_ext.breakable import Breakable
 from twip_ext.shuttered import Shuttered
 
 
+def _blindered_for(entity, world):
+    blindered = entity.behaviors.get(Blindered.kind)
+    if isinstance(blindered, Blindered):
+        return blindered
+
+    for other in world.entities.values():
+        blindered = other.behaviors.get(Blindered.kind)
+        if isinstance(blindered, Blindered) and blindered.covers == entity.id:
+            return blindered
+
+    return None
+
+
 @dataclass
 class LookThroughable(Behavior):
     kind: ClassVar[str] = "look_throughable"
@@ -28,7 +41,7 @@ class LookThroughable(Behavior):
         if isinstance(shuttered, Shuttered) and not shuttered.open:
             return Result.failure(shuttered.closed_message)
 
-        blindered = entity.behaviors.get(Blindered.kind)
+        blindered = _blindered_for(entity, world)
         if isinstance(blindered, Blindered) and not blindered.raised:
             if not blindered.open:
                 return Result.failure(blindered.closed_message)
