@@ -6,7 +6,6 @@ from twip.world import World
 from twip_ext.breakable import Breakable
 from twip_ext.look_throughable import LookThroughable
 from twip_ext.shuttered import Shuttered
-from twip_ext.blindered import Blindered
 from twip_ext.view_covering import ViewCovering
 
 from assertions import assert_ok_message
@@ -14,102 +13,21 @@ from scenario import bs
 
 
 WINDOW = "window"
+BLINDS = "blinds"
+CURTAINS = "curtains"
 
 BREAK_MESSAGE = "The window shatters."
 VIEW_MESSAGE = "Through the window, you see a dark garden."
 BROKEN_VIEW_MESSAGE = "Through the broken window, you see a dark garden."
+
 SHUTTERED_MESSAGE = "The shutters are closed."
-BLINDS_CLOSED_MESSAGE = "The blinds are closed."
-BLINDS_OPEN_VIEW_MESSAGE = "Through the open blinds, you see a dark garden."
-BLINDS = "blinds"
-OPEN_BLINDS_MESSAGE = "You open the blinds."
-CLOSE_BLINDS_MESSAGE = "You close the blinds."
 
+COVERING_CLOSED_MESSAGE = "The blinds are closed."
+COVERING_OPEN_VIEW_MESSAGE = "Through the open blinds, you see a dark garden."
+OPEN_COVERING_MESSAGE = "You open the blinds."
+CLOSE_COVERING_MESSAGE = "You close the blinds."
 
-def add_window_with_view_covering(
-    s,
-    *,
-    covering_name: str,
-    covering: bool,
-    covering_open: bool,
-    open_uncovers: bool = False,
-):
-    created = {}
-
-    def window_factory(world: World):
-        window = breakable_window(world)
-        created["window"] = window
-        return window
-
-    def covering_factory(world: World):
-        window = created["window"]
-
-        view_cover = world.add(
-            names=(covering_name,),
-            traits=set(),
-            behaviors=(
-                Containable(),
-                ViewCovering(
-                    covers=window.id,
-                    covering=covering,
-                    open=covering_open,
-                    closed_message=BLINDS_CLOSED_MESSAGE,
-                    open_view_message=BLINDS_OPEN_VIEW_MESSAGE,
-                    open_message=OPEN_BLINDS_MESSAGE,
-                    close_message=CLOSE_BLINDS_MESSAGE,
-                    open_uncovers=open_uncovers,
-                ),
-            ),
-        )
-
-        created["covering"] = view_cover
-        return view_cover
-
-    s.put_room(s.room_one, window_factory, covering_factory)
-
-    return created["window"], created["covering"]
-
-
-def add_window_with_covering_blinds(
-    s,
-    *,
-    blinds_raised: bool,
-    blinds_open: bool,
-):
-    created = {}
-
-    def window_factory(world: World):
-        window = breakable_window(world)
-        created["window"] = window
-        return window
-
-    def blinds_factory(world: World):
-        window = created["window"]
-
-        blinds = world.add(
-            names=(BLINDS,),
-            traits=set(),
-            behaviors=(
-                Containable(),
-                Blindered(
-                    raised=blinds_raised,
-                    open=blinds_open,
-                    covers=window.id,
-                    closed_message=BLINDS_CLOSED_MESSAGE,
-                    open_view_message=BLINDS_OPEN_VIEW_MESSAGE,
-                    open_message=OPEN_BLINDS_MESSAGE,
-                    close_message=CLOSE_BLINDS_MESSAGE,
-                ),
-            ),
-        )
-
-        created["blinds"] = blinds
-        return blinds
-
-    s.put_room(s.room_one, window_factory, blinds_factory)
-
-    return created["window"], created["blinds"]
-
+OPEN_CURTAINS_MESSAGE = "You open the curtains."
 
 
 def breakable_window(world: World):
@@ -149,18 +67,24 @@ def shuttered_breakable_window(*, shutters_open: bool):
     return factory
 
 
-def blindered_breakable_window(*, blinds_raised: bool, blinds_open: bool):
+def view_covered_breakable_window(
+    *,
+    covering: bool,
+    covering_open: bool,
+):
     def factory(world: World):
         return world.add(
             names=(WINDOW,),
             traits=set(),
             behaviors=(
                 Containable(),
-                Blindered(
-                    raised=blinds_raised,
-                    open=blinds_open,
-                    closed_message=BLINDS_CLOSED_MESSAGE,
-                    open_view_message=BLINDS_OPEN_VIEW_MESSAGE,
+                ViewCovering(
+                    covering=covering,
+                    open=covering_open,
+                    closed_message=COVERING_CLOSED_MESSAGE,
+                    open_view_message=COVERING_OPEN_VIEW_MESSAGE,
+                    open_message=OPEN_COVERING_MESSAGE,
+                    close_message=CLOSE_COVERING_MESSAGE,
                 ),
                 Breakable(break_message=BREAK_MESSAGE),
                 LookThroughable(
@@ -173,9 +97,71 @@ def blindered_breakable_window(*, blinds_raised: bool, blinds_open: bool):
     return factory
 
 
-def test_look_through_unbroken_window_succeeds(restore_verbs):
+def add_window_with_view_covering(
+    s,
+    *,
+    covering_name: str,
+    covering: bool,
+    covering_open: bool,
+    closed_message: str = COVERING_CLOSED_MESSAGE,
+    open_view_message: str | None = COVERING_OPEN_VIEW_MESSAGE,
+    open_message: str = OPEN_COVERING_MESSAGE,
+    close_message: str = CLOSE_COVERING_MESSAGE,
+    open_uncovers: bool = False,
+):
+    created = {}
+
+    def window_factory(world: World):
+        window = breakable_window(world)
+        created["window"] = window
+        return window
+
+    def covering_factory(world: World):
+        window = created["window"]
+
+        view_cover = world.add(
+            names=(covering_name,),
+            traits=set(),
+            behaviors=(
+                Containable(),
+                ViewCovering(
+                    covers=window.id,
+                    covering=covering,
+                    open=covering_open,
+                    closed_message=closed_message,
+                    open_view_message=open_view_message,
+                    open_message=open_message,
+                    close_message=close_message,
+                    open_uncovers=open_uncovers,
+                ),
+            ),
+        )
+
+        created["covering"] = view_cover
+        return view_cover
+
+    s.put_room(s.room_one, window_factory, covering_factory)
+
+    return created["window"], created["covering"]
+
+
+def load_look_through_extensions():
     load_extension("twip_ext.breakable")
     load_extension("twip_ext.look_throughable")
+
+
+def load_shuttered_extensions():
+    load_look_through_extensions()
+    load_extension("twip_ext.shuttered")
+
+
+def load_view_covering_extensions():
+    load_look_through_extensions()
+    load_extension("twip_ext.view_covering")
+
+
+def test_look_through_unbroken_window_succeeds(restore_verbs):
+    load_look_through_extensions()
 
     s = bs().one_room()
     s.put_room(s.room_one, breakable_window)
@@ -186,8 +172,7 @@ def test_look_through_unbroken_window_succeeds(restore_verbs):
 
 
 def test_look_through_broken_window_uses_broken_view_message(restore_verbs):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
+    load_look_through_extensions()
 
     s = bs().one_room()
     s.put_room(s.room_one, breakable_window)
@@ -199,9 +184,7 @@ def test_look_through_broken_window_uses_broken_view_message(restore_verbs):
 
 
 def test_look_through_closed_shutters_fails(restore_verbs):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.shuttered")
+    load_shuttered_extensions()
 
     s = bs().one_room()
     s.put_room(s.room_one, shuttered_breakable_window(shutters_open=False))
@@ -213,9 +196,7 @@ def test_look_through_closed_shutters_fails(restore_verbs):
 
 
 def test_look_through_open_shutters_succeeds(restore_verbs):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.shuttered")
+    load_shuttered_extensions()
 
     s = bs().one_room()
     s.put_room(s.room_one, shuttered_breakable_window(shutters_open=True))
@@ -226,9 +207,7 @@ def test_look_through_open_shutters_succeeds(restore_verbs):
 
 
 def test_look_through_closed_shutters_beat_broken_window(restore_verbs):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.shuttered")
+    load_shuttered_extensions()
 
     s = bs().one_room()
     s.put_room(s.room_one, shuttered_breakable_window(shutters_open=False))
@@ -238,58 +217,56 @@ def test_look_through_closed_shutters_beat_broken_window(restore_verbs):
 
     assert not result.ok
     assert result.message == SHUTTERED_MESSAGE
-    
-    
-def test_look_through_lowered_closed_blinds_fails(restore_verbs):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.blindered")
+
+
+def test_look_through_same_entity_view_covering_closed_fails(restore_verbs):
+    load_view_covering_extensions()
 
     s = bs().one_room()
     s.put_room(
         s.room_one,
-        blindered_breakable_window(
-            blinds_raised=False,
-            blinds_open=False,
+        view_covered_breakable_window(
+            covering=True,
+            covering_open=False,
         ),
     )
 
     result = s.handle("look through window")
 
     assert not result.ok
-    assert result.message == BLINDS_CLOSED_MESSAGE
+    assert result.message == COVERING_CLOSED_MESSAGE
 
 
-def test_look_through_lowered_open_blinds_succeeds_with_blinds_message(restore_verbs):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.blindered")
+def test_look_through_same_entity_view_covering_open_uses_covering_message(
+    restore_verbs,
+):
+    load_view_covering_extensions()
 
     s = bs().one_room()
     s.put_room(
         s.room_one,
-        blindered_breakable_window(
-            blinds_raised=False,
-            blinds_open=True,
+        view_covered_breakable_window(
+            covering=True,
+            covering_open=True,
         ),
     )
 
     result = s.handle("look through window")
 
-    assert_ok_message(result, BLINDS_OPEN_VIEW_MESSAGE)
+    assert_ok_message(result, COVERING_OPEN_VIEW_MESSAGE)
 
 
-def test_look_through_raised_blinds_uses_normal_view(restore_verbs):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.blindered")
+def test_look_through_same_entity_view_covering_uncovered_uses_normal_view(
+    restore_verbs,
+):
+    load_view_covering_extensions()
 
     s = bs().one_room()
     s.put_room(
         s.room_one,
-        blindered_breakable_window(
-            blinds_raised=True,
-            blinds_open=False,
+        view_covered_breakable_window(
+            covering=False,
+            covering_open=False,
         ),
     )
 
@@ -298,17 +275,17 @@ def test_look_through_raised_blinds_uses_normal_view(restore_verbs):
     assert_ok_message(result, VIEW_MESSAGE)
 
 
-def test_look_through_closed_blinds_beat_broken_window(restore_verbs):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.blindered")
+def test_look_through_same_entity_closed_view_covering_beats_broken_window(
+    restore_verbs,
+):
+    load_view_covering_extensions()
 
     s = bs().one_room()
     s.put_room(
         s.room_one,
-        blindered_breakable_window(
-            blinds_raised=False,
-            blinds_open=False,
+        view_covered_breakable_window(
+            covering=True,
+            covering_open=False,
         ),
     )
 
@@ -316,20 +293,20 @@ def test_look_through_closed_blinds_beat_broken_window(restore_verbs):
     result = s.handle("look through window")
 
     assert not result.ok
-    assert result.message == BLINDS_CLOSED_MESSAGE
+    assert result.message == COVERING_CLOSED_MESSAGE
 
 
-def test_look_through_broken_window_beats_open_blinds_flavor(restore_verbs):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.blindered")
+def test_look_through_broken_window_beats_same_entity_open_covering_flavor(
+    restore_verbs,
+):
+    load_view_covering_extensions()
 
     s = bs().one_room()
     s.put_room(
         s.room_one,
-        blindered_breakable_window(
-            blinds_raised=False,
-            blinds_open=True,
+        view_covered_breakable_window(
+            covering=True,
+            covering_open=True,
         ),
     )
 
@@ -337,134 +314,12 @@ def test_look_through_broken_window_beats_open_blinds_flavor(restore_verbs):
     result = s.handle("look through window")
 
     assert_ok_message(result, BROKEN_VIEW_MESSAGE)
-    
-    
-def test_look_through_window_fails_when_external_blinds_cover_it_closed(
+
+
+def test_look_through_window_fails_when_external_view_covering_is_closed(
     restore_verbs,
 ):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.blindered")
-
-    s = bs().one_room()
-    add_window_with_covering_blinds(
-        s,
-        blinds_raised=False,
-        blinds_open=False,
-    )
-
-    result = s.handle("look through window")
-
-    assert not result.ok
-    assert result.message == BLINDS_CLOSED_MESSAGE
-
-
-def test_look_through_window_uses_external_open_blinds_view(
-    restore_verbs,
-):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.blindered")
-
-    s = bs().one_room()
-    add_window_with_covering_blinds(
-        s,
-        blinds_raised=False,
-        blinds_open=True,
-    )
-
-    result = s.handle("look through window")
-
-    assert_ok_message(result, BLINDS_OPEN_VIEW_MESSAGE)
-
-
-def test_look_through_window_ignores_external_raised_blinds(
-    restore_verbs,
-):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.blindered")
-
-    s = bs().one_room()
-    add_window_with_covering_blinds(
-        s,
-        blinds_raised=True,
-        blinds_open=False,
-    )
-
-    result = s.handle("look through window")
-
-    assert_ok_message(result, VIEW_MESSAGE)
-
-
-def test_external_closed_blinds_beat_broken_window(
-    restore_verbs,
-):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.blindered")
-
-    s = bs().one_room()
-    add_window_with_covering_blinds(
-        s,
-        blinds_raised=False,
-        blinds_open=False,
-    )
-
-    s.handle("break window")
-    result = s.handle("look through window")
-
-    assert not result.ok
-    assert result.message == BLINDS_CLOSED_MESSAGE
-    
-    
-def test_open_blinds_opens_external_blinds_and_allows_view(restore_verbs):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.blindered")
-
-    s = bs().one_room()
-    _, blinds = add_window_with_covering_blinds(
-        s,
-        blinds_raised=False,
-        blinds_open=False,
-    )
-
-    open_result = s.handle("open blinds")
-    look_result = s.handle("look through window")
-
-    assert_ok_message(open_result, OPEN_BLINDS_MESSAGE)
-    assert blinds.behaviors[Blindered.kind].open
-    assert_ok_message(look_result, BLINDS_OPEN_VIEW_MESSAGE)
-
-
-def test_close_blinds_closes_external_blinds_and_blocks_view(restore_verbs):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.blindered")
-
-    s = bs().one_room()
-    _, blinds = add_window_with_covering_blinds(
-        s,
-        blinds_raised=False,
-        blinds_open=True,
-    )
-
-    close_result = s.handle("close blinds")
-    look_result = s.handle("look through window")
-
-    assert_ok_message(close_result, CLOSE_BLINDS_MESSAGE)
-    assert not blinds.behaviors[Blindered.kind].open
-    assert not look_result.ok
-    assert look_result.message == BLINDS_CLOSED_MESSAGE
-    
-    
-def test_look_through_window_fails_when_view_covering_is_closed(
-    restore_verbs,
-):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.view_covering")
+    load_view_covering_extensions()
 
     s = bs().one_room()
     add_window_with_view_covering(
@@ -477,15 +332,13 @@ def test_look_through_window_fails_when_view_covering_is_closed(
     result = s.handle("look through window")
 
     assert not result.ok
-    assert result.message == BLINDS_CLOSED_MESSAGE
+    assert result.message == COVERING_CLOSED_MESSAGE
 
 
-def test_look_through_window_uses_open_view_covering_message(
+def test_look_through_window_uses_external_open_view_covering_message(
     restore_verbs,
 ):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.view_covering")
+    load_view_covering_extensions()
 
     s = bs().one_room()
     add_window_with_view_covering(
@@ -497,15 +350,13 @@ def test_look_through_window_uses_open_view_covering_message(
 
     result = s.handle("look through window")
 
-    assert_ok_message(result, BLINDS_OPEN_VIEW_MESSAGE)
+    assert_ok_message(result, COVERING_OPEN_VIEW_MESSAGE)
 
 
-def test_look_through_window_ignores_view_covering_when_uncovered(
+def test_look_through_window_ignores_external_view_covering_when_uncovered(
     restore_verbs,
 ):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.view_covering")
+    load_view_covering_extensions()
 
     s = bs().one_room()
     add_window_with_view_covering(
@@ -520,25 +371,96 @@ def test_look_through_window_ignores_view_covering_when_uncovered(
     assert_ok_message(result, VIEW_MESSAGE)
 
 
-def test_open_view_covering_can_uncover_window(
-    restore_verbs,
-):
-    load_extension("twip_ext.breakable")
-    load_extension("twip_ext.look_throughable")
-    load_extension("twip_ext.view_covering")
+def test_external_closed_view_covering_beats_broken_window(restore_verbs):
+    load_view_covering_extensions()
+
+    s = bs().one_room()
+    add_window_with_view_covering(
+        s,
+        covering_name=BLINDS,
+        covering=True,
+        covering_open=False,
+    )
+
+    s.handle("break window")
+    result = s.handle("look through window")
+
+    assert not result.ok
+    assert result.message == COVERING_CLOSED_MESSAGE
+
+
+def test_broken_window_beats_external_open_view_covering_flavor(restore_verbs):
+    load_view_covering_extensions()
+
+    s = bs().one_room()
+    add_window_with_view_covering(
+        s,
+        covering_name=BLINDS,
+        covering=True,
+        covering_open=True,
+    )
+
+    s.handle("break window")
+    result = s.handle("look through window")
+
+    assert_ok_message(result, BROKEN_VIEW_MESSAGE)
+
+
+def test_open_external_view_covering_allows_view(restore_verbs):
+    load_view_covering_extensions()
+
+    s = bs().one_room()
+    _, covering = add_window_with_view_covering(
+        s,
+        covering_name=BLINDS,
+        covering=True,
+        covering_open=False,
+    )
+
+    open_result = s.handle("open blinds")
+    look_result = s.handle("look through window")
+
+    assert_ok_message(open_result, OPEN_COVERING_MESSAGE)
+    assert covering.behaviors[ViewCovering.kind].open
+    assert_ok_message(look_result, COVERING_OPEN_VIEW_MESSAGE)
+
+
+def test_close_external_view_covering_blocks_view(restore_verbs):
+    load_view_covering_extensions()
+
+    s = bs().one_room()
+    _, covering = add_window_with_view_covering(
+        s,
+        covering_name=BLINDS,
+        covering=True,
+        covering_open=True,
+    )
+
+    close_result = s.handle("close blinds")
+    look_result = s.handle("look through window")
+
+    assert_ok_message(close_result, CLOSE_COVERING_MESSAGE)
+    assert not covering.behaviors[ViewCovering.kind].open
+    assert not look_result.ok
+    assert look_result.message == COVERING_CLOSED_MESSAGE
+
+
+def test_open_external_view_covering_can_uncover_window(restore_verbs):
+    load_view_covering_extensions()
 
     s = bs().one_room()
     _, curtains = add_window_with_view_covering(
         s,
-        covering_name="curtains",
+        covering_name=CURTAINS,
         covering=True,
         covering_open=False,
+        open_message=OPEN_CURTAINS_MESSAGE,
         open_uncovers=True,
     )
 
     open_result = s.handle("open curtains")
     look_result = s.handle("look through window")
 
-    assert_ok_message(open_result, OPEN_BLINDS_MESSAGE)
+    assert_ok_message(open_result, OPEN_CURTAINS_MESSAGE)
     assert not curtains.behaviors[ViewCovering.kind].covering
     assert_ok_message(look_result, VIEW_MESSAGE)
