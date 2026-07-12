@@ -1,12 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
-from twip.behavior import Behavior
-from twip.dispatcher import dispatch
-from twip.entity import Entity
-from twip.parser import Parser
-from twip.result import Result
 from twip.behavior import (
     Behavior,
     Containable,
@@ -14,6 +10,11 @@ from twip.behavior import (
     Connector,
     Openable,
 )
+from twip.dispatcher import dispatch
+from twip.entity import Entity
+from twip.language import English, Language
+from twip.parser import Parser
+from twip.result import Result
 
 Connection = tuple[Entity | str, str | set[str]]
 
@@ -22,6 +23,7 @@ Connection = tuple[Entity | str, str | set[str]]
 class World:
     entities: dict[str, Entity] = field(default_factory=dict)
     parser: Parser = field(default_factory=Parser)
+    language: Language = field(default_factory=English)
     current: str | None = None
     player_id: str | None = None
     _next_entity_id: int = 1
@@ -36,9 +38,7 @@ class World:
             names=names,
             traits=traits or set(),
         )
-
         entity.add_behavior(*behaviors)
-
         return self._add_entity(entity)
 
     def add_and_connect(
@@ -49,7 +49,6 @@ class World:
         behaviors: tuple[Behavior, ...] = (),
     ) -> Entity:
         connector = Connector.from_connections(connections)
-
         return self.add(
             names=names,
             traits=traits,
@@ -63,7 +62,6 @@ class World:
         entity_id = self._new_entity_id()
         entity._assign_id(entity_id)
         self.entities[entity_id] = entity
-
         return entity
 
     def _new_entity_id(self) -> str:
@@ -129,12 +127,10 @@ class World:
             return entity.matches(target)
 
         connector = entity.behavior(Connector.kind)
-
         if not isinstance(connector, Connector):
             return False
 
         side = connector.side_for(self.current)
-
         if side is None:
             return False
 
@@ -158,7 +154,6 @@ class World:
 
     def _connector_is_visible(self, entity: Entity) -> bool:
         connector = entity.behavior(Connector.kind)
-
         if not isinstance(connector, Connector):
             return False
 
@@ -173,17 +168,15 @@ class World:
             return False
 
         player = self.entities.get(self.player_id)
-
         if player is None:
             return False
 
         container = player.behaviors.get(Container.kind)
-
         return (
             container is not None
             and entity.id in container.items
         )
-        
+
     def _is_visible_from(
         self,
         entity: Entity,
@@ -194,7 +187,6 @@ class World:
 
         while True:
             containable = current.behaviors.get(Containable.kind)
-
             if not isinstance(containable, Containable):
                 return False
 
@@ -207,14 +199,12 @@ class World:
                 return False
 
             seen.add(parent_id)
-
             parent = self.entities.get(parent_id)
 
             if parent is None:
                 return False
 
             openable = parent.behaviors.get(Openable.kind)
-
             if (
                 isinstance(openable, Openable)
                 and not openable.is_open
@@ -222,7 +212,7 @@ class World:
                 return False
 
             current = parent
-            
+
     def _containment_path_allows(
         self,
         entity: Entity,
@@ -235,7 +225,6 @@ class World:
 
         while True:
             containable = current.behaviors.get(Containable.kind)
-
             if not isinstance(containable, Containable):
                 return False
 
@@ -248,7 +237,6 @@ class World:
                 return False
 
             seen.add(parent_id)
-
             parent = self.entities.get(parent_id)
 
             if parent is None:
@@ -261,16 +249,13 @@ class World:
 
     def _blocks_visibility(self, entity: Entity) -> bool:
         openable = entity.behaviors.get(Openable.kind)
-
         return (
             isinstance(openable, Openable)
             and openable.is_closed
         )
 
-
     def _blocks_reach(self, entity: Entity) -> bool:
         openable = entity.behaviors.get(Openable.kind)
-
         return (
             isinstance(openable, Openable)
             and openable.is_closed

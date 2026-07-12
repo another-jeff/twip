@@ -6,6 +6,7 @@ from twip.behavior import Containable, Container, Takeable
 from twip.result import Result
 
 if TYPE_CHECKING:
+    from twip.entity import Entity
     from twip.world import World
 
 
@@ -37,13 +38,19 @@ def handle(world: World, target: str) -> Result:
         return Result.failure(f"You can't take {target}.")
 
     containable = entity.behavior(Containable.kind)
+    source: Entity | None = None
 
     if containable.parent:
         parent = world.entities[containable.parent]
         parent_container = parent.behavior(Container.kind)
         parent_container.items.remove(entity.id)
 
+        if parent.id != world.current:
+            source = parent
+
     player_container.items.add(entity.id)
     containable.parent = player.id
 
-    return Result.success("Taken.")
+    return Result.success(
+        world.language.take_success(entity, source)
+    )

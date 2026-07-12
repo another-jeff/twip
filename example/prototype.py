@@ -1,4 +1,4 @@
-# example/prototype.py
+from collections.abc import Callable
 
 from twip import direction
 from twip.behavior import (
@@ -16,7 +16,7 @@ def build_world() -> World:
     world = World()
 
     porch = world.add(
-        names=("room", "front porch"),
+        names=("room", "Front Porch"),
         behaviors=(
             Container(),
             Lookable(
@@ -27,7 +27,7 @@ def build_world() -> World:
     )
 
     hall = world.add(
-        names=("room", "entry hall"),
+        names=("room", "Entry Hall"),
         behaviors=(
             Container(),
             Lookable(
@@ -36,7 +36,7 @@ def build_world() -> World:
             ),
         ),
     )
-    
+
     desk = world.add(
         names=("desk", "writing desk"),
         behaviors=(
@@ -55,7 +55,7 @@ def build_world() -> World:
             (hall, direction.S),
         ),
     )
-    
+
     box = world.add(
         names=("box", "wooden box"),
         behaviors=(
@@ -66,7 +66,7 @@ def build_world() -> World:
         ),
     )
     world.contain(hall, box)
-    
+
     coin = world.add(
         names=("coin", "brass coin"),
         behaviors=(
@@ -82,20 +82,29 @@ def build_world() -> World:
         behaviors=(Container(),),
     )
     world.player_id = player.id
-
     world.current = porch.id
-    
+
+    return world
+
+
+def run(
+    *,
+    read: Callable[[str], str] = input,
+    write: Callable[[str], None] = print,
+) -> World:
+    world = build_world()
+
+    write("Twip Prototype")
+    write("")
+    write(world.handle("look").message)
+
+    play(world, read=read, write=write)
+
     return world
 
 
 def main() -> None:
-    world = build_world()
-
-    print("Twip Prototype")
-    print()
-    print(world.handle("look").message)
-
-    play(world)
+    run()
 
 
 if __name__ == "__main__":

@@ -15,22 +15,24 @@ def room(world: World) -> Result:
     if not world.current:
         return Result.failure("You are nowhere.")
 
-    room = world.entities[world.current]
-    message = f"You are in {room.names[-1]}."
+    entity = world.entities[world.current]
+    lookable = entity.behaviors.get(Lookable.kind)
+    description = (
+        lookable.text
+        if isinstance(lookable, Lookable)
+        else None
+    )
 
-    lookable = room.behaviors.get(Lookable.kind)
-    if lookable:
-        message += f" {lookable.text}"
+    container = entity.behaviors.get(Container.kind)
+    contents = (
+        [world.entities[item_id] for item_id in container.items]
+        if isinstance(container, Container)
+        else []
+    )
 
-    container = room.behaviors.get(Container.kind)
-    if container and container.items:
-        names = sorted(
-            world.entities[item_id].names[0]
-            for item_id in container.items
-        )
-        message += f" You see {', '.join(names)} here."
-
-    return Result.success(message)
+    return Result.success(
+        world.language.room(entity, description, contents)
+    )
 
 
 def target(world: World, action: Action) -> Result:
@@ -77,22 +79,26 @@ def _inside(world: World, entity: Entity) -> Result:
 
     if not isinstance(container, Container):
         return Result.failure(
-            f"You can't look in the {entity.name}."
+            world.language.look_in_not_container(entity)
         )
 
     openable = entity.behaviors.get(Openable.kind)
 
     if isinstance(openable, Openable) and openable.is_closed:
-        return Result.failure(f"The {entity.name} is closed.")
+        return Result.failure(
+            world.language.look_in_closed(entity)
+        )
 
     if not container.items:
-        return Result.success(f"The {entity.name} is empty.")
+        return Result.success(
+            world.language.look_in_empty(entity)
+        )
 
-    names = sorted(
-        world.entities[item_id].name
+    contents = [
+        world.entities[item_id]
         for item_id in container.items
-    )
+    ]
 
     return Result.success(
-        f"In the {entity.name}, you see {', '.join(names)}."
+        world.language.look_in_contents(entity, contents)
     )

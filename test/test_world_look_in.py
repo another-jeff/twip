@@ -69,5 +69,5 @@ def test_look_in_open_populated_container_lists_contents():
 
     assert_ok_message(
         result,
-        "In the box, you see coin.",
+        "Inside the box, you see a coin.",
     )

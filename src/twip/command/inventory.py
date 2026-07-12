@@ -17,11 +17,13 @@ def handle(world: World) -> Result:
     container = player.behavior(Container.kind)
 
     if not container.items:
-        return Result.success("You are carrying nothing.")
+        return Result.success(world.language.inventory_empty())
 
-    names = sorted(
-        world.entities[item_id].names[0]
+    items = [
+        world.entities[item_id]
         for item_id in container.items
-    )
+    ]
 
-    return Result.success("You are carrying: " + ", ".join(names))
+    return Result.success(
+        world.language.inventory_contents(items)
+    )
