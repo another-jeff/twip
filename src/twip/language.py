@@ -36,6 +36,24 @@ class Language(Protocol):
         source: Entity | None,
     ) -> str: ...
 
+    def put_not_carried(self, target: str) -> str: ...
+
+    def put_missing_destination(self, item: Entity) -> str: ...
+
+    def put_unsupported_relation(self, item: Entity) -> str: ...
+
+    def put_destination_not_seen(self, target: str) -> str: ...
+
+    def put_in_not_container(self, entity: Entity) -> str: ...
+
+    def put_in_closed(self, container: Entity) -> str: ...
+
+    def put_in_success(
+        self,
+        item: Entity,
+        container: Entity,
+    ) -> str: ...
+
     def inventory_empty(self) -> str: ...
 
     def inventory_contents(self, items: list[Entity]) -> str: ...
@@ -95,6 +113,38 @@ class English:
 
         return f"{message}."
 
+    def put_not_carried(self, target: str) -> str:
+        return f"You aren't carrying {self.definite_text(target)}."
+
+    def put_missing_destination(self, item: Entity) -> str:
+        return f"Where do you want to put {self.definite(item)}?"
+
+    def put_unsupported_relation(self, item: Entity) -> str:
+        return (
+            f"You can't put {self.definite(item)} "
+            "there that way."
+        )
+
+    def put_destination_not_seen(self, target: str) -> str:
+        return f"You don't see {self.definite_text(target)} here."
+
+    def put_in_not_container(self, entity: Entity) -> str:
+        return f"You can't put anything in {self.definite(entity)}."
+
+    def put_in_closed(self, container: Entity) -> str:
+        phrase = self.definite(container)
+        return f"{self._sentence_start(phrase)} is closed."
+
+    def put_in_success(
+        self,
+        item: Entity,
+        container: Entity,
+    ) -> str:
+        return (
+            f"You put {self.definite(item)} "
+            f"in {self.definite(container)}."
+        )
+
     def inventory_empty(self) -> str:
         return "You are carrying nothing."
 
@@ -105,7 +155,10 @@ class English:
         )
 
     def definite(self, entity: Entity) -> str:
-        return f"the {entity.name}"
+        return self.definite_text(entity.name)
+
+    def definite_text(self, text: str) -> str:
+        return f"the {text}"
 
     def indefinite(self, entity: Entity) -> str:
         article = (

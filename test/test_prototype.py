@@ -15,6 +15,9 @@ def prototype_script() -> tuple[Callable[[str], str], list[str]]:
             "look in box",
             "take coin",
             "inventory",
+            "put coin in box",
+            "look in box",
+            "inventory",
             "quit",
         )
     )
@@ -46,9 +49,13 @@ def test_prototype_script(
         "Inside the box, you see a coin.",
         "You take the coin from the box.",
         "You are carrying a coin.",
+        "You put the coin in the box.",
+        "Inside the box, you see a coin.",
+        "You are carrying nothing.",
     ]
 
     assert world.player_id is not None
+
     player = world.entity(world.player_id)
     inventory = player.behavior(Container.kind)
     assert isinstance(inventory, Container)
@@ -58,8 +65,18 @@ def test_prototype_script(
         for entity in world.entities.values()
         if entity.name == "coin"
     )
+    box = next(
+        entity
+        for entity in world.entities.values()
+        if entity.name == "box"
+    )
+
+    box_container = box.behavior(Container.kind)
+    assert isinstance(box_container, Container)
+
     containable = coin.behavior(Containable.kind)
     assert isinstance(containable, Containable)
 
-    assert coin.id in inventory.items
-    assert containable.parent == player.id
+    assert coin.id not in inventory.items
+    assert coin.id in box_container.items
+    assert containable.parent == box.id

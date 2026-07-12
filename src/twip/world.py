@@ -160,8 +160,16 @@ class World:
         return connector.side_for(self.current) is not None
 
     def contain(self, container: Entity, entity: Entity) -> None:
-        container.behaviors[Container.kind].items.add(entity.id)
-        entity.behaviors[Containable.kind].parent = container.id
+        destination = container.behavior(Container.kind)
+        containable = entity.behavior(Containable.kind)
+
+        if containable.parent is not None:
+            parent = self.entities[containable.parent]
+            source = parent.behavior(Container.kind)
+            source.items.discard(entity.id)
+
+        destination.items.add(entity.id)
+        containable.parent = container.id
 
     def _is_in_player_inventory(self, entity: Entity) -> bool:
         if self.player_id is None:

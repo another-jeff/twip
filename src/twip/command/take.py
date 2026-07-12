@@ -40,16 +40,10 @@ def handle(world: World, target: str) -> Result:
     containable = entity.behavior(Containable.kind)
     source: Entity | None = None
 
-    if containable.parent:
-        parent = world.entities[containable.parent]
-        parent_container = parent.behavior(Container.kind)
-        parent_container.items.remove(entity.id)
+    if containable.parent and containable.parent != world.current:
+        source = world.entities[containable.parent]
 
-        if parent.id != world.current:
-            source = parent
-
-    player_container.items.add(entity.id)
-    containable.parent = player.id
+    world.contain(player, entity)
 
     return Result.success(
         world.language.take_success(entity, source)
