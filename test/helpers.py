@@ -1,5 +1,5 @@
 from twip.entity import Entity
-from twip.behavior import Containable, Container, Lookable
+from twip.behavior import Containable, Container, Lookable, Takeable
 from twip.world import World
 
 import tt
@@ -43,7 +43,10 @@ def item(world: World, name: str) -> Entity:
     return world.add(
         names=(name,),
         traits=set(),
-        behaviors=(Containable(),),
+        behaviors=(
+            Containable(),
+            Takeable(),
+        ),
     )
 
 
@@ -51,7 +54,10 @@ def item_with_trait(world: World, name: str, trait: str) -> Entity:
     return world.add(
         names=(name,),
         traits={trait},
-        behaviors=(Containable(),),
+        behaviors=(
+            Containable(),
+            Takeable(),
+        ),
     )
 
 
@@ -62,6 +68,7 @@ def lookable_item(world: World, name: str, text: str) -> Entity:
         behaviors=(
             Containable(),
             Lookable(text),
+            Takeable(),
         ),
     )
 
@@ -78,6 +85,7 @@ def lookable_item_with_trait(
         behaviors=(
             Containable(),
             Lookable(text),
+            Takeable(),
         ),
     )
 

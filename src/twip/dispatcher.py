@@ -54,7 +54,7 @@ def _handle_targeted_action(world: World, action: Action) -> Result:
     if not target:
         return Result.failure(f"{action.verb.capitalize()} what?")
 
-    matching_entities = world.find_accessible_all(target)
+    matching_entities = world.find_reachable_all(target)
 
     if not matching_entities:
         return Result.failure(f"You don't see {target} here.")

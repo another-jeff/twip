@@ -13,6 +13,7 @@ from twip.behavior.pullable import Pullable
 from twip.behavior.readable import Readable
 from twip.behavior.searchable import Searchable
 from twip.behavior.smellable import Smellable
+from twip.behavior.takeable import Takeable
 from twip.behavior.tasteable import Tasteable
 from twip.behavior.touchable import Touchable
 from twip.behavior.turnable import Turnable
@@ -37,6 +38,7 @@ __all__ = [
     "Readable",
     "Searchable",
     "Smellable",
+    "Takeable",
     "Tasteable",
     "Touchable",
     "Turnable",

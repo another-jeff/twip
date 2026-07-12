@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from twip import direction
 from twip.entity import Entity
 from twip.behavior import Connector, Openable, OpenState
 from twip.result import Result
@@ -27,14 +28,24 @@ def handle(world: World, target: str) -> Result:
     if _connector_blocks_movement(entity):
         return Result.failure("It's closed.")
 
+    here = connector.side_for(world.current)
+
+    if here is None:
+        return Result.failure("You can't go that way.")
+
     there = _other_side(connector, world.current)
 
     if there is None:
         return Result.failure("You can't go that way.")
 
+    movement_direction = next(
+        (trait for trait in here.traits if trait in direction.ALL),
+        target,
+    )
+
     world.current = there.room
 
-    return Result.success("You go that way.")
+    return Result.success(f"You go {movement_direction}.")
 
 
 def _matching_exits(world: World, target: str) -> list[tuple[Entity, Connector]]:

@@ -8,12 +8,12 @@ import tt
 
 def test_go_direction_moves_to_connected_room():
     s = bs().two_rooms()
-
     s.connect()
 
     result = s.handle("go north")
 
     assert result.ok
+    assert result.message == "You go north."
     assert s.world.current == s.room_two.id
 
 
@@ -23,6 +23,7 @@ def test_go_unknown_direction_fails_cleanly():
     result = s.handle("go north")
 
     assert not result.ok
+    assert result.message == "You can't go that way."
     assert s.world.current == s.room_one.id
 
 
