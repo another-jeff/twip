@@ -4,7 +4,15 @@ from typing import TYPE_CHECKING
 
 from twip import direction
 from twip.action import Action
-from twip.command import drop, inventory, look, move, put, take, wait
+from twip.command import (
+    drop,
+    inventory,
+    look,
+    move,
+    put,
+    take,
+    wait,
+)
 from twip.result import Result
 from twip.verb import VERBS
 
@@ -59,16 +67,23 @@ def _handle_targeted_action(
     action: Action,
 ) -> Result:
     target = action.target
+
     if not target:
-        return Result.failure(f"{action.verb.capitalize()} what?")
+        return Result.failure(
+            f"{action.verb.capitalize()} what?"
+        )
 
     matching_entities = world.find_reachable_all(target)
 
     if not matching_entities:
-        return Result.failure(f"You don't see {target} here.")
+        return Result.failure(
+            world.language.not_seen(target)
+        )
 
     if len(matching_entities) > 1:
-        return Result.failure(f"Which {target} do you mean?")
+        return Result.failure(
+            f"Which {target} do you mean?"
+        )
 
     entity = matching_entities[0]
     result = entity.handle(action, world)
@@ -84,14 +99,17 @@ def _handle_targetless_action(
     action: Action,
 ) -> Result:
     result = _handle_current_room_action(world, action)
+
     if result is not None:
         return result
 
     result = _handle_player_action(world, action)
+
     if result is not None:
         return result
 
     verb = action.verb or ""
+
     if _verb_requires_target(verb):
         return Result.failure(f"{verb.capitalize()} what?")
 
@@ -106,6 +124,7 @@ def _handle_current_room_action(
         return None
 
     entity = world.entities.get(world.current)
+
     if entity is None:
         return None
 
@@ -120,6 +139,7 @@ def _handle_player_action(
         return None
 
     entity = world.entities.get(world.player_id)
+
     if entity is None:
         return None
 
@@ -128,6 +148,7 @@ def _handle_player_action(
 
 def _verb_requires_target(verb: str) -> bool:
     policy = VERBS.get(verb)
+
     if policy is None:
         return True
 

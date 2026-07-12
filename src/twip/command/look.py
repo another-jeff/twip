@@ -16,6 +16,7 @@ def room(world: World) -> Result:
         return Result.failure("You are nowhere.")
 
     entity = world.entities[world.current]
+
     lookable = entity.behaviors.get(Lookable.kind)
     description = (
         lookable.text
@@ -25,7 +26,10 @@ def room(world: World) -> Result:
 
     container = entity.behaviors.get(Container.kind)
     contents = (
-        [world.entities[item_id] for item_id in container.items]
+        [
+            world.entities[item_id]
+            for item_id in container.items
+        ]
         if isinstance(container, Container)
         else []
     )
@@ -51,12 +55,15 @@ def target(world: World, action: Action) -> Result:
             matching_entities.extend(inventory_matches)
 
     matching_entities = list(
-        {entity.id: entity for entity in matching_entities}.values()
+        {
+            entity.id: entity
+            for entity in matching_entities
+        }.values()
     )
 
     if not matching_entities:
         return Result.failure(
-            f"You don't see {action.target} here."
+            world.language.not_seen(action.target)
         )
 
     if len(matching_entities) > 1:
@@ -68,6 +75,7 @@ def target(world: World, action: Action) -> Result:
         return _inside(world, entity)
 
     result = entity.handle(action, world)
+
     if result:
         return result
 

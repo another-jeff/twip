@@ -15,6 +15,7 @@ def handle(world: World, action: Action) -> Result:
         return Result.failure("There is no player.")
 
     target = action.target
+
     if not target:
         return Result.failure("Put what?")
 
@@ -24,7 +25,10 @@ def handle(world: World, action: Action) -> Result:
     matching_items = [
         world.entities[item_id]
         for item_id in inventory.items
-        if world._matches(world.entities[item_id], target)
+        if world._matches(
+            world.entities[item_id],
+            target,
+        )
     ]
 
     if not matching_items:
@@ -33,7 +37,9 @@ def handle(world: World, action: Action) -> Result:
         )
 
     if len(matching_items) > 1:
-        return Result.failure(f"Which {target} do you mean?")
+        return Result.failure(
+            f"Which {target} do you mean?"
+        )
 
     item = matching_items[0]
 
@@ -54,9 +60,7 @@ def handle(world: World, action: Action) -> Result:
 
     if not matching_destinations:
         return Result.failure(
-            world.language.put_destination_not_seen(
-                destination_target
-            )
+            world.language.not_seen(destination_target)
         )
 
     if len(matching_destinations) > 1:
@@ -73,6 +77,7 @@ def handle(world: World, action: Action) -> Result:
         )
 
     openable = destination.behaviors.get(Openable.kind)
+
     if isinstance(openable, Openable) and openable.is_closed:
         return Result.failure(
             world.language.put_in_closed(destination)

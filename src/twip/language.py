@@ -18,6 +18,8 @@ class Language(Protocol):
         contents: list[Entity],
     ) -> str: ...
 
+    def not_seen(self, target: str) -> str: ...
+
     def look_in_not_container(self, entity: Entity) -> str: ...
 
     def look_in_closed(self, container: Entity) -> str: ...
@@ -41,8 +43,6 @@ class Language(Protocol):
     def put_missing_destination(self, item: Entity) -> str: ...
 
     def put_unsupported_relation(self, item: Entity) -> str: ...
-
-    def put_destination_not_seen(self, target: str) -> str: ...
 
     def put_in_not_container(self, entity: Entity) -> str: ...
 
@@ -79,6 +79,9 @@ class English:
             )
 
         return "\n".join(parts)
+
+    def not_seen(self, target: str) -> str:
+        return f"You don't see {self.indefinite_text(target)} here."
 
     def look_in_not_container(self, entity: Entity) -> str:
         return f"You can't look inside {self.definite(entity)}."
@@ -125,9 +128,6 @@ class English:
             "there that way."
         )
 
-    def put_destination_not_seen(self, target: str) -> str:
-        return f"You don't see {self.definite_text(target)} here."
-
     def put_in_not_container(self, entity: Entity) -> str:
         return f"You can't put anything in {self.definite(entity)}."
 
@@ -161,12 +161,15 @@ class English:
         return f"the {text}"
 
     def indefinite(self, entity: Entity) -> str:
+        return self.indefinite_text(entity.name)
+
+    def indefinite_text(self, text: str) -> str:
         article = (
             "an"
-            if entity.name[:1].casefold() in "aeiou"
+            if text[:1].casefold() in "aeiou"
             else "a"
         )
-        return f"{article} {entity.name}"
+        return f"{article} {text}"
 
     def entity_list(
         self,
