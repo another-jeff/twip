@@ -44,7 +44,7 @@ def build_world() -> World:
             ),
         ),
     )
-    world.contain(hall, desk)
+    world.put(hall, desk)
 
     world.add_and_connect(
         names=("doorway",),
@@ -62,7 +62,7 @@ def build_world() -> World:
             Lookable("A squat wooden box with a hinged lid."),
         ),
     )
-    world.contain(hall, box)
+    world.put(hall, box)
 
     coin = world.add(
         names=("coin", "brass coin"),
@@ -71,7 +71,7 @@ def build_world() -> World:
             Lookable("A dull brass coin, worn nearly smooth."),
         ),
     )
-    world.contain(box, coin)
+    world.put(box, coin)
 
     player = world.add(
         names=("player",),

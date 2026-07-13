@@ -55,8 +55,8 @@ def test_movement_changes_visible_room_contents():
     coin = item(s.world, tt.COIN)
     gem = item(s.world, tt.GEM)
 
-    s.world.contain(s.room_one, coin)
-    s.world.contain(s.room_two, gem)
+    s.world.put(s.room_one, coin)
+    s.world.put(s.room_two, gem)
 
     s.connect()
 

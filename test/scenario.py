@@ -49,7 +49,7 @@ class BasicScenario:
         entities = [factory(self.world) for factory in factories]
 
         for entity in entities:
-            self.world.contain(room, entity)
+            self.world.put(room, entity)
 
         return one_or_many(entities)
 
@@ -60,7 +60,7 @@ class BasicScenario:
         entities = [factory(self.world) for factory in factories]
 
         for entity in entities:
-            self.world.contain(self.player, entity)
+            self.world.put(self.player, entity)
 
         return one_or_many(entities)
 

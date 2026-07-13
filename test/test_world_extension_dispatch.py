@@ -115,7 +115,7 @@ def room_item(s, name: str, *behaviors: Behavior) -> Entity:
         ),
     )
 
-    s.world.contain(s.room_one, entity)
+    s.world.put(s.room_one, entity)
 
     return entity
 
@@ -129,7 +129,7 @@ def inventory_item(s, name: str, *behaviors: Behavior) -> Entity:
         ),
     )
 
-    s.world.contain(s.player, entity)
+    s.world.put(s.player, entity)
 
     return entity
 

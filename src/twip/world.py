@@ -197,7 +197,7 @@ class World:
             or entity.has_behavior(Container.kind)
         )
 
-    def contain(
+    def put(
         self,
         container: Entity,
         entity: Entity,

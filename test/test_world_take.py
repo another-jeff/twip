@@ -106,7 +106,7 @@ def test_take_non_takeable_uses_resolved_entity_name():
 
     statue_entity = statue(s.world)
     statue_entity.traits.add("stone")
-    s.world.contain(s.room_one, statue_entity)
+    s.world.put(s.room_one, statue_entity)
 
     result = s.handle("take stone statue")
 

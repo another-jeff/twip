@@ -34,7 +34,7 @@ def test_look_in_closed_container_reports_closed():
     s = bs().one_room()
     box = s.put_room(s.room_one, box_factory())
     coin = item(s.world, tt.COIN)
-    s.world.contain(box, coin)
+    s.world.put(box, coin)
 
     result = s.handle("look in box")
 
@@ -61,7 +61,7 @@ def test_look_in_open_populated_container_lists_contents():
         box_factory(OpenState.OPEN),
     )
     coin = item(s.world, tt.COIN)
-    s.world.contain(box, coin)
+    s.world.put(box, coin)
 
     result = s.handle("look in box")
 

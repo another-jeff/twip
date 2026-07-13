@@ -13,7 +13,7 @@ def test_contain_moves_entity_between_containers():
 
     coin_entity = s.put_room(s.room_one, coin)
 
-    s.world.contain(s.room_two, coin_entity)
+    s.world.put(s.room_two, coin_entity)
 
     assert_does_not_contain(s.room_one, coin_entity)
     assert_contains(s.room_two, coin_entity)
@@ -25,7 +25,7 @@ def test_contain_in_same_container_is_idempotent():
 
     coin_entity = s.put_room(s.room_one, coin)
 
-    s.world.contain(s.room_one, coin_entity)
+    s.world.put(s.room_one, coin_entity)
 
     assert_contains(s.room_one, coin_entity)
     assert coin_entity.parent == s.room_one.id
@@ -36,7 +36,7 @@ def test_any_entity_can_be_contained_without_a_behavior():
 
     statue_entity = statue(s.world)
 
-    s.world.contain(s.room_one, statue_entity)
+    s.world.put(s.room_one, statue_entity)
 
     assert_contains(s.room_one, statue_entity)
     assert statue_entity.parent == s.room_one.id
@@ -48,7 +48,7 @@ def test_room_can_parent_without_container_behavior():
     room = world.add_room(names=("room",))
     coin_entity = coin(world)
 
-    world.contain(room, coin_entity)
+    world.put(room, coin_entity)
 
     assert not room.has_behavior(Container.kind)
     assert world.contents_of(room) == [coin_entity]
@@ -62,7 +62,7 @@ def test_player_can_parent_without_container_behavior():
     world.player_id = player.id
     coin_entity = coin(world)
 
-    world.contain(player, coin_entity)
+    world.put(player, coin_entity)
 
     assert not player.has_behavior(Container.kind)
     assert world.contents_of(player) == [coin_entity]
@@ -78,7 +78,7 @@ def test_container_behavior_allows_ordinary_entity_to_parent():
     )
     coin_entity = coin(world)
 
-    world.contain(box, coin_entity)
+    world.put(box, coin_entity)
 
     assert world.contents_of(box) == [coin_entity]
     assert coin_entity.parent == box.id
@@ -91,7 +91,7 @@ def test_ordinary_entity_cannot_parent():
     coin_entity = coin(world)
 
     with pytest.raises(ValueError, match="cannot contain"):
-        world.contain(desk, coin_entity)
+        world.put(desk, coin_entity)
 
     assert coin_entity.parent is None
 
@@ -105,7 +105,7 @@ def test_entity_cannot_contain_itself():
     )
 
     with pytest.raises(ValueError, match="itself"):
-        world.contain(box, box)
+        world.put(box, box)
 
     assert box.parent is None
     assert world.contents_of(box) == []
@@ -123,10 +123,10 @@ def test_containment_cycle_is_rejected_without_mutation():
         behaviors=(Container(),),
     )
 
-    world.contain(outer_box, inner_box)
+    world.put(outer_box, inner_box)
 
     with pytest.raises(ValueError, match="cycle"):
-        world.contain(inner_box, outer_box)
+        world.put(inner_box, outer_box)
 
     assert outer_box.parent is None
     assert inner_box.parent == outer_box.id

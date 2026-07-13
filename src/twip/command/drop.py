@@ -35,6 +35,6 @@ def handle(world: World, target: str) -> Result:
         return Result.failure(f"Which {target}?")
 
     entity = matching_entities[0]
-    world.contain(room, entity)
+    world.put(room, entity)
 
     return Result.success("Dropped.")

@@ -9,7 +9,7 @@ def test_take_containable_but_not_takeable_fails_without_mutation():
     desk = s.world.add(
         names=("desk",),
     )
-    s.world.contain(s.room_one, desk)
+    s.world.put(s.room_one, desk)
 
     result = s.handle("take desk")
 

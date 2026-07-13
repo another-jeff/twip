@@ -11,8 +11,8 @@ def test_inventory_lists_only_carried_items_not_room_items():
     carried_key = item(s.world, tt.KEY)
     room_coin = item(s.world, tt.COIN)
 
-    s.world.contain(s.player, carried_key)
-    s.world.contain(s.room_one, room_coin)
+    s.world.put(s.player, carried_key)
+    s.world.put(s.room_one, room_coin)
 
     result = s.handle("inventory")
 
@@ -26,8 +26,8 @@ def test_inventory_lists_multiple_carried_items():
     coin_entity = item(s.world, tt.COIN)
     key_entity = item(s.world, tt.KEY)
 
-    s.world.contain(s.player, coin_entity)
-    s.world.contain(s.player, key_entity)
+    s.world.put(s.player, coin_entity)
+    s.world.put(s.player, key_entity)
 
     result = s.handle("inventory")
 
@@ -40,7 +40,7 @@ def test_inventory_lists_carried_item():
 
     coin_entity = item(s.world, tt.COIN)
 
-    s.world.contain(s.player, coin_entity)
+    s.world.put(s.player, coin_entity)
 
     result = s.handle("inventory")
 

@@ -43,7 +43,7 @@ def handle(world: World, target: str) -> Result:
     if entity.parent and entity.parent != world.current:
         source = world.entities[entity.parent]
 
-    world.contain(player, entity)
+    world.put(player, entity)
 
     return Result.success(
         world.language.take_success(entity, source)

@@ -86,7 +86,7 @@ def test_drop_without_player_fails_without_mutation():
     player_entity = player(s.world)
     coin_entity = coin(s.world)
 
-    s.world.contain(player_entity, coin_entity)
+    s.world.put(player_entity, coin_entity)
 
     result = s.handle("drop coin")
 

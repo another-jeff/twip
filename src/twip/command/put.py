@@ -83,7 +83,7 @@ def handle(world: World, action: Action) -> Result:
             world.language.put_in_closed(destination)
         )
 
-    world.contain(destination, item)
+    world.put(destination, item)
 
     return Result.success(
         world.language.put_in_success(item, destination)
