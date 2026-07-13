@@ -2,7 +2,7 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.behavior import Containable, Searchable
+from twip.behavior import Searchable
 
 
 def searchable_desk(world):
@@ -10,7 +10,6 @@ def searchable_desk(world):
         names=("desk",),
         traits=set(),
         behaviors=(
-            Containable(),
             Searchable("You find a tiny brass key taped underneath."),
         ),
     )

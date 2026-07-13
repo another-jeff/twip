@@ -1,5 +1,4 @@
 from twip.behavior import (
-    Containable,
     Container,
     Openable,
     OpenState,
@@ -23,7 +22,6 @@ def box_factory(
         return world.add(
             names=("box",),
             behaviors=(
-                Containable(),
                 Container(),
                 Openable(state=state),
             ),

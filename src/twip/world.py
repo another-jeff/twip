@@ -5,7 +5,6 @@ from dataclasses import dataclass, field
 
 from twip.behavior import (
     Behavior,
-    Containable,
     Container,
     Connector,
     Openable,
@@ -159,17 +158,20 @@ class World:
 
         return connector.side_for(self.current) is not None
 
-    def contain(self, container: Entity, entity: Entity) -> None:
+    def contain(
+        self,
+        container: Entity,
+        entity: Entity,
+    ) -> None:
         destination = container.behavior(Container.kind)
-        containable = entity.behavior(Containable.kind)
 
-        if containable.parent is not None:
-            parent = self.entities[containable.parent]
+        if entity.parent is not None:
+            parent = self.entities[entity.parent]
             source = parent.behavior(Container.kind)
             source.items.discard(entity.id)
 
         destination.items.add(entity.id)
-        containable.parent = container.id
+        entity.parent = container.id
 
     def _is_in_player_inventory(self, entity: Entity) -> bool:
         if self.player_id is None:
@@ -194,11 +196,7 @@ class World:
         seen: set[str] = set()
 
         while True:
-            containable = current.behaviors.get(Containable.kind)
-            if not isinstance(containable, Containable):
-                return False
-
-            parent_id = containable.parent
+            parent_id = current.parent
 
             if parent_id == root_id:
                 return True
@@ -207,12 +205,14 @@ class World:
                 return False
 
             seen.add(parent_id)
+
             parent = self.entities.get(parent_id)
 
             if parent is None:
                 return False
 
             openable = parent.behaviors.get(Openable.kind)
+
             if (
                 isinstance(openable, Openable)
                 and not openable.is_open
@@ -232,11 +232,7 @@ class World:
         seen: set[str] = set()
 
         while True:
-            containable = current.behaviors.get(Containable.kind)
-            if not isinstance(containable, Containable):
-                return False
-
-            parent_id = containable.parent
+            parent_id = current.parent
 
             if parent_id == root_id:
                 return True
@@ -245,6 +241,7 @@ class World:
                 return False
 
             seen.add(parent_id)
+
             parent = self.entities.get(parent_id)
 
             if parent is None:
@@ -254,7 +251,7 @@ class World:
                 return False
 
             current = parent
-
+        
     def _blocks_visibility(self, entity: Entity) -> bool:
         openable = entity.behaviors.get(Openable.kind)
         return (

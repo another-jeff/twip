@@ -5,7 +5,7 @@ from typing import ClassVar
 from twip.action import Action
 from twip.behavior import Behavior
 from twip.entity import Entity
-from twip.behavior import Containable, Container
+from twip.behavior import Container
 from twip.result import Result
 from twip.world import World
 
@@ -112,7 +112,6 @@ def room_item(s, name: str, *behaviors: Behavior) -> Entity:
         traits=set(),
         behaviors=(
             *behaviors,
-            Containable(),
         ),
     )
 
@@ -127,7 +126,6 @@ def inventory_item(s, name: str, *behaviors: Behavior) -> Entity:
         traits=set(),
         behaviors=(
             *behaviors,
-            Containable(),
         ),
     )
 

@@ -2,7 +2,6 @@ from collections.abc import Callable
 
 from twip import direction
 from twip.behavior import (
-    Containable,
     Container,
     Lookable,
     Openable,
@@ -40,7 +39,6 @@ def build_world() -> World:
     desk = world.add(
         names=("desk", "writing desk"),
         behaviors=(
-            Containable(),
             Lookable(
                 "A narrow writing desk with a scarred wooden surface."
             ),
@@ -59,7 +57,6 @@ def build_world() -> World:
     box = world.add(
         names=("box", "wooden box"),
         behaviors=(
-            Containable(),
             Container(),
             Openable(),
             Lookable("A squat wooden box with a hinged lid."),
@@ -70,7 +67,6 @@ def build_world() -> World:
     coin = world.add(
         names=("coin", "brass coin"),
         behaviors=(
-            Containable(),
             Takeable(),
             Lookable("A dull brass coin, worn nearly smooth."),
         ),

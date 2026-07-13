@@ -1,6 +1,5 @@
 from twip.behavior.base import Behavior
 from twip.behavior.connector import Connector
-from twip.behavior.containable import Containable
 from twip.behavior.container import Container
 from twip.behavior.drinkable import Drinkable
 from twip.behavior.eatable import Eatable
@@ -23,7 +22,6 @@ from twip.behavior.verb_message_behavior import VerbMessageBehavior
 __all__ = [
     "Behavior",
     "Connector",
-    "Containable",
     "Container",
     "Drinkable",
     "Eatable",

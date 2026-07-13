@@ -2,7 +2,7 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.behavior import Containable, Listenable
+from twip.behavior import Listenable
 
 
 def listenable_shell(world):
@@ -10,7 +10,6 @@ def listenable_shell(world):
         names=("shell",),
         traits=set(),
         behaviors=(
-            Containable(),
             Listenable("You hear the faint hush of the sea."),
         ),
     )

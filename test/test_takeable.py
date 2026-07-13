@@ -1,6 +1,6 @@
 from scenario import bs
 
-from twip.behavior import Containable, Container
+from twip.behavior import Container
 
 
 def test_take_containable_but_not_takeable_fails_without_mutation():
@@ -8,7 +8,6 @@ def test_take_containable_but_not_takeable_fails_without_mutation():
 
     desk = s.world.add(
         names=("desk",),
-        behaviors=(Containable(),),
     )
     s.world.contain(s.room_one, desk)
 

@@ -2,7 +2,7 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.behavior import Containable, Tasteable
+from twip.behavior import Tasteable
 
 
 def tasteable_powder(world):
@@ -10,7 +10,6 @@ def tasteable_powder(world):
         names=("powder",),
         traits=set(),
         behaviors=(
-            Containable(),
             Tasteable("It tastes bitter and metallic."),
         ),
     )

@@ -3,7 +3,7 @@ from collections.abc import Callable
 import pytest
 
 from example.prototype import run
-from twip.behavior import Containable, Container
+from twip.behavior import Container
 
 
 @pytest.fixture
@@ -74,9 +74,5 @@ def test_prototype_script(
     box_container = box.behavior(Container.kind)
     assert isinstance(box_container, Container)
 
-    containable = coin.behavior(Containable.kind)
-    assert isinstance(containable, Containable)
-
     assert coin.id not in inventory.items
     assert coin.id in box_container.items
-    assert containable.parent == box.id

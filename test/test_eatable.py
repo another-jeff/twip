@@ -2,7 +2,7 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.behavior import Containable, Eatable
+from twip.behavior import Eatable
 
 
 def eatable_apple(world):
@@ -10,7 +10,6 @@ def eatable_apple(world):
         names=("apple",),
         traits=set(),
         behaviors=(
-            Containable(),
             Eatable("You eat the apple. It is crisp and sharp."),
         ),
     )

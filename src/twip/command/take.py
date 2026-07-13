@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from twip.behavior import Containable, Container, Takeable
+from twip.behavior import Container, Takeable
 from twip.result import Result
 
 if TYPE_CHECKING:
@@ -33,19 +33,15 @@ def handle(world: World, target: str) -> Result:
 
     entity = matching_entities[0]
 
-    if (
-        Containable.kind not in entity.behaviors
-        or Takeable.kind not in entity.behaviors
-    ):
+    if Takeable.kind not in entity.behaviors:
         return Result.failure(
             world.language.take_not_takeable(entity)
         )
 
-    containable = entity.behavior(Containable.kind)
     source: Entity | None = None
 
-    if containable.parent and containable.parent != world.current:
-        source = world.entities[containable.parent]
+    if entity.parent and entity.parent != world.current:
+        source = world.entities[entity.parent]
 
     world.contain(player, entity)
 

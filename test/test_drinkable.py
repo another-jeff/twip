@@ -2,7 +2,7 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.behavior import Containable, Drinkable
+from twip.behavior import Drinkable
 
 
 def drinkable_water(world):
@@ -10,7 +10,6 @@ def drinkable_water(world):
         names=("water",),
         traits=set(),
         behaviors=(
-            Containable(),
             Drinkable("You drink the water. It tastes clean and cold."),
         ),
     )

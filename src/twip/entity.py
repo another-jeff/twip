@@ -13,6 +13,8 @@ class Entity:
     names: tuple[str, ...]
     traits: set[str] = field(default_factory=set)
     behaviors: dict[str, Behavior] = field(default_factory=dict)
+    parent: str | None = field(default=None, init=False)
+    
     _id: str | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self) -> None:

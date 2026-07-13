@@ -1,6 +1,6 @@
 # test/test_pullable.py
 
-from twip.behavior import Containable, Pullable
+from twip.behavior import Pullable
 from twip.world import World
 
 from assertions import assert_not_ok_contains, assert_ok_message
@@ -18,7 +18,6 @@ def pullable_lever(world: World):
         names=(LEVER,),
         traits=set(),
         behaviors=(
-            Containable(),
             Pullable(PULL_MESSAGE),
         ),
     )

@@ -1,6 +1,5 @@
 from twip.world import World
 from twip.behavior import (
-    Containable,
     Container,
     Openable,
     OpenState,
@@ -59,7 +58,6 @@ def test_closed_container_contents_are_not_visible():
     box = world.add(
         names=("box",),
         behaviors=(
-            Containable(),
             Container(),
             Openable(),
         ),
@@ -82,7 +80,6 @@ def test_open_container_contents_are_visible():
     box = world.add(
         names=("box",),
         behaviors=(
-            Containable(),
             Container(),
             Openable(state=OpenState.OPEN),
         ),
@@ -104,7 +101,6 @@ def test_open_container_contents_are_reachable():
     box = world.add(
         names=("box",),
         behaviors=(
-            Containable(),
             Container(),
             Openable(state=OpenState.OPEN),
         ),
@@ -126,7 +122,6 @@ def test_closed_container_contents_are_not_reachable():
     box = world.add(
         names=("box",),
         behaviors=(
-            Containable(),
             Container(),
             Openable(),
         ),

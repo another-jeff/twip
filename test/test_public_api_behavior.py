@@ -2,7 +2,6 @@
 
 from twip.behavior import (
     Behavior,
-    Containable,
     Container,
     Lookable,
     Openable,
@@ -16,7 +15,6 @@ def test_behavior_public_api_exports_extension_building_blocks():
 
 
 def test_behavior_public_api_exports_core_behaviors():
-    assert Containable
     assert Container
     assert Lookable
     assert Openable

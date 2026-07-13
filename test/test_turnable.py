@@ -2,7 +2,7 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.behavior import Containable, Turnable
+from twip.behavior import Turnable
 
 
 def turnable_knob(world):
@@ -10,7 +10,6 @@ def turnable_knob(world):
         names=("knob",),
         traits=set(),
         behaviors=(
-            Containable(),
             Turnable("The knob turns with a soft click."),
         ),
     )

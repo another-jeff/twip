@@ -1,6 +1,5 @@
 # test/test_pushable.py
 
-from twip.behavior import Containable
 from twip.extensions import load_extension
 from twip.world import World
 from twip_ext.pushable import Pushable
@@ -20,7 +19,6 @@ def pushable_button(world: World):
         names=(BUTTON,),
         traits=set(),
         behaviors=(
-            Containable(),
             Pushable(PUSH_MESSAGE),
         ),
     )

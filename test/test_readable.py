@@ -2,7 +2,7 @@
 
 from assertions import assert_ok_message
 from scenario import bs
-from twip.behavior import Containable, Readable
+from twip.behavior import Readable
 
 
 def readable_note(world):
@@ -10,7 +10,6 @@ def readable_note(world):
         names=("note",),
         traits=set(),
         behaviors=(
-            Containable(),
             Readable("The note says: beware the cellar."),
         ),
     )

@@ -1,10 +1,15 @@
 from twip.entity import Entity
-from twip.behavior import Containable, Container
+from twip.behavior import Container
 
 
-def assert_contains(container: Entity, entity: Entity):
-    assert entity.id in container.behavior(Container.kind).items
-    assert entity.behavior(Containable.kind).parent == container.id
+def assert_contains(
+    container: Entity,
+    entity: Entity,
+):
+    assert entity.id in container.behavior(
+        Container.kind
+    ).items
+    assert entity.parent == container.id
 
 
 def assert_does_not_contain(container: Entity, entity: Entity):

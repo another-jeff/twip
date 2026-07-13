@@ -1,5 +1,4 @@
 from twip.behavior import (
-    Containable,
     Container,
     Openable,
     OpenState,
@@ -24,7 +23,6 @@ def box(
     return world.add(
         names=("box",),
         behaviors=(
-            Containable(),
             Container(),
             Openable(state=state),
         ),
@@ -42,7 +40,6 @@ def closed_box(world: World):
 def desk(world: World):
     return world.add(
         names=("desk",),
-        behaviors=(Containable(),),
     )
 
 

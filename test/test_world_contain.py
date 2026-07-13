@@ -1,7 +1,5 @@
-from twip.behavior import Containable
-
 from assertions import assert_contains, assert_does_not_contain
-from helpers import coin
+from helpers import coin, statue
 from scenario import bs
 
 
@@ -13,9 +11,7 @@ def test_contain_moves_entity_between_containers():
 
     assert_does_not_contain(s.room_one, coin_entity)
     assert_contains(s.room_two, coin_entity)
-
-    containable = coin_entity.behavior(Containable.kind)
-    assert containable.parent == s.room_two.id
+    assert coin_entity.parent == s.room_two.id
 
 
 def test_contain_in_same_container_is_idempotent():
@@ -25,6 +21,14 @@ def test_contain_in_same_container_is_idempotent():
     s.world.contain(s.room_one, coin_entity)
 
     assert_contains(s.room_one, coin_entity)
+    assert coin_entity.parent == s.room_one.id
 
-    containable = coin_entity.behavior(Containable.kind)
-    assert containable.parent == s.room_one.id
+
+def test_any_entity_can_be_contained_without_a_behavior():
+    s = bs().one_room()
+    statue_entity = statue(s.world)
+
+    s.world.contain(s.room_one, statue_entity)
+
+    assert_contains(s.room_one, statue_entity)
+    assert statue_entity.parent == s.room_one.id

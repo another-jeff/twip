@@ -1,7 +1,7 @@
 from typing import ClassVar
 
 from twip.action import Action
-from twip.behavior import Behavior, Containable
+from twip.behavior import Behavior
 from twip.entity import Entity
 from twip.result import Result
 from twip.world import World
@@ -77,7 +77,6 @@ def switch_with(*behaviors: Behavior):
             traits=set(),
             behaviors=(
                 *behaviors,
-                Containable(),
             ),
         )
 

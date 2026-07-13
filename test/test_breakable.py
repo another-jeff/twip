@@ -1,6 +1,5 @@
 # test/test_breakable.py
 
-from twip.behavior import Containable
 from twip.extensions import load_extension
 from twip.world import World
 from twip_ext.breakable import Breakable
@@ -22,7 +21,6 @@ def breakable_window(world: World):
         names=(WINDOW,),
         traits=set(),
         behaviors=(
-            Containable(),
             Breakable(
                 break_message=BREAK_MESSAGE,
                 already_broken_message=ALREADY_BROKEN_MESSAGE,
