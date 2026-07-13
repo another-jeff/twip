@@ -15,6 +15,6 @@ def test_take_containable_but_not_takeable_fails_without_mutation():
     result = s.handle("take desk")
 
     assert not result.ok
-    assert result.message == "You can't take desk."
+    assert result.message == "You can't take the desk."
     assert desk.id in s.room_one.behavior(Container.kind).items
     assert desk.id not in s.player.behavior(Container.kind).items

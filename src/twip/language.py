@@ -57,6 +57,8 @@ class Language(Protocol):
     def inventory_empty(self) -> str: ...
 
     def inventory_contents(self, items: list[Entity]) -> str: ...
+    
+    def take_not_takeable(self, item: Entity) -> str: ...
 
 
 class English:
@@ -115,6 +117,9 @@ class English:
             message += f" from {self.definite(source)}"
 
         return f"{message}."
+    
+    def take_not_takeable(self, item: Entity) -> str:
+        return f"You can't take {self.definite(item)}."
 
     def not_carried(self, target: str) -> str:
         return (

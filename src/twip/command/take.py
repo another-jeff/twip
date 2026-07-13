@@ -37,7 +37,9 @@ def handle(world: World, target: str) -> Result:
         Containable.kind not in entity.behaviors
         or Takeable.kind not in entity.behaviors
     ):
-        return Result.failure(f"You can't take {target}.")
+        return Result.failure(
+            world.language.take_not_takeable(entity)
+        )
 
     containable = entity.behavior(Containable.kind)
     source: Entity | None = None

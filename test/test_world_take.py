@@ -1,5 +1,6 @@
 from assertions import assert_contains, assert_does_not_contain
 from helpers import coin, coin_blue, coin_red, statue
+from twip.behavior import Containable
 from scenario import bs
 
 
@@ -99,3 +100,19 @@ def test_take_ignores_same_named_inventory_item_after_prior_take():
 
     assert_contains(s.player, red)
     assert_contains(s.player, blue)
+    
+    
+def test_take_non_takeable_uses_resolved_entity_name():
+    s = bs().one_room().with_player()
+
+    statue_entity = s.world.add(
+        names=("statue",),
+        traits={"stone"},
+        behaviors=(Containable(),),
+    )
+    s.world.contain(s.room_one, statue_entity)
+
+    result = s.handle("take stone statue")
+
+    assert not result.ok
+    assert result.message == "You can't take the statue."
