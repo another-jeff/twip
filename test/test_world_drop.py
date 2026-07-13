@@ -83,34 +83,6 @@ def test_drop_ambiguous_inventory_items_fails_without_mutation():
     assert_does_not_contain(s.room_one, second_coin)
 
 
-def test_drop_without_player_fails_without_mutation():
-    s = bs().one_room()
-
-    player_entity = player(s.world)
-    coin_entity = coin(s.world)
-
-    s.world.player_id = player_entity.id
-    s.world.put(player_entity, coin_entity)
-    s.world.player_id = None
-
-    result = s.handle("drop coin")
-
-    assert not result.ok
-    assert_contains(player_entity, coin_entity)
-    assert_does_not_contain(s.room_one, coin_entity)
-
-
-def test_drop_without_current_room_fails_without_mutation():
-    s = bs().with_player()
-
-    coin_entity = s.put_inventory(coin)
-
-    result = s.handle("drop coin")
-
-    assert not result.ok
-    assert_contains(s.player, coin_entity)
-
-
 def test_drop_same_named_visible_room_item_does_not_create_ambiguity():
     s = bs().one_room().with_player()
 

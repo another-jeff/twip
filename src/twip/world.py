@@ -91,6 +91,15 @@ class World:
 
     def entity(self, entity_id: str) -> Entity:
         return self.entities[entity_id]
+    
+    def get_context(self) -> tuple[Entity, Entity]:
+        if self.player_id is None:
+            raise RuntimeError("World context has no player.")
+
+        if self.current is None:
+            raise RuntimeError("World context has no current room.")
+
+        return self.entities[self.player_id], self.entities[self.current]
 
     def contents_of(self, container: Entity) -> list[Entity]:
         return [

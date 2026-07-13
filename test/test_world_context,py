@@ -1,0 +1,26 @@
+import pytest
+
+from scenario import bs
+
+
+def test_get_context_returns_player_and_current_room():
+    s = bs().one_room().with_player()
+
+    player, room = s.world.get_context()
+
+    assert player is s.player
+    assert room is s.room_one
+
+
+def test_get_context_requires_player():
+    s = bs().one_room()
+
+    with pytest.raises(RuntimeError, match="no player"):
+        s.world.get_context()
+
+
+def test_get_context_requires_current_room():
+    s = bs().with_player()
+
+    with pytest.raises(RuntimeError, match="no current room"):
+        s.world.get_context()

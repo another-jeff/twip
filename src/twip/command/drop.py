@@ -9,14 +9,7 @@ if TYPE_CHECKING:
 
 
 def handle(world: World, target: str) -> Result:
-    if not world.player_id:
-        return Result.failure("There is no player.")
-
-    if not world.current:
-        return Result.failure("You are nowhere.")
-
-    player = world.entities[world.player_id]
-    room = world.entities[world.current]
+    player, room = world.get_context()
 
     matching_entities = [
         entity
