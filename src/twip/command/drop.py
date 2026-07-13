@@ -27,7 +27,9 @@ def handle(world: World, target: str) -> Result:
     ]
 
     if not matching_entities:
-        return Result.failure(f"You aren't carrying {target}.")
+        return Result.failure(
+            world.language.not_carried(target)
+        )
 
     if len(matching_entities) > 1:
         return Result.failure(f"Which {target}?")

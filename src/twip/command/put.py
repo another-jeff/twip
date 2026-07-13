@@ -33,7 +33,7 @@ def handle(world: World, action: Action) -> Result:
 
     if not matching_items:
         return Result.failure(
-            world.language.put_not_carried(target)
+            world.language.not_carried(target)
         )
 
     if len(matching_items) > 1:

@@ -37,8 +37,8 @@ class Language(Protocol):
         item: Entity,
         source: Entity | None,
     ) -> str: ...
-
-    def put_not_carried(self, target: str) -> str: ...
+    
+    def not_carried(self, target: str) -> str: ...
 
     def put_missing_destination(self, item: Entity) -> str: ...
 
@@ -116,8 +116,11 @@ class English:
 
         return f"{message}."
 
-    def put_not_carried(self, target: str) -> str:
-        return f"You aren't carrying {self.definite_text(target)}."
+    def not_carried(self, target: str) -> str:
+        return (
+            "You aren't carrying "
+            f"{self.indefinite_text(target)}."
+        )
 
     def put_missing_destination(self, item: Entity) -> str:
         return f"Where do you want to put {self.definite(item)}?"

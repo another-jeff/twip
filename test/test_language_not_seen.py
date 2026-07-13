@@ -46,3 +46,33 @@ def test_unresolved_target_uses_an_before_vowel():
     result = s.handle("take apple")
 
     assert_not_seen(result, "You don't see an apple here.")
+    
+
+from scenario import bs
+
+
+def test_drop_unresolved_target_uses_indefinite_article():
+    s = bs().one_room().with_player()
+
+    result = s.handle("drop coin")
+
+    assert not result.ok
+    assert result.message == "You aren't carrying a coin."
+
+
+def test_put_unresolved_target_uses_indefinite_article():
+    s = bs().one_room().with_player()
+
+    result = s.handle("put coin in box")
+
+    assert not result.ok
+    assert result.message == "You aren't carrying a coin."
+
+
+def test_unresolved_inventory_target_uses_an_before_vowel():
+    s = bs().one_room().with_player()
+
+    result = s.handle("drop apple")
+
+    assert not result.ok
+    assert result.message == "You aren't carrying an apple."
