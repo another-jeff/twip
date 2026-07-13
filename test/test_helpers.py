@@ -1,12 +1,10 @@
 from helpers import item, item_with_trait, player, room, statue
-
 import tt
-
 from twip.behavior import Container, Takeable
 from twip.world import World
 
 
-def test_room_adds_named_container_with_trait():
+def test_room_adds_named_structural_room_with_trait():
     world = World()
 
     entity = room(world, tt.ROOM_1)
@@ -14,10 +12,11 @@ def test_room_adds_named_container_with_trait():
     assert entity.id in world.entities
     assert entity.names == (tt.ROOM,)
     assert entity.traits == {tt.ROOM_1}
-    assert Container.kind in entity.behaviors
+    assert world.can_parent(entity)
+    assert not entity.has_behavior(Container.kind)
 
 
-def test_player_adds_named_container():
+def test_player_adds_named_entity_without_container_behavior():
     world = World()
 
     entity = player(world)
@@ -25,7 +24,7 @@ def test_player_adds_named_container():
     assert entity.id in world.entities
     assert entity.names == (tt.PLAYER,)
     assert entity.traits == set()
-    assert Container.kind in entity.behaviors
+    assert not entity.has_behavior(Container.kind)
 
 
 def test_player_does_not_set_world_player_id():
@@ -52,7 +51,11 @@ def test_item_adds_named_takeable():
 def test_item_with_trait_adds_named_takeable_with_trait():
     world = World()
 
-    entity = item_with_trait(world, tt.COIN, tt.TREASURE)
+    entity = item_with_trait(
+        world,
+        tt.COIN,
+        tt.TREASURE,
+    )
 
     assert entity.id in world.entities
     assert entity.names == (tt.COIN,)

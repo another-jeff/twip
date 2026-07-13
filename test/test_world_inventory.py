@@ -1,6 +1,8 @@
 from assertions import assert_ok_contains, assert_ok_omits
 from helpers import item
 from scenario import bs
+from twip.behavior import Container
+from twip.world import World
 
 import tt
 
@@ -39,7 +41,6 @@ def test_inventory_lists_carried_item():
     s = bs().with_player()
 
     coin_entity = item(s.world, tt.COIN)
-
     s.world.put(s.player, coin_entity)
 
     result = s.handle("inventory")
@@ -62,3 +63,30 @@ def test_inventory_without_player_fails():
 
     assert not result.ok
     assert tt.PLAYER in result.message
+
+
+def test_empty_inventory_does_not_require_container_behavior():
+    world = World()
+
+    player = world.add(names=(tt.PLAYER,))
+    world.player_id = player.id
+
+    result = world.handle("inventory")
+
+    assert_ok_contains(result, "nothing")
+    assert not player.has_behavior(Container.kind)
+
+
+def test_inventory_uses_structural_contents():
+    world = World()
+
+    player = world.add(names=(tt.PLAYER,))
+    world.player_id = player.id
+
+    coin_entity = item(world, tt.COIN)
+    world.put(player, coin_entity)
+
+    result = world.handle("inventory")
+
+    assert_ok_contains(result, tt.COIN)
+    assert not player.has_behavior(Container.kind)

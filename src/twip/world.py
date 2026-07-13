@@ -129,9 +129,6 @@ class World:
         ]
 
     def _is_reachable(self, entity: Entity) -> bool:
-        if self._is_in_player_inventory(entity):
-            return True
-
         if self.current is None:
             return True
 
@@ -141,9 +138,19 @@ class World:
         if Connector.kind in entity.behaviors:
             return self._connector_is_visible(entity)
 
-        return self._containment_path_allows(
+        if self._containment_path_allows(
             entity,
             root_id=self.current,
+            blocked_by=self._blocks_reach,
+        ):
+            return True
+
+        if self.player_id is None:
+            return False
+
+        return self._containment_path_allows(
+            entity,
+            root_id=self.player_id,
             blocked_by=self._blocks_reach,
         )
 
@@ -176,9 +183,19 @@ class World:
         if Connector.kind in entity.behaviors:
             return self._connector_is_visible(entity)
 
-        return self._containment_path_allows(
+        if self._containment_path_allows(
             entity,
             root_id=self.current,
+            blocked_by=self._blocks_visibility,
+        ):
+            return True
+
+        if self.player_id is None:
+            return False
+
+        return self._containment_path_allows(
+            entity,
+            root_id=self.player_id,
             blocked_by=self._blocks_visibility,
         )
 
@@ -216,18 +233,6 @@ class World:
             raise ValueError(
                 f"{container.name} cannot contain entities."
             )
-
-        if entity.parent is not None:
-            parent = self.entities[entity.parent]
-            source = parent.behaviors.get(Container.kind)
-
-            if isinstance(source, Container):
-                source.items.discard(entity.id)
-
-        destination = container.behaviors.get(Container.kind)
-
-        if isinstance(destination, Container):
-            destination.items.add(entity.id)
 
         entity.parent = container.id
 

@@ -1,19 +1,18 @@
 from twip.entity import Entity
-from twip.behavior import Container
 
 
 def assert_contains(
     container: Entity,
     entity: Entity,
 ):
-    assert entity.id in container.behavior(
-        Container.kind
-    ).items
     assert entity.parent == container.id
 
 
-def assert_does_not_contain(container: Entity, entity: Entity):
-    assert entity.id not in container.behavior(Container.kind).items
+def assert_does_not_contain(
+    container: Entity,
+    entity: Entity,
+):
+    assert entity.parent != container.id
 
 
 def assert_ok_message(result, message: str):

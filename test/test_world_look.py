@@ -1,3 +1,6 @@
+from twip.behavior import Container
+from twip.world import World
+
 from assertions import (
     assert_not_ok_contains,
     assert_not_ok_contains_any,
@@ -217,3 +220,36 @@ def test_look_target_inventory_item_ignores_same_named_item_in_other_room():
     result = s.handle("look coin")
 
     assert_ok_message(result, tt.SILVER_COIN_DESCRIPTION)
+    
+    
+def test_look_room_contents_do_not_require_container_behavior():
+    world = World()
+
+    room = world.add_room(names=(tt.ROOM_1,))
+    world.current = room.id
+
+    coin_entity = item(world, tt.COIN)
+    world.put(room, coin_entity)
+
+    result = world.handle("look")
+
+    assert_ok_contains(result, tt.ROOM_1, tt.COIN)
+    assert not room.has_behavior(Container.kind)
+
+
+def test_look_target_inventory_does_not_require_container_behavior():
+    world = World()
+
+    room = world.add_room(names=(tt.ROOM_1,))
+    world.current = room.id
+
+    player = world.add(names=(tt.PLAYER,))
+    world.player_id = player.id
+
+    coin_entity = coin_copper(world)
+    world.put(player, coin_entity)
+
+    result = world.handle("look coin")
+
+    assert_ok_message(result, tt.COPPER_COIN_DESCRIPTION)
+    assert not player.has_behavior(Container.kind)

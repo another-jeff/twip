@@ -3,7 +3,6 @@ from collections.abc import Callable
 import pytest
 
 from example.prototype import run
-from twip.behavior import Container
 
 
 @pytest.fixture
@@ -57,8 +56,6 @@ def test_prototype_script(
     assert world.player_id is not None
 
     player = world.entity(world.player_id)
-    inventory = player.behavior(Container.kind)
-    assert isinstance(inventory, Container)
 
     coin = next(
         entity
@@ -71,8 +68,6 @@ def test_prototype_script(
         if entity.name == "box"
     )
 
-    box_container = box.behavior(Container.kind)
-    assert isinstance(box_container, Container)
-
-    assert coin.id not in inventory.items
-    assert coin.id in box_container.items
+    assert coin not in world.contents_of(player)
+    assert coin in world.contents_of(box)
+    assert coin.parent == box.id

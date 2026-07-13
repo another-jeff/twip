@@ -14,9 +14,15 @@ ALIASES = {
     "g": "again",
 }
 
+PREPOSITION_ALIASES = {
+    "inside": "in",
+    "into": "in",
+}
+
 PREPOSITIONS = {
     "at",
     "in",
+    "inside",
     "into",
     "on",
     "onto",
@@ -31,6 +37,8 @@ PREPOSITIONS = {
 
 PREFIX_PREPOSITIONS = {
     "in",
+    "inside",
+    "into",
     "off",
     "on",
     "to",
@@ -86,15 +94,19 @@ class Parser:
 
         if words and words[0] in PREFIX_PREPOSITIONS:
             return (
-                self._clean_optional_target(" ".join(words[1:])),
-                words[0],
+                self._clean_optional_target(
+                    " ".join(words[1:])
+                ),
+                self._normalize_preposition(words[0]),
                 None,
             )
 
         if words and words[-1] in POSTFIX_PREPOSITIONS:
             return (
-                self._clean_optional_target(" ".join(words[:-1])),
-                words[-1],
+                self._clean_optional_target(
+                    " ".join(words[:-1])
+                ),
+                self._normalize_preposition(words[-1]),
                 None,
             )
 
@@ -108,11 +120,20 @@ class Parser:
             if direct and indirect:
                 return (
                     self._clean_target(direct),
-                    word,
+                    self._normalize_preposition(word),
                     self._clean_target(indirect),
                 )
 
         return target, None, None
+
+    def _normalize_preposition(
+        self,
+        preposition: str,
+    ) -> str:
+        return PREPOSITION_ALIASES.get(
+            preposition,
+            preposition,
+        )
 
     def _clean_optional_target(self, target: str) -> str | None:
         cleaned = self._clean_target(target)

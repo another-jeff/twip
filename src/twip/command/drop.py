@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from twip.behavior import Container
 from twip.result import Result
 
 if TYPE_CHECKING:
@@ -18,12 +17,11 @@ def handle(world: World, target: str) -> Result:
 
     player = world.entities[world.player_id]
     room = world.entities[world.current]
-    player_container = player.behavior(Container.kind)
 
     matching_entities = [
-        world.entities[item_id]
-        for item_id in player_container.items
-        if world._matches(world.entities[item_id], target)
+        entity
+        for entity in world.contents_of(player)
+        if world._matches(entity, target)
     ]
 
     if not matching_entities:
@@ -35,6 +33,7 @@ def handle(world: World, target: str) -> Result:
         return Result.failure(f"Which {target}?")
 
     entity = matching_entities[0]
+
     world.put(room, entity)
 
     return Result.success("Dropped.")

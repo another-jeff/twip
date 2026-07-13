@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from twip.behavior import Container, Takeable
+from twip.behavior import Takeable
 from twip.result import Result
 
 if TYPE_CHECKING:
@@ -15,12 +15,11 @@ def handle(world: World, target: str) -> Result:
         return Result.failure("There is no player.")
 
     player = world.entities[world.player_id]
-    player_container = player.behavior(Container.kind)
 
     matching_entities = [
         entity
         for entity in world.find_reachable_all(target)
-        if entity.id not in player_container.items
+        if entity.parent != player.id
     ]
 
     if not matching_entities:

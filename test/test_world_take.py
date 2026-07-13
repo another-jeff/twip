@@ -2,17 +2,19 @@ from assertions import assert_contains, assert_does_not_contain
 from helpers import coin, coin_blue, coin_red, statue
 from scenario import bs
 
+from twip.behavior import Container, Openable, OpenState
+from twip.world import World
 
-def test_take_visible_non_containable_fails_without_mutation():
+
+def test_take_visible_non_takeable_fails_without_mutation():
     s = bs().one_room().with_player()
 
-    statue_entity = statue(s.world)
-    s.room_one.behaviors["container"].items.add(statue_entity.id)
+    statue_entity = s.put_room(s.room_one, statue)
 
     result = s.handle("take statue")
 
     assert not result.ok
-    assert statue_entity.id in s.room_one.behaviors["container"].items
+    assert_contains(s.room_one, statue_entity)
     assert_does_not_contain(s.player, statue_entity)
 
 
@@ -114,3 +116,114 @@ def test_take_non_takeable_uses_resolved_entity_name():
     assert result.message == "You can't take the statue."
     assert_contains(s.room_one, statue_entity)
     assert_does_not_contain(s.player, statue_entity)
+    
+    
+def test_take_does_not_require_player_container_behavior():
+    world = World()
+
+    room = world.add_room(names=("room",))
+    world.current = room.id
+
+    player = world.add(names=("player",))
+    world.player_id = player.id
+
+    coin_entity = coin(world)
+    world.put(room, coin_entity)
+
+    result = world.handle("take coin")
+
+    assert result.ok
+    assert not player.has_behavior(Container.kind)
+    assert world.contents_of(room) == []
+    assert world.contents_of(player) == [coin_entity]
+    assert coin_entity.parent == player.id
+
+
+def test_take_from_nested_open_containers():
+    s = bs().one_room().with_player()
+
+    outer_box = s.world.add(
+        names=("outer box",),
+        behaviors=(
+            Container(),
+            Openable(state=OpenState.OPEN),
+        ),
+    )
+    inner_box = s.world.add(
+        names=("inner box",),
+        behaviors=(
+            Container(),
+            Openable(state=OpenState.OPEN),
+        ),
+    )
+    coin_entity = coin(s.world)
+
+    s.world.put(s.room_one, outer_box)
+    s.world.put(outer_box, inner_box)
+    s.world.put(inner_box, coin_entity)
+
+    result = s.handle("take coin")
+
+    assert result.ok
+    assert_contains(s.player, coin_entity)
+    assert_does_not_contain(inner_box, coin_entity)
+
+
+def test_take_through_closed_outer_container_fails_without_mutation():
+    s = bs().one_room().with_player()
+
+    outer_box = s.world.add(
+        names=("outer box",),
+        behaviors=(
+            Container(),
+            Openable(),
+        ),
+    )
+    inner_box = s.world.add(
+        names=("inner box",),
+        behaviors=(
+            Container(),
+            Openable(state=OpenState.OPEN),
+        ),
+    )
+    coin_entity = coin(s.world)
+
+    s.world.put(s.room_one, outer_box)
+    s.world.put(outer_box, inner_box)
+    s.world.put(inner_box, coin_entity)
+
+    result = s.handle("take coin")
+
+    assert not result.ok
+    assert_contains(inner_box, coin_entity)
+    assert_does_not_contain(s.player, coin_entity)
+
+
+def test_take_through_closed_inner_container_fails_without_mutation():
+    s = bs().one_room().with_player()
+
+    outer_box = s.world.add(
+        names=("outer box",),
+        behaviors=(
+            Container(),
+            Openable(state=OpenState.OPEN),
+        ),
+    )
+    inner_box = s.world.add(
+        names=("inner box",),
+        behaviors=(
+            Container(),
+            Openable(),
+        ),
+    )
+    coin_entity = coin(s.world)
+
+    s.world.put(s.room_one, outer_box)
+    s.world.put(outer_box, inner_box)
+    s.world.put(inner_box, coin_entity)
+
+    result = s.handle("take coin")
+
+    assert not result.ok
+    assert_contains(inner_box, coin_entity)
+    assert_does_not_contain(s.player, coin_entity)

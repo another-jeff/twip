@@ -175,3 +175,44 @@ def test_put_ambiguous_destination_fails_without_mutation():
     assert_contains(s.player, coin_entity)
     assert_does_not_contain(first_box, coin_entity)
     assert_does_not_contain(second_box, coin_entity)
+    
+    
+def test_put_container_in_itself_fails_without_mutation():
+    s = bs().one_room().with_player()
+
+    box_entity = s.put_inventory(open_box)
+
+    result = s.handle("put box in box")
+
+    assert not result.ok
+    assert_contains(s.player, box_entity)
+    assert box_entity.parent == s.player.id
+
+
+def test_put_container_in_its_contents_fails_without_mutation():
+    s = bs().one_room().with_player()
+
+    outer_box = s.world.add(
+        names=("outer box",),
+        behaviors=(
+            Container(),
+            Openable(state=OpenState.OPEN),
+        ),
+    )
+    inner_box = s.world.add(
+        names=("inner box",),
+        behaviors=(
+            Container(),
+            Openable(state=OpenState.OPEN),
+        ),
+    )
+
+    s.world.put(s.player, outer_box)
+    s.world.put(outer_box, inner_box)
+
+    result = s.handle("put outer box in inner box")
+
+    assert not result.ok
+    assert_contains(s.player, outer_box)
+    assert_contains(outer_box, inner_box)
+    assert_does_not_contain(inner_box, outer_box)

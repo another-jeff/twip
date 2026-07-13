@@ -1,3 +1,6 @@
+from twip.behavior import Container
+from twip.world import World
+
 from assertions import assert_contains, assert_does_not_contain
 from helpers import coin, coin_blue, coin_red, player
 from scenario import bs
@@ -86,7 +89,9 @@ def test_drop_without_player_fails_without_mutation():
     player_entity = player(s.world)
     coin_entity = coin(s.world)
 
+    s.world.player_id = player_entity.id
     s.world.put(player_entity, coin_entity)
+    s.world.player_id = None
 
     result = s.handle("drop coin")
 
@@ -137,3 +142,24 @@ def test_drop_after_room_change_puts_item_in_new_current_room():
     assert_does_not_contain(s.player, coin_entity)
     assert_does_not_contain(s.room_one, coin_entity)
     assert_contains(s.room_two, coin_entity)
+    
+
+def test_drop_does_not_require_player_container_behavior():
+    world = World()
+
+    room = world.add_room(names=("room",))
+    world.current = room.id
+
+    player_entity = world.add(names=("player",))
+    world.player_id = player_entity.id
+
+    coin_entity = coin(world)
+    world.put(player_entity, coin_entity)
+
+    result = world.handle("drop coin")
+
+    assert result.ok
+    assert not player_entity.has_behavior(Container.kind)
+    assert world.contents_of(player_entity) == []
+    assert world.contents_of(room) == [coin_entity]
+    assert coin_entity.parent == room.id

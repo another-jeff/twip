@@ -1,4 +1,3 @@
-from twip.behavior import Container
 from twip.world import World
 
 
@@ -6,7 +5,6 @@ def player(world: World):
     return world.add(
         names=("player",),
         traits=set(),
-        behaviors=(Container(),),
     )
 
 
@@ -19,10 +17,14 @@ def test_world_can_store_player_id():
     assert world.player_id == player_entity.id
 
 
-def test_player_inventory_is_an_ordinary_container():
+def test_player_can_hold_inventory_without_container_behavior():
     world = World()
     player_entity = player(world)
+    world.player_id = player_entity.id
 
-    container = player_entity.behavior(Container.kind)
+    coin = world.add(names=("coin",))
 
-    assert container.items == set()
+    world.put(player_entity, coin)
+
+    assert world.contents_of(player_entity) == [coin]
+    assert coin.parent == player_entity.id

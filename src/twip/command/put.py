@@ -20,15 +20,10 @@ def handle(world: World, action: Action) -> Result:
         return Result.failure("Put what?")
 
     player = world.entities[world.player_id]
-    inventory = player.behavior(Container.kind)
-
     matching_items = [
-        world.entities[item_id]
-        for item_id in inventory.items
-        if world._matches(
-            world.entities[item_id],
-            target,
-        )
+        entity
+        for entity in world.contents_of(player)
+        if world._matches(entity, target)
     ]
 
     if not matching_items:
@@ -78,12 +73,18 @@ def handle(world: World, action: Action) -> Result:
 
     openable = destination.behaviors.get(Openable.kind)
 
-    if isinstance(openable, Openable) and openable.is_closed:
+    if (
+        isinstance(openable, Openable)
+        and openable.is_closed
+    ):
         return Result.failure(
             world.language.put_in_closed(destination)
         )
 
-    world.put(destination, item)
+    try:
+        world.put(destination, item)
+    except ValueError as error:
+        return Result.failure(str(error))
 
     return Result.success(
         world.language.put_in_success(item, destination)

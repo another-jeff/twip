@@ -1,31 +1,32 @@
 from twip.entity import Entity
-from twip.behavior import Container, Lookable, Takeable
+from twip.behavior import Lookable, Takeable
 from twip.world import World
 
 import tt
 
+
 def room(world: World, trait: str) -> Entity:
-    return world.add(
+    return world.add_room(
         names=(tt.ROOM,),
         traits={trait},
-        behaviors=(Container(),),
     )
 
 
 def named_room(world: World, name: str) -> Entity:
-    return world.add(
+    return world.add_room(
         names=(tt.ROOM, name),
         traits=set(),
-        behaviors=(Container(),),
     )
 
 
-def described_room(world: World, name: str = tt.ROTUNDA) -> Entity:
-    return world.add(
+def described_room(
+    world: World,
+    name: str = tt.ROTUNDA,
+) -> Entity:
+    return world.add_room(
         names=(tt.ROOM, name),
         traits=set(),
         behaviors=(
-            Container(),
             Lookable(tt.ROOM_DESCRIPTION),
         ),
     )
@@ -35,7 +36,6 @@ def player(world: World) -> Entity:
     return world.add(
         names=(tt.PLAYER,),
         traits=set(),
-        behaviors=(Container(),),
     )
 
 
@@ -49,7 +49,11 @@ def item(world: World, name: str) -> Entity:
     )
 
 
-def item_with_trait(world: World, name: str, trait: str) -> Entity:
+def item_with_trait(
+    world: World,
+    name: str,
+    trait: str,
+) -> Entity:
     return world.add(
         names=(name,),
         traits={trait},
@@ -59,7 +63,11 @@ def item_with_trait(world: World, name: str, trait: str) -> Entity:
     )
 
 
-def lookable_item(world: World, name: str, text: str) -> Entity:
+def lookable_item(
+    world: World,
+    name: str,
+    text: str,
+) -> Entity:
     return world.add(
         names=(name,),
         traits=set(),
@@ -85,16 +93,25 @@ def lookable_item_with_trait(
         ),
     )
 
+
 def coin(world: World) -> Entity:
     return item(world, tt.COIN)
 
 
 def coin_red(world: World) -> Entity:
-    return item_with_trait(world, tt.COIN, tt.RED)
+    return item_with_trait(
+        world,
+        tt.COIN,
+        tt.RED,
+    )
 
 
 def coin_blue(world: World) -> Entity:
-    return item_with_trait(world, tt.COIN, tt.BLUE)
+    return item_with_trait(
+        world,
+        tt.COIN,
+        tt.BLUE,
+    )
 
 
 def coin_copper(world: World) -> Entity:

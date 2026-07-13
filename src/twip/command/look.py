@@ -16,23 +16,13 @@ def room(world: World) -> Result:
         return Result.failure("You are nowhere.")
 
     entity = world.entities[world.current]
-
     lookable = entity.behaviors.get(Lookable.kind)
     description = (
         lookable.text
         if isinstance(lookable, Lookable)
         else None
     )
-
-    container = entity.behaviors.get(Container.kind)
-    contents = (
-        [
-            world.entities[item_id]
-            for item_id in container.items
-        ]
-        if isinstance(container, Container)
-        else []
-    )
+    contents = world.contents_of(entity)
 
     return Result.success(
         world.language.room(entity, description, contents)
@@ -44,15 +34,12 @@ def target(world: World, action: Action) -> Result:
 
     if world.player_id:
         player = world.entities[world.player_id]
-        inventory = player.behaviors.get(Container.kind)
-
-        if inventory:
-            inventory_matches = [
-                world.entities[item_id]
-                for item_id in inventory.items
-                if world.entities[item_id].matches(action.target)
-            ]
-            matching_entities.extend(inventory_matches)
+        inventory_matches = [
+            entity
+            for entity in world.contents_of(player)
+            if entity.matches(action.target)
+        ]
+        matching_entities.extend(inventory_matches)
 
     matching_entities = list(
         {
@@ -92,20 +79,20 @@ def _inside(world: World, entity: Entity) -> Result:
 
     openable = entity.behaviors.get(Openable.kind)
 
-    if isinstance(openable, Openable) and openable.is_closed:
+    if (
+        isinstance(openable, Openable)
+        and openable.is_closed
+    ):
         return Result.failure(
             world.language.look_in_closed(entity)
         )
 
-    if not container.items:
+    contents = world.contents_of(entity)
+
+    if not contents:
         return Result.success(
             world.language.look_in_empty(entity)
         )
-
-    contents = [
-        world.entities[item_id]
-        for item_id in container.items
-    ]
 
     return Result.success(
         world.language.look_in_contents(entity, contents)
