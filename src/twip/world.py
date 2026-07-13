@@ -15,6 +15,7 @@ from twip.language import English, Language
 from twip.parser import Parser
 from twip.result import Result
 
+
 Connection = tuple[Entity | str, str | set[str]]
 
 
@@ -25,6 +26,7 @@ class World:
     language: Language = field(default_factory=English)
     current: str | None = None
     player_id: str | None = None
+    _room_ids: set[str] = field(default_factory=set, repr=False)
     _next_entity_id: int = 1
 
     def add(
@@ -38,7 +40,23 @@ class World:
             traits=traits or set(),
         )
         entity.add_behavior(*behaviors)
+
         return self._add_entity(entity)
+
+    def add_room(
+        self,
+        names: tuple[str, ...],
+        traits: set[str] | None = None,
+        behaviors: tuple[Behavior, ...] = (),
+    ) -> Entity:
+        room = self.add(
+            names=names,
+            traits=traits,
+            behaviors=behaviors,
+        )
+        self._room_ids.add(room.id)
+
+        return room
 
     def add_and_connect(
         self,
@@ -48,6 +66,7 @@ class World:
         behaviors: tuple[Behavior, ...] = (),
     ) -> Entity:
         connector = Connector.from_connections(connections)
+
         return self.add(
             names=names,
             traits=traits,
@@ -61,18 +80,28 @@ class World:
         entity_id = self._new_entity_id()
         entity._assign_id(entity_id)
         self.entities[entity_id] = entity
+
         return entity
 
     def _new_entity_id(self) -> str:
         entity_id = f"entity_{self._next_entity_id}"
         self._next_entity_id += 1
+
         return entity_id
 
     def entity(self, entity_id: str) -> Entity:
         return self.entities[entity_id]
 
+    def contents_of(self, container: Entity) -> list[Entity]:
+        return [
+            entity
+            for entity in self.entities.values()
+            if entity.parent == container.id
+        ]
+
     def handle(self, text: str) -> Result:
         action = self.parser.parse(text)
+
         return dispatch(self, action)
 
     def find(self, target: str) -> Entity | None:
@@ -126,10 +155,12 @@ class World:
             return entity.matches(target)
 
         connector = entity.behavior(Connector.kind)
+
         if not isinstance(connector, Connector):
             return False
 
         side = connector.side_for(self.current)
+
         if side is None:
             return False
 
@@ -153,39 +184,85 @@ class World:
 
     def _connector_is_visible(self, entity: Entity) -> bool:
         connector = entity.behavior(Connector.kind)
+
         if not isinstance(connector, Connector):
             return False
 
         return connector.side_for(self.current) is not None
+
+    def can_parent(self, entity: Entity) -> bool:
+        return (
+            entity.id in self._room_ids
+            or entity.id == self.player_id
+            or entity.has_behavior(Container.kind)
+        )
 
     def contain(
         self,
         container: Entity,
         entity: Entity,
     ) -> None:
-        destination = container.behavior(Container.kind)
+        if container.id == entity.id:
+            raise ValueError(
+                f"{entity.name} cannot contain itself."
+            )
+
+        if self._is_descendant_of(container, entity):
+            raise ValueError(
+                "Containment would create a cycle."
+            )
+
+        if not self.can_parent(container):
+            raise ValueError(
+                f"{container.name} cannot contain entities."
+            )
 
         if entity.parent is not None:
             parent = self.entities[entity.parent]
-            source = parent.behavior(Container.kind)
-            source.items.discard(entity.id)
+            source = parent.behaviors.get(Container.kind)
 
-        destination.items.add(entity.id)
+            if isinstance(source, Container):
+                source.items.discard(entity.id)
+
+        destination = container.behaviors.get(Container.kind)
+
+        if isinstance(destination, Container):
+            destination.items.add(entity.id)
+
         entity.parent = container.id
 
+    def _is_descendant_of(
+        self,
+        entity: Entity,
+        ancestor: Entity,
+    ) -> bool:
+        current = entity
+        seen: set[str] = set()
+
+        while current.parent is not None:
+            parent_id = current.parent
+
+            if parent_id == ancestor.id:
+                return True
+
+            if parent_id in seen:
+                return False
+
+            seen.add(parent_id)
+            parent = self.entities.get(parent_id)
+
+            if parent is None:
+                return False
+
+            current = parent
+
+        return False
+    
     def _is_in_player_inventory(self, entity: Entity) -> bool:
         if self.player_id is None:
             return False
 
-        player = self.entities.get(self.player_id)
-        if player is None:
-            return False
-
-        container = player.behaviors.get(Container.kind)
-        return (
-            container is not None
-            and entity.id in container.items
-        )
+        return entity.parent == self.player_id
 
     def _is_visible_from(
         self,
@@ -205,7 +282,6 @@ class World:
                 return False
 
             seen.add(parent_id)
-
             parent = self.entities.get(parent_id)
 
             if parent is None:
@@ -241,7 +317,6 @@ class World:
                 return False
 
             seen.add(parent_id)
-
             parent = self.entities.get(parent_id)
 
             if parent is None:
@@ -251,9 +326,10 @@ class World:
                 return False
 
             current = parent
-        
+
     def _blocks_visibility(self, entity: Entity) -> bool:
         openable = entity.behaviors.get(Openable.kind)
+
         return (
             isinstance(openable, Openable)
             and openable.is_closed
@@ -261,6 +337,7 @@ class World:
 
     def _blocks_reach(self, entity: Entity) -> bool:
         openable = entity.behaviors.get(Openable.kind)
+
         return (
             isinstance(openable, Openable)
             and openable.is_closed
