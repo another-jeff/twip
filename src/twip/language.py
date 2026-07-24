@@ -79,6 +79,14 @@ class Language(Protocol):
     def open_success(self, entity: Entity) -> str: ...
 
     def close_success(self, entity: Entity) -> str: ...
+    
+    def already_on(self, entity: Entity) -> str: ...
+
+    def already_off(self, entity: Entity) -> str: ...
+
+    def turn_on_success(self, entity: Entity) -> str: ...
+
+    def turn_off_success(self, entity: Entity) -> str: ...
 
 
 class English:
@@ -255,3 +263,21 @@ class English:
 
     def close_success(self, entity: Entity) -> str:
         return f"You close {self.definite(entity)}."
+    
+    def already_on(self, entity: Entity) -> str:
+        return (
+            f"{self._sentence_start(self.definite(entity))} "
+            "is already on."
+        )
+
+    def already_off(self, entity: Entity) -> str:
+        return (
+            f"{self._sentence_start(self.definite(entity))} "
+            "is already off."
+        )
+
+    def turn_on_success(self, entity: Entity) -> str:
+        return f"You turn on {self.definite(entity)}."
+
+    def turn_off_success(self, entity: Entity) -> str:
+        return f"You turn off {self.definite(entity)}."

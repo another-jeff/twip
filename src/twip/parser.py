@@ -12,6 +12,7 @@ ALIASES = {
     "i": "inventory",
     "z": "wait",
     "g": "again",
+    "switch": "turn",
 }
 
 PREPOSITION_ALIASES = {
