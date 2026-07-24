@@ -4,8 +4,8 @@ from typing import ClassVar
 
 from twip.action import Action
 from twip.behavior.base import Behavior
-from twip.entity import Entity
 from twip.behavior.lockable import Lockable, LockState
+from twip.entity import Entity
 from twip.result import Result
 
 
@@ -28,30 +28,81 @@ class Openable(Behavior):
     def is_closed(self) -> bool:
         return self.state == OpenState.CLOSED
 
-    def handle(self, action: Action, entity: Entity, world: object) -> Result | None:
+    def handle(
+        self,
+        action: Action,
+        entity: Entity,
+        world: object,
+    ) -> Result | None:
         if action.verb == "open":
-            return self.open(entity)
+            return self.change_state(
+                entity,
+                target_state=OpenState.OPEN,
+            )
 
         if action.verb == "close":
-            return self.close(entity)
+            return self.change_state(
+                entity,
+                target_state=OpenState.CLOSED,
+            )
 
         return None
 
-    def open(self, entity: Entity) -> Result:
-        if self.is_open:
-            return Result.success(f"The {entity.name} is already open.")
+    def change_state(
+        self,
+        entity: Entity,
+        *,
+        target_state: OpenState,
+    ) -> Result:
+        result = self.validate_state(entity, target_state)
+        if result is not None:
+            return result
 
-        lockable = entity.behaviors.get(Lockable.kind)
+        self.set_state(target_state)
 
-        if lockable is not None and lockable.state == LockState.LOCKED:
-            return Result.failure(f"The {entity.name} is locked.")
+        return self.report_state_change(entity, target_state)
 
-        self.state = OpenState.OPEN
-        return Result.success(f"You open the {entity.name}.")
+    def validate_state(
+        self,
+        entity: Entity,
+        target_state: OpenState,
+    ) -> Result | None:
+        if self.state == target_state:
+            if target_state == OpenState.OPEN:
+                return Result.success(
+                    f"The {entity.name} is already open."
+                )
 
-    def close(self, entity: Entity) -> Result:
-        if self.is_closed:
-            return Result.success(f"The {entity.name} is already closed.")
+            return Result.success(
+                f"The {entity.name} is already closed."
+            )
 
-        self.state = OpenState.CLOSED
-        return Result.success(f"You close the {entity.name}.")
+        if target_state == OpenState.OPEN:
+            lockable = entity.behaviors.get(Lockable.kind)
+
+            if (
+                lockable is not None
+                and lockable.state == LockState.LOCKED
+            ):
+                return Result.failure(
+                    f"The {entity.name} is locked."
+                )
+
+        return None
+
+    def set_state(self, state: OpenState) -> None:
+        self.state = state
+
+    def report_state_change(
+        self,
+        entity: Entity,
+        state: OpenState,
+    ) -> Result:
+        if state == OpenState.OPEN:
+            return Result.success(
+                f"You open the {entity.name}."
+            )
+
+        return Result.success(
+            f"You close the {entity.name}."
+        )
