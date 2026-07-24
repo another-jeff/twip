@@ -63,20 +63,20 @@ class Lockable(Behavior):
         if failure is not None:
             return failure
 
-        failure = self.validate_state(target_state)
+        failure = self.validate_state(world, target_state)
         if failure is not None:
             return failure
 
         self.set_state(target_state)
 
-        return self.report_state_change(target_state)
+        return self.report_state_change(world, target_state)
 
     def validate_key(self, action, world, *, required: bool) -> Result | None:
         if self.key_id is None or not required:
             return None
 
         if not self.has_matching_key(action, world):
-            return Result.failure("That key doesn't fit.")
+            return Result.failure(world.language.key_does_not_fit())
 
         return None
 
@@ -103,17 +103,25 @@ class Lockable(Behavior):
     def set_state(self, state: LockState) -> None:
         self.state = state
         
-    def report_state_change(self, state: LockState) -> Result:
+    def report_state_change(
+        self,
+        world,
+        state: LockState,
+    ) -> Result:
         if state == LockState.LOCKED:
-            return Result.success("Locked.")
+            return Result.success(world.language.lock_success())
 
-        return Result.success("Unlocked.")
+        return Result.success(world.language.unlock_success())
     
-    def validate_state(self, target_state: LockState) -> Result | None:
-        if self.state == target_state:
-            if target_state == LockState.LOCKED:
-                return Result.failure("It's already locked.")
+    def validate_state(
+        self,
+        world,
+        target_state: LockState,
+    ) -> Result | None:
+        if self.state != target_state:
+            return None
 
-            return Result.failure("It's already unlocked.")
+        if target_state == LockState.LOCKED:
+            return Result.failure(world.language.already_locked())
 
-        return None
+        return Result.failure(world.language.already_unlocked())

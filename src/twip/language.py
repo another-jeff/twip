@@ -59,6 +59,26 @@ class Language(Protocol):
     def inventory_contents(self, items: list[Entity]) -> str: ...
     
     def take_not_takeable(self, item: Entity) -> str: ...
+    
+    def key_does_not_fit(self) -> str: ...
+
+    def already_locked(self) -> str: ...
+
+    def already_unlocked(self) -> str: ...
+
+    def lock_success(self) -> str: ...
+
+    def unlock_success(self) -> str: ...
+    
+    def already_open(self, entity: Entity) -> str: ...
+
+    def already_closed(self, entity: Entity) -> str: ...
+
+    def locked(self, entity: Entity) -> str: ...
+
+    def open_success(self, entity: Entity) -> str: ...
+
+    def close_success(self, entity: Entity) -> str: ...
 
 
 class English:
@@ -205,3 +225,33 @@ class English:
 
     def _sentence_start(self, text: str) -> str:
         return text[:1].upper() + text[1:]
+    
+    def key_does_not_fit(self) -> str:
+        return "That key doesn't fit."
+
+    def already_locked(self) -> str:
+        return "It's already locked."
+
+    def already_unlocked(self) -> str:
+        return "It's already unlocked."
+
+    def lock_success(self) -> str:
+        return "Locked."
+
+    def unlock_success(self) -> str:
+        return "Unlocked."
+    
+    def already_open(self, entity: Entity) -> str:
+        return f"{self._sentence_start(self.definite(entity))} is already open."
+
+    def already_closed(self, entity: Entity) -> str:
+        return f"{self._sentence_start(self.definite(entity))} is already closed."
+
+    def locked(self, entity: Entity) -> str:
+        return f"{self._sentence_start(self.definite(entity))} is locked."
+
+    def open_success(self, entity: Entity) -> str:
+        return f"You open {self.definite(entity)}."
+
+    def close_success(self, entity: Entity) -> str:
+        return f"You close {self.definite(entity)}."

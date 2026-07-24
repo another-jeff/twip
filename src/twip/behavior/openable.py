@@ -32,17 +32,19 @@ class Openable(Behavior):
         self,
         action: Action,
         entity: Entity,
-        world: object,
+        world,
     ) -> Result | None:
         if action.verb == "open":
             return self.change_state(
                 entity,
+                world,
                 target_state=OpenState.OPEN,
             )
 
         if action.verb == "close":
             return self.change_state(
                 entity,
+                world,
                 target_state=OpenState.CLOSED,
             )
 
@@ -51,30 +53,32 @@ class Openable(Behavior):
     def change_state(
         self,
         entity: Entity,
+        world,
         *,
         target_state: OpenState,
     ) -> Result:
-        result = self.validate_state(entity, target_state)
+        result = self.validate_state(entity, world, target_state)
         if result is not None:
             return result
 
         self.set_state(target_state)
 
-        return self.report_state_change(entity, target_state)
-
+        return self.report_state_change(entity, world, target_state)
+    
     def validate_state(
         self,
         entity: Entity,
+        world,
         target_state: OpenState,
     ) -> Result | None:
         if self.state == target_state:
             if target_state == OpenState.OPEN:
                 return Result.success(
-                    f"The {entity.name} is already open."
+                    world.language.already_open(entity)
                 )
 
             return Result.success(
-                f"The {entity.name} is already closed."
+                world.language.already_closed(entity)
             )
 
         if target_state == OpenState.OPEN:
@@ -85,7 +89,7 @@ class Openable(Behavior):
                 and lockable.state == LockState.LOCKED
             ):
                 return Result.failure(
-                    f"The {entity.name} is locked."
+                    world.language.locked(entity)
                 )
 
         return None
@@ -96,13 +100,14 @@ class Openable(Behavior):
     def report_state_change(
         self,
         entity: Entity,
+        world,
         state: OpenState,
     ) -> Result:
         if state == OpenState.OPEN:
             return Result.success(
-                f"You open the {entity.name}."
+                world.language.open_success(entity)
             )
 
         return Result.success(
-            f"You close the {entity.name}."
+            world.language.close_success(entity)
         )
