@@ -1,7 +1,7 @@
 import tt
 
 from twip.behavior import Openable, OpenState
-from twip.world import World
+from twip.world import World, Result
 
 
 def add_openable(
@@ -21,7 +21,7 @@ def test_open_closed_entity():
 
     result = world.handle("open thing")
 
-    assert result.ok
+    assert result == Result.success("You open the thing.")
     assert entity.behavior(Openable.kind).state == OpenState.OPEN
 
 
@@ -31,8 +31,7 @@ def test_open_already_open_entity():
 
     result = world.handle("open thing")
 
-    assert result.ok
-    assert "already open" in result.message
+    assert result == Result.success("The thing is already open.")
     assert entity.behavior(Openable.kind).state == OpenState.OPEN
 
 
@@ -42,7 +41,7 @@ def test_close_open_entity():
 
     result = world.handle("close thing")
 
-    assert result.ok
+    assert result == Result.success("You close the thing.")
     assert entity.behavior(Openable.kind).state == OpenState.CLOSED
 
 
@@ -52,6 +51,5 @@ def test_close_already_closed_entity():
 
     result = world.handle("close thing")
 
-    assert result.ok
-    assert "already closed" in result.message
+    assert result == Result.success("The thing is already closed.")
     assert entity.behavior(Openable.kind).state == OpenState.CLOSED

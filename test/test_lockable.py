@@ -1,6 +1,9 @@
 import tt
-from twip.behavior import Lockable, LockState, Openable, OpenState, Container
+
+from twip.behavior import Container, Lockable, LockState, Openable, OpenState
+from twip.result import Result
 from twip.world import World
+
 
 def add_openable_lockable(
     world: World,
@@ -24,14 +27,14 @@ def add_openable_lockable(
         ),
     )
 
+
 def test_open_locked_entity_fails():
     world = World()
     entity = add_openable_lockable(world, lock_state=LockState.LOCKED)
 
     result = world.handle("open thing")
 
-    assert not result.ok
-    assert "locked" in result.message
+    assert result == Result.failure("The thing is locked.")
     assert entity.behavior(Openable.kind).state == OpenState.CLOSED
 
 
@@ -41,7 +44,7 @@ def test_open_unlocked_entity_succeeds():
 
     result = world.handle("open thing")
 
-    assert result.ok
+    assert result == Result.success("You open the thing.")
     assert entity.behavior(Openable.kind).state == OpenState.OPEN
 
 
@@ -56,10 +59,10 @@ def test_unlock_keyed_entity_with_wrong_key_fails():
 
     result = world.handle("unlock thing with wrong key")
 
-    assert not result.ok
+    assert result == Result.failure("That key doesn't fit.")
     assert entity.behavior(Lockable.kind).state == LockState.LOCKED
-    
-    
+
+
 def test_unlock_keyed_entity_with_correct_key_succeeds():
     world = World()
     key = world.add(names=("key",))
@@ -70,9 +73,10 @@ def test_unlock_keyed_entity_with_correct_key_succeeds():
 
     result = world.handle("unlock thing with key")
 
-    assert result.ok
+    assert result == Result.success("Unlocked.")
     assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
-    
+
+
 def test_unlock_keyed_entity_without_key_fails():
     world = World()
     key = world.add(names=("key",))
@@ -83,7 +87,7 @@ def test_unlock_keyed_entity_without_key_fails():
 
     result = world.handle("unlock thing")
 
-    assert not result.ok
+    assert result == Result.failure("That key doesn't fit.")
     assert entity.behavior(Lockable.kind).state == LockState.LOCKED
 
 
@@ -108,10 +112,10 @@ def test_unlock_keyed_entity_with_unreachable_key_fails():
 
     result = world.handle("unlock thing with key")
 
-    assert not result.ok
+    assert result == Result.failure("That key doesn't fit.")
     assert entity.behavior(Lockable.kind).state == LockState.LOCKED
-    
-    
+
+
 def test_unlock_keyed_entity_with_key_in_room_fails():
     world = World()
 
@@ -131,10 +135,10 @@ def test_unlock_keyed_entity_with_key_in_room_fails():
 
     result = world.handle("unlock thing with key")
 
-    assert not result.ok
+    assert result == Result.failure("That key doesn't fit.")
     assert entity.behavior(Lockable.kind).state == LockState.LOCKED
-    
-    
+
+
 def test_unlock_keyed_entity_with_key_in_closed_carried_container_fails():
     world = World()
 
@@ -162,7 +166,7 @@ def test_unlock_keyed_entity_with_key_in_closed_carried_container_fails():
 
     result = world.handle("unlock thing with key")
 
-    assert not result.ok
+    assert result == Result.failure("That key doesn't fit.")
     assert entity.behavior(Lockable.kind).state == LockState.LOCKED
 
 
@@ -187,10 +191,10 @@ def test_unlock_keyed_entity_with_correct_carried_key_and_wrong_key_succeeds():
 
     result = world.handle("unlock thing with key")
 
-    assert result.ok
+    assert result == Result.success("Unlocked.")
     assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
-    
-    
+
+
 def test_unlock_keyed_entity_then_open_succeeds():
     world = World()
 
@@ -211,12 +215,12 @@ def test_unlock_keyed_entity_then_open_succeeds():
     unlock_result = world.handle("unlock thing with key")
     open_result = world.handle("open thing")
 
-    assert unlock_result.ok
-    assert open_result.ok
+    assert unlock_result == Result.success("Unlocked.")
+    assert open_result == Result.success("You open the thing.")
     assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
     assert entity.behavior(Openable.kind).state == OpenState.OPEN
-    
-    
+
+
 def test_lock_keyed_entity_without_key_fails():
     world = World()
     key = world.add(names=("key",))
@@ -228,10 +232,10 @@ def test_lock_keyed_entity_without_key_fails():
 
     result = world.handle("lock thing")
 
-    assert not result.ok
+    assert result == Result.failure("That key doesn't fit.")
     assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
-    
-    
+
+
 def test_lock_keyed_entity_with_correct_carried_key_succeeds():
     world = World()
 
@@ -252,7 +256,7 @@ def test_lock_keyed_entity_with_correct_carried_key_succeeds():
 
     result = world.handle("lock thing with key")
 
-    assert result.ok
+    assert result == Result.success("Locked.")
     assert entity.behavior(Lockable.kind).state == LockState.LOCKED
 
 
@@ -277,10 +281,10 @@ def test_lock_keyed_entity_with_wrong_carried_key_fails():
 
     result = world.handle("lock thing with wrong key")
 
-    assert not result.ok
+    assert result == Result.failure("That key doesn't fit.")
     assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
-    
-    
+
+
 def test_lock_keyed_entity_without_key_succeeds_when_key_not_required():
     world = World()
     key = world.add(names=("key",))
@@ -293,7 +297,7 @@ def test_lock_keyed_entity_without_key_succeeds_when_key_not_required():
 
     result = world.handle("lock thing")
 
-    assert result.ok
+    assert result == Result.success("Locked.")
     assert entity.behavior(Lockable.kind).state == LockState.LOCKED
 
 
@@ -308,9 +312,10 @@ def test_unlock_keyed_entity_without_key_succeeds_when_key_not_required():
 
     result = world.handle("unlock thing")
 
-    assert result.ok
+    assert result == Result.success("Unlocked.")
     assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
-    
+
+
 def test_unlock_keyed_entity_with_invalid_preposition_fails():
     world = World()
 
@@ -330,7 +335,7 @@ def test_unlock_keyed_entity_with_invalid_preposition_fails():
 
     result = world.handle("unlock thing in key")
 
-    assert not result.ok
+    assert result == Result.failure("That key doesn't fit.")
     assert entity.behavior(Lockable.kind).state == LockState.LOCKED
 
 
@@ -354,5 +359,33 @@ def test_lock_keyed_entity_with_invalid_preposition_fails():
 
     result = world.handle("lock thing in key")
 
-    assert not result.ok
+    assert result == Result.failure("That key doesn't fit.")
+    assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
+
+
+def test_lock_already_locked_entity_fails():
+    world = World()
+    entity = add_openable_lockable(
+        world,
+        lock_state=LockState.LOCKED,
+        key_id=None,
+    )
+
+    result = world.handle("lock thing")
+
+    assert result == Result.failure("It's already locked.")
+    assert entity.behavior(Lockable.kind).state == LockState.LOCKED
+
+
+def test_unlock_already_unlocked_entity_fails():
+    world = World()
+    entity = add_openable_lockable(
+        world,
+        lock_state=LockState.UNLOCKED,
+        key_id=None,
+    )
+
+    result = world.handle("unlock thing")
+
+    assert result == Result.failure("It's already unlocked.")
     assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
