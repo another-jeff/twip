@@ -17,6 +17,7 @@ from twip.result import Result
 from twip.verb import VERBS
 
 if TYPE_CHECKING:
+    from twip.entity import Entity
     from twip.world import World
 
 
@@ -73,20 +74,12 @@ def _handle_targeted_action(
             f"{action.verb.capitalize()} what?"
         )
 
-    matching_entities = world.find_reachable_all(target)
+    resolved = _resolve_reachable_target(world, target)
 
-    if not matching_entities:
-        return Result.failure(
-            world.language.not_seen(target)
-        )
+    if isinstance(resolved, Result):
+        return resolved
 
-    if len(matching_entities) > 1:
-        return Result.failure(
-            f"Which {target} do you mean?"
-        )
-
-    entity = matching_entities[0]
-    result = entity.handle(action, world)
+    result = resolved.handle(action, world)
 
     if result is None:
         return Result.failure("You can't do that.")
@@ -153,3 +146,22 @@ def _verb_requires_target(verb: str) -> bool:
         return True
 
     return policy.requires_target
+
+
+def _resolve_reachable_target(
+    world: World,
+    target: str,
+) -> Entity | Result:
+    matching_entities = world.find_reachable_all(target)
+
+    if not matching_entities:
+        return Result.failure(
+            world.language.not_seen(target)
+        )
+
+    if len(matching_entities) > 1:
+        return Result.failure(
+            f"Which {target} do you mean?"
+        )
+
+    return matching_entities[0]
