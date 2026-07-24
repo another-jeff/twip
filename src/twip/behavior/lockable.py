@@ -26,22 +26,27 @@ class Lockable(Behavior):
 
     def handle(self, action, _entity, world):
         if action.verb == "lock":
+            if self.key_id is not None and not self.has_matching_key(action, world):
+                return Result.failure("That key doesn't fit.")
+
             return self.lock()
 
         if action.verb == "unlock":
-            if self.key_id is not None:
-                keys = world.find_reachable_all(action.target_indirect or "")
-
-                if not any(
-                    key.id == self.key_id
-                    and key.parent == world.player_id
-                    for key in keys
-                ):
-                    return Result.failure("That key doesn't fit.")
+            if self.key_id is not None and not self.has_matching_key(action, world):
+                return Result.failure("That key doesn't fit.")
 
             return self.unlock()
 
         return None
+
+    def has_matching_key(self, action, world) -> bool:
+        keys = world.find_reachable_all(action.target_indirect or "")
+
+        return any(
+            key.id == self.key_id
+            and key.parent == world.player_id
+            for key in keys
+        )
 
     def lock(self) -> Result:
         if self.state == LockState.LOCKED:
