@@ -32,7 +32,11 @@ class Lockable(Behavior):
             if self.key_id is not None:
                 keys = world.find_reachable_all(action.target_indirect or "")
 
-                if not any(key.id == self.key_id for key in keys):
+                if not any(
+                    key.id == self.key_id
+                    and key.parent == world.player_id
+                    for key in keys
+                ):
                     return Result.failure("That key doesn't fit.")
 
             return self.unlock()
