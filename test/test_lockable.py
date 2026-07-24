@@ -2,22 +2,27 @@ import tt
 from twip.behavior import Lockable, LockState, Openable, OpenState, Container
 from twip.world import World
 
-
 def add_openable_lockable(
     world: World,
     *,
     open_state: OpenState = OpenState.CLOSED,
     lock_state: LockState = LockState.LOCKED,
     key_id: str | None = None,
+    key_required_to_lock: bool = True,
+    key_required_to_unlock: bool = True,
 ):
     return world.add(
         names=(tt.THING,),
         behaviors=(
             Openable(state=open_state),
-            Lockable(state=lock_state, key_id=key_id),
+            Lockable(
+                state=lock_state,
+                key_id=key_id,
+                key_required_to_lock=key_required_to_lock,
+                key_required_to_unlock=key_required_to_unlock,
+            ),
         ),
     )
-
 
 def test_open_locked_entity_fails():
     world = World()
@@ -273,4 +278,35 @@ def test_lock_keyed_entity_with_wrong_carried_key_fails():
     result = world.handle("lock thing with wrong key")
 
     assert not result.ok
+    assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
+    
+    
+def test_lock_keyed_entity_without_key_succeeds_when_key_not_required():
+    world = World()
+    key = world.add(names=("key",))
+    entity = add_openable_lockable(
+        world,
+        lock_state=LockState.UNLOCKED,
+        key_id=key.id,
+        key_required_to_lock=False,
+    )
+
+    result = world.handle("lock thing")
+
+    assert result.ok
+    assert entity.behavior(Lockable.kind).state == LockState.LOCKED
+
+
+def test_unlock_keyed_entity_without_key_succeeds_when_key_not_required():
+    world = World()
+    key = world.add(names=("key",))
+    entity = add_openable_lockable(
+        world,
+        key_id=key.id,
+        key_required_to_unlock=False,
+    )
+
+    result = world.handle("unlock thing")
+
+    assert result.ok
     assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
