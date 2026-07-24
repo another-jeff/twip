@@ -225,3 +225,52 @@ def test_lock_keyed_entity_without_key_fails():
 
     assert not result.ok
     assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
+    
+    
+def test_lock_keyed_entity_with_correct_carried_key_succeeds():
+    world = World()
+
+    room = world.add_room(names=("room",))
+    player = world.add(names=("player",))
+    key = world.add(names=("key",))
+    entity = add_openable_lockable(
+        world,
+        lock_state=LockState.UNLOCKED,
+        key_id=key.id,
+    )
+
+    world.current = room.id
+    world.player_id = player.id
+    world.put(room, player)
+    world.put(player, key)
+    world.put(room, entity)
+
+    result = world.handle("lock thing with key")
+
+    assert result.ok
+    assert entity.behavior(Lockable.kind).state == LockState.LOCKED
+
+
+def test_lock_keyed_entity_with_wrong_carried_key_fails():
+    world = World()
+
+    room = world.add_room(names=("room",))
+    player = world.add(names=("player",))
+    key = world.add(names=("key",))
+    wrong_key = world.add(names=("wrong key",))
+    entity = add_openable_lockable(
+        world,
+        lock_state=LockState.UNLOCKED,
+        key_id=key.id,
+    )
+
+    world.current = room.id
+    world.player_id = player.id
+    world.put(room, player)
+    world.put(player, wrong_key)
+    world.put(room, entity)
+
+    result = world.handle("lock thing with wrong key")
+
+    assert not result.ok
+    assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
