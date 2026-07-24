@@ -310,3 +310,49 @@ def test_unlock_keyed_entity_without_key_succeeds_when_key_not_required():
 
     assert result.ok
     assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED
+    
+def test_unlock_keyed_entity_with_invalid_preposition_fails():
+    world = World()
+
+    room = world.add_room(names=("room",))
+    player = world.add(names=("player",))
+    key = world.add(names=("key",))
+    entity = add_openable_lockable(
+        world,
+        key_id=key.id,
+    )
+
+    world.current = room.id
+    world.player_id = player.id
+    world.put(room, player)
+    world.put(player, key)
+    world.put(room, entity)
+
+    result = world.handle("unlock thing in key")
+
+    assert not result.ok
+    assert entity.behavior(Lockable.kind).state == LockState.LOCKED
+
+
+def test_lock_keyed_entity_with_invalid_preposition_fails():
+    world = World()
+
+    room = world.add_room(names=("room",))
+    player = world.add(names=("player",))
+    key = world.add(names=("key",))
+    entity = add_openable_lockable(
+        world,
+        lock_state=LockState.UNLOCKED,
+        key_id=key.id,
+    )
+
+    world.current = room.id
+    world.player_id = player.id
+    world.put(room, player)
+    world.put(player, key)
+    world.put(room, entity)
+
+    result = world.handle("lock thing in key")
+
+    assert not result.ok
+    assert entity.behavior(Lockable.kind).state == LockState.UNLOCKED

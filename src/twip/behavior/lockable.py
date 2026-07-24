@@ -52,6 +52,9 @@ class Lockable(Behavior):
         return None
 
     def has_matching_key(self, action, world) -> bool:
+        if action.preposition != "with":
+            return False
+
         keys = world.find_reachable_all(action.target_indirect or "")
 
         return any(
