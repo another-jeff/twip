@@ -13,30 +13,42 @@ if TYPE_CHECKING:
 
 def handle(world: World, target: str) -> Result:
     if world.current is None:
-        return Result.failure("You can't go that way.")
+        return Result.failure(
+            world.language.movement_not_possible()
+        )
 
     exits = _matching_exits(world, target)
 
     if not exits:
-        return Result.failure("You can't go that way.")
+        return Result.failure(
+            world.language.movement_not_possible()
+        )
 
     if len(exits) > 1:
-        return Result.failure(f"Which {target} way do you mean?")
+        return Result.failure(
+            world.language.movement_ambiguous(target)
+        )
 
     entity, connector = exits[0]
 
     if _connector_blocks_movement(entity):
-        return Result.failure("It's closed.")
+        return Result.failure(
+            world.language.movement_blocked()
+        )
 
     here = connector.side_for(world.current)
 
     if here is None:
-        return Result.failure("You can't go that way.")
+        return Result.failure(
+            world.language.movement_not_possible()
+        )
 
     there = _other_side(connector, world.current)
 
     if there is None:
-        return Result.failure("You can't go that way.")
+        return Result.failure(
+            world.language.movement_not_possible()
+        )
 
     movement_direction = next(
         (trait for trait in here.traits if trait in direction.ALL),
@@ -45,7 +57,9 @@ def handle(world: World, target: str) -> Result:
 
     world.current = there.room
 
-    return Result.success(f"You go {movement_direction}.")
+    return Result.success(
+        world.language.movement_success(movement_direction)
+    )
 
 
 def _matching_exits(world: World, target: str) -> list[tuple[Entity, Connector]]:

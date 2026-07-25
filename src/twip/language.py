@@ -87,6 +87,14 @@ class Language(Protocol):
     def turn_on_success(self, entity: Entity) -> str: ...
 
     def turn_off_success(self, entity: Entity) -> str: ...
+    
+    def movement_not_possible(self) -> str: ...
+
+    def movement_ambiguous(self, target: str) -> str: ...
+
+    def movement_blocked(self) -> str: ...
+
+    def movement_success(self, direction: str) -> str: ...
 
 
 class English:
@@ -281,3 +289,15 @@ class English:
 
     def turn_off_success(self, entity: Entity) -> str:
         return f"You turn off {self.definite(entity)}."
+    
+    def movement_not_possible(self) -> str:
+        return "You can't go that way."
+
+    def movement_ambiguous(self, target: str) -> str:
+        return f"Which {target} way do you mean?"
+
+    def movement_blocked(self) -> str:
+        return "It's closed."
+
+    def movement_success(self, direction: str) -> str:
+        return f"You go {direction}."
