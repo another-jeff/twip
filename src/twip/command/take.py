@@ -28,7 +28,9 @@ def handle(world: World, target: str) -> Result:
         )
 
     if len(matching_entities) > 1:
-        return Result.failure(f"Which {target}?")
+        return Result.failure(
+        world.language.ambiguous(target)
+    )
 
     entity = matching_entities[0]
 

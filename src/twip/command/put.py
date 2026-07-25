@@ -33,7 +33,7 @@ def handle(world: World, action: Action) -> Result:
 
     if len(matching_items) > 1:
         return Result.failure(
-            f"Which {target} do you mean?"
+            world.language.ambiguous(target)
         )
 
     item = matching_items[0]
@@ -60,7 +60,7 @@ def handle(world: World, action: Action) -> Result:
 
     if len(matching_destinations) > 1:
         return Result.failure(
-            f"Which {destination_target} do you mean?"
+            world.language.ambiguous(destination_target)
         )
 
     destination = matching_destinations[0]

@@ -58,3 +58,24 @@ def test_world_uses_injected_language_for_drop():
     result = s.handle("drop coin")
 
     assert_ok_message(result, "drop:coin")
+    
+    
+class AmbiguousEnglish(English):
+    def ambiguous(self, target: str) -> str:
+        return f"ambiguous:{target}"
+
+
+def test_world_uses_injected_language_for_ambiguity():
+    s = bs().one_room().with_player()
+    s.world.language = AmbiguousEnglish()
+
+    first = s.world.add(names=("coin",))
+    second = s.world.add(names=("coin",))
+
+    s.world.put(s.room_one, first)
+    s.world.put(s.room_one, second)
+
+    result = s.handle("take coin")
+
+    assert not result.ok
+    assert result.message == "ambiguous:coin"

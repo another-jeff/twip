@@ -54,7 +54,9 @@ def target(world: World, action: Action) -> Result:
         )
 
     if len(matching_entities) > 1:
-        return Result.failure(f"Which {action.target}?")
+        return Result.failure(
+            world.language.ambiguous(action.target)
+        )
 
     entity = matching_entities[0]
 
