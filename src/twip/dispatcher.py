@@ -33,7 +33,7 @@ def dispatch(world: World, action: Action) -> Result:
             return look.room(world)
 
         case "wait":
-            return wait.handle()
+            return wait.handle(world, action)
 
         case _ if not action.target:
             return _handle_targetless_action(world, action)

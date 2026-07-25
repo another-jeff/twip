@@ -26,6 +26,7 @@ class World:
     language: Language = field(default_factory=English)
     current: str | None = None
     player_id: str | None = None
+    turn: int = 0
     _room_ids: set[str] = field(default_factory=set, repr=False)
     _next_entity_id: int = 1
 
@@ -110,8 +111,13 @@ class World:
 
     def handle(self, text: str) -> Result:
         action = self.parser.parse(text)
+        result = dispatch(self, action)
 
-        return dispatch(self, action)
+        if result.consumes_turn:
+            self.turn += 1
+
+        return result
+    
 
     def find(self, target: str) -> Entity | None:
         matching_entities = self.find_all(target)
