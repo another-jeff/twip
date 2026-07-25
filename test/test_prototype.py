@@ -3,6 +3,7 @@ from collections.abc import Callable
 import pytest
 
 from example.prototype import run
+from twip.behavior.switchable import Switchable
 
 
 @pytest.fixture
@@ -10,7 +11,11 @@ def prototype_script() -> tuple[Callable[[str], str], list[str]]:
     responses = iter(
         (
             "north",
+            "take key",
+            "unlock box with key",
             "open box",
+            "turn on lamp",
+            "wait",
             "look in box",
             "take coin",
             "inventory",
@@ -44,13 +49,17 @@ def test_prototype_script(
             "The entry hall lies to the north."
         ),
         "You go north.",
+        "You take the key.",
+        "Unlocked.",
         "You open the box.",
+        "You turn on the lamp.",
+        "Time passes.",
         "Inside the box, you see a coin.",
         "You take the coin from the box.",
-        "You are carrying a coin.",
+        "You are carrying a coin and a key.",
         "You put the coin in the box.",
         "Inside the box, you see a coin.",
-        "You are carrying nothing.",
+        "You are carrying a key.",
     ]
 
     assert world.player_id is not None
@@ -67,6 +76,14 @@ def test_prototype_script(
         for entity in world.entities.values()
         if entity.name == "box"
     )
+    lamp = next(
+        entity
+        for entity in world.entities.values()
+        if entity.name == "lamp"
+    )
+
+    assert lamp.behavior(Switchable.kind).is_on
+    assert world.turn == 1
 
     assert coin not in world.contents_of(player)
     assert coin in world.contents_of(box)

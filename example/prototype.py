@@ -3,10 +3,13 @@ from collections.abc import Callable
 from twip import direction
 from twip.behavior import (
     Container,
+    Lockable,
     Lookable,
     Openable,
+    Switchable,
     Takeable,
 )
+from twip.behavior.lockable import LockState
 from twip.play import play
 from twip.world import World
 
@@ -54,11 +57,33 @@ def build_world() -> World:
         ),
     )
 
+    key = world.add(
+        names=("key", "small key"),
+        behaviors=(
+            Takeable(),
+            Lookable("A small iron key."),
+        ),
+    )
+    world.put(hall, key)
+
+    lamp = world.add(
+        names=("lamp",),
+        behaviors=(
+            Switchable(),
+            Lookable("A plain electric lamp."),
+        ),
+    )
+    world.put(hall, lamp)
+
     box = world.add(
         names=("box", "wooden box"),
         behaviors=(
             Container(),
             Openable(),
+            Lockable(
+                state=LockState.LOCKED,
+                key_id=key.id,
+            ),
             Lookable("A squat wooden box with a hinged lid."),
         ),
     )
