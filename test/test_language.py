@@ -16,9 +16,6 @@ class MarkedEnglish(English):
         return f"take:{item.name}:from:{source_name}"
 
 
-class MovementEnglish(English):
-    def movement_success(self, direction: str) -> str:
-        return f"move:{direction}"
 
 
 
@@ -32,6 +29,10 @@ def test_world_uses_injected_language():
     assert_ok_message(result, "take:coin:from:none")
     
 
+class MovementEnglish(English):
+    def movement_success(self, direction: str) -> str:
+        return f"move:{direction}"
+
 
 def test_world_uses_injected_language_for_movement():
     s = bs().two_rooms()
@@ -41,3 +42,19 @@ def test_world_uses_injected_language_for_movement():
     result = s.handle("go north")
 
     assert_ok_message(result, "move:north")
+    
+    
+class DropEnglish(English):
+    def drop_success(self, item: Entity) -> str:
+        return f"drop:{item.name}"
+
+
+def test_world_uses_injected_language_for_drop():
+    s = bs().one_room().with_player()
+    coin = s.world.add(names=("coin",))
+    s.world.put(s.player, coin)
+    s.world.language = DropEnglish()
+
+    result = s.handle("drop coin")
+
+    assert_ok_message(result, "drop:coin")

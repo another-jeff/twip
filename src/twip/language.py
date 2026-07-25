@@ -95,6 +95,10 @@ class Language(Protocol):
     def movement_blocked(self) -> str: ...
 
     def movement_success(self, direction: str) -> str: ...
+    
+    def ambiguous(self, target: str) -> str: ...
+
+    def drop_success(self, item: Entity) -> str: ...
 
 
 class English:
@@ -301,3 +305,9 @@ class English:
 
     def movement_success(self, direction: str) -> str:
         return f"You go {direction}."
+    
+    def ambiguous(self, target: str) -> str:
+        return f"Which {target}?"
+
+    def drop_success(self, item: Entity) -> str:
+        return f"You drop {self.definite(item)}."
