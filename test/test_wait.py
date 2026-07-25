@@ -42,3 +42,20 @@ def test_multiple_waits_advance_monotonically():
     world.handle("z")
 
     assert world.turn == 3
+    
+    
+def test_advance_turn_increments_turn():
+    world = World()
+
+    world.advance_turn()
+
+    assert world.turn == 1
+
+
+def test_advance_turn_increments_monotonically():
+    world = World()
+
+    world.advance_turn()
+    world.advance_turn()
+
+    assert world.turn == 2

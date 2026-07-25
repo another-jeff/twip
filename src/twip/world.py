@@ -114,11 +114,13 @@ class World:
         result = dispatch(self, action)
 
         if result.consumes_turn:
-            self.turn += 1
+            self.advance_turn()
 
         return result
     
-
+    def advance_turn(self) -> None:
+        self.turn += 1
+    
     def find(self, target: str) -> Entity | None:
         matching_entities = self.find_all(target)
 
