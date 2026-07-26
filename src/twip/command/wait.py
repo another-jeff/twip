@@ -1,7 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from twip.result import Result
 
-def handle(world, action) -> Result:
+if TYPE_CHECKING:
+    from twip.action import Action
+    from twip.world import World
+
+
+def handle(world: World, action: Action) -> Result:
     return Result.success(
-        "Time passes.",
+        world.language.wait_success(),
         consumes_turn=True,
     )

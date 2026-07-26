@@ -79,3 +79,18 @@ def test_world_uses_injected_language_for_ambiguity():
 
     assert not result.ok
     assert result.message == "ambiguous:coin"
+    
+    
+class WaitEnglish(English):
+    def wait_success(self) -> str:
+        return "waited"
+
+
+def test_world_uses_injected_language_for_wait():
+    s = bs()
+    s.world.language = WaitEnglish()
+
+    result = s.handle("wait")
+
+    assert_ok_message(result, "waited")
+    assert result.consumes_turn

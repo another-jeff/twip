@@ -99,6 +99,8 @@ class Language(Protocol):
     def ambiguous(self, target: str) -> str: ...
 
     def drop_success(self, item: Entity) -> str: ...
+    
+    def wait_success(self) -> str: ...
 
 
 class English:
@@ -311,3 +313,6 @@ class English:
 
     def drop_success(self, item: Entity) -> str:
         return f"You drop {self.definite(item)}."
+    
+    def wait_success(self) -> str:
+        return "Time passes."
