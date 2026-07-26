@@ -204,4 +204,4 @@ def test_extension_action_is_ambiguous_between_room_and_inventory_items():
     result = s.handle("eat apple")
 
     assert not result.ok
-    assert result.message == "Which apple do you mean?"
+    assert result.message == "Which apple?"

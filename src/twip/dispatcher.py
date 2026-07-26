@@ -24,7 +24,9 @@ if TYPE_CHECKING:
 def dispatch(world: World, action: Action) -> Result:
     match action.verb:
         case None | "":
-            return Result.failure("Nothing happens.")
+            return Result.failure(
+                world.language.nothing_happens()
+            )
 
         case "inventory":
             return inventory.handle(world)
@@ -71,7 +73,9 @@ def _handle_targeted_action(
 
     if not target:
         return Result.failure(
-            f"{action.verb.capitalize()} what?"
+            world.language.missing_target(
+                action.verb or "",
+            )
         )
 
     resolved = _resolve_reachable_target(world, target)
@@ -82,7 +86,9 @@ def _handle_targeted_action(
     result = resolved.handle(action, world)
 
     if result is None:
-        return Result.failure("You can't do that.")
+        return Result.failure(
+            world.language.unsupported_action()
+        )
 
     return result
 
@@ -104,9 +110,13 @@ def _handle_targetless_action(
     verb = action.verb or ""
 
     if _verb_requires_target(verb):
-        return Result.failure(f"{verb.capitalize()} what?")
+        return Result.failure(
+            world.language.missing_target(verb)
+        )
 
-    return Result.failure("Nothing happens.")
+    return Result.failure(
+        world.language.nothing_happens()
+    )
 
 
 def _handle_current_room_action(
@@ -161,7 +171,7 @@ def _resolve_reachable_target(
 
     if len(matching_entities) > 1:
         return Result.failure(
-            f"Which {target} do you mean?"
+            world.language.ambiguous(target)
         )
 
     return matching_entities[0]

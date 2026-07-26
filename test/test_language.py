@@ -94,3 +94,46 @@ def test_world_uses_injected_language_for_wait():
 
     assert_ok_message(result, "waited")
     assert result.consumes_turn
+    
+class DispatcherEnglish(English):
+    def nothing_happens(self) -> str:
+        return "nothing"
+
+    def missing_target(self, verb: str) -> str:
+        return f"missing:{verb}"
+
+    def unsupported_action(self) -> str:
+        return "unsupported"
+
+
+def test_world_uses_injected_language_for_nothing_happens():
+    s = bs()
+    s.world.language = DispatcherEnglish()
+
+    result = s.handle("sing")
+
+    assert not result.ok
+    assert result.message == "nothing"
+
+
+def test_world_uses_injected_language_for_missing_target():
+    s = bs()
+    s.world.language = DispatcherEnglish()
+
+    result = s.handle("eat")
+
+    assert not result.ok
+    assert result.message == "missing:eat"
+
+
+def test_world_uses_injected_language_for_unsupported_action():
+    s = bs().one_room().with_player()
+    s.world.language = DispatcherEnglish()
+
+    rock = s.world.add(names=("rock",))
+    s.world.put(s.room_one, rock)
+
+    result = s.handle("eat rock")
+
+    assert not result.ok
+    assert result.message == "unsupported"

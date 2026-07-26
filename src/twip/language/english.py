@@ -223,3 +223,12 @@ class English:
     
     def wait_success(self) -> str:
         return "Time passes."
+    
+    def nothing_happens(self) -> str:
+        return "Nothing happens."
+
+    def missing_target(self, verb: str) -> str:
+        return f"{verb.capitalize()} what?"
+
+    def unsupported_action(self) -> str:
+        return "You can't do that."
