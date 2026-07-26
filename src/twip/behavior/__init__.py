@@ -17,6 +17,7 @@ from twip.behavior.takeable import Takeable
 from twip.behavior.tasteable import Tasteable
 from twip.behavior.touchable import Touchable
 from twip.behavior.turnable import Turnable
+from twip.behavior.wearable import Wearable, WearState
 
 from twip.behavior.verb_message_behavior import VerbMessageBehavior
 
@@ -43,5 +44,7 @@ __all__ = [
     "Tasteable",
     "Touchable",
     "Turnable",
+    "Wearable",
+    "WearState",
     "VerbMessageBehavior",
 ]

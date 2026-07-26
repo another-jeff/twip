@@ -232,3 +232,6 @@ class English:
 
     def unsupported_action(self) -> str:
         return "You can't do that."
+    
+    def wear_success(self, entity: Entity) -> str:
+        return f"You wear {self.definite(entity)}."
