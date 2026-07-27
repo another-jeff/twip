@@ -25,3 +25,24 @@ def test_wear_carried_wearable_entity():
         hat.behavior(Wearable.kind).state
         == WearState.WORN
     )
+    
+def test_wear_already_worn_entity_succeeds_without_consuming_turn():
+    s = bs().one_room().with_player()
+
+    hat = s.world.add(
+        names=("hat",),
+        behaviors=(
+            Wearable(state=WearState.WORN),
+        ),
+    )
+    s.world.put(s.player, hat)
+
+    result = s.handle("wear hat")
+
+    assert result == Result.success(
+        "You are already wearing the hat.",
+    )
+    assert (
+        hat.behavior(Wearable.kind).state
+        == WearState.WORN
+    )

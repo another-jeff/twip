@@ -235,3 +235,9 @@ class English:
     
     def wear_success(self, entity: Entity) -> str:
         return f"You wear {self.definite(entity)}."
+    
+    def already_wearing(self, entity: Entity) -> str:
+        return (
+            "You are already wearing "
+            f"{self.definite(entity)}."
+        )

@@ -36,6 +36,11 @@ class Wearable(Behavior):
         if entity.parent != world.player_id:
             return None
 
+        if self.state == WearState.WORN:
+            return Result.success(
+                world.language.already_wearing(entity)
+            )
+
         self.state = WearState.WORN
 
         return Result.success(
