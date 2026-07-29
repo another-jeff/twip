@@ -24,26 +24,54 @@ class Wearable(Behavior):
 
     state: WearState = WearState.NOT_WORN
 
-    def handle(
-        self,
-        action: Action,
-        entity: Entity,
-        world: World,
-    ) -> Result | None:
-        if action.verb != "wear":
-            return None
+def handle(
+    self,
+    action: Action,
+    entity: Entity,
+    world: World,
+) -> Result | None:
+    if action.verb == "wear":
+        return self._wear(entity, world)
 
-        if entity.parent != world.player_id:
-            return None
+    if action.verb == "remove":
+        return self._remove(entity, world)
 
-        if self.state == WearState.WORN:
-            return Result.success(
-                world.language.already_wearing(entity)
-            )
+    return None
 
-        self.state = WearState.WORN
+def _wear(
+    self,
+    entity: Entity,
+    world: World,
+) -> Result | None:
+    if entity.parent != world.player_id:
+        return None
 
+    if self.state == WearState.WORN:
         return Result.success(
-            world.language.wear_success(entity),
-            consumes_turn=True,
+            world.language.already_wearing(entity)
         )
+
+    self.state = WearState.WORN
+
+    return Result.success(
+        world.language.wear_success(entity),
+        consumes_turn=True,
+    )
+
+def _remove(
+    self,
+    entity: Entity,
+    world: World,
+) -> Result | None:
+    if entity.parent != world.player_id:
+        return None
+
+    if self.state != WearState.WORN:
+        return None
+
+    self.state = WearState.NOT_WORN
+
+    return Result.success(
+        world.language.remove_success(entity),
+        consumes_turn=True,
+    )

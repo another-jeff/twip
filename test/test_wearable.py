@@ -46,3 +46,25 @@ def test_wear_already_worn_entity_succeeds_without_consuming_turn():
         hat.behavior(Wearable.kind).state
         == WearState.WORN
     )
+    
+def test_remove_worn_entity():
+    s = bs().one_room().with_player()
+
+    hat = s.world.add(
+        names=("hat",),
+        behaviors=(
+            Wearable(state=WearState.WORN),
+        ),
+    )
+    s.world.put(s.player, hat)
+
+    result = s.handle("remove hat")
+
+    assert result == Result.success(
+        "You remove the hat.",
+        consumes_turn=True,
+    )
+    assert (
+        hat.behavior(Wearable.kind).state
+        == WearState.NOT_WORN
+    )
